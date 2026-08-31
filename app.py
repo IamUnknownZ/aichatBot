@@ -19,31 +19,74 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Custom CSS เพื่อปรับแต่ง UI ให้สะอาด สบายตา และใช้งานง่าย
+# Custom CSS เพื่อรองรับการแสดงผลแบบ Responsive บน iPad และ Mobile
 st.markdown("""
 <style>
     /* ซ่อน Header และ Footer ส่วนเกินของ Streamlit */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
+    header {visibility: hidden;}
     
-    /* ปรับแต่งระยะขอบกล่องข้อความ */
-    .stChatMessage {
-        padding: 0.8rem 1rem;
-        border-radius: 10px;
-        margin-bottom: 0.5rem;
+    /* ควบคุมขนาด Container ให้พอดีทุกขนาดหน้าจอ (Desktop, iPad, Mobile) */
+    .block-container {
+        max-width: 860px !important;
+        padding-top: 1.5rem !important;
+        padding-bottom: 5rem !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        margin: auto !important;
     }
     
-    /* สไตล์หัวเรื่อง */
+    /* สไตล์หัวเรื่องแบบ Responsive */
     .main-title {
-        font-size: 1.8rem;
+        font-size: clamp(1.3rem, 4vw, 1.85rem);
         font-weight: 700;
         color: #1a73e8;
         margin-bottom: 0.2rem;
+        line-height: 1.3;
     }
     .sub-title {
-        font-size: 0.95rem;
+        font-size: clamp(0.82rem, 2.5vw, 0.95rem);
         color: #5f6368;
         margin-bottom: 1.2rem;
+        line-height: 1.4;
+    }
+    
+    /* ปรับแต่งกล่องข้อความแชต */
+    .stChatMessage {
+        padding: clamp(0.6rem, 2vw, 0.9rem) clamp(0.8rem, 2.5vw, 1.2rem);
+        border-radius: 12px;
+        margin-bottom: 0.6rem;
+        font-size: clamp(0.9rem, 2.5vw, 1rem);
+        line-height: 1.6;
+    }
+
+    /* ปรับแต่งโค้ดบล็อกให้เลื่อนในแนวนอนได้ดีบนมือถือ ไม่ล้นจอ */
+    pre, code {
+        max-width: 100%;
+        overflow-x: auto;
+        border-radius: 8px;
+    }
+
+    /* สไตล์สำหรับแท็บเล็ตและไอแพด (iPad / Tablet: 768px - 1024px) */
+    @media (max-width: 1024px) {
+        .block-container {
+            padding-left: 1.2rem !important;
+            padding-right: 1.2rem !important;
+        }
+    }
+
+    /* สไตล์สำหรับมือถือ (Mobile: ต่ำกว่า 768px) */
+    @media (max-width: 768px) {
+        .block-container {
+            padding-top: 1rem !important;
+            padding-bottom: 4.5rem !important;
+            padding-left: 0.6rem !important;
+            padding-right: 0.6rem !important;
+        }
+        .stChatMessage {
+            border-radius: 8px;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
