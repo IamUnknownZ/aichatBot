@@ -10,346 +10,583 @@ def inject_theme() -> None:
         """
 <style>
 :root {
-    --tutor-ink: #111827;
-    --tutor-muted: #697386;
-    --tutor-blue: #4f6ef7;
-    --tutor-indigo: #7657f6;
-    --tutor-cyan: #35b9d4;
-    --tutor-surface: rgba(255, 255, 255, 0.88);
-    --tutor-border: rgba(79, 110, 247, 0.13);
-    --tutor-shadow: 0 22px 60px rgba(49, 61, 100, 0.10);
+    --ink: #182033;
+    --ink-soft: #344054;
+    --muted: #697386;
+    --line: rgba(31, 41, 55, .09);
+    --line-strong: rgba(79, 70, 229, .16);
+    --surface: rgba(255, 255, 255, .88);
+    --surface-solid: #ffffff;
+    --surface-soft: #f7f8fc;
+    --accent: #5b5bd6;
+    --accent-2: #7c5ce7;
+    --accent-soft: rgba(91, 91, 214, .09);
+    --success: #15956f;
+    --shadow-soft: 0 12px 34px rgba(31, 42, 70, .07);
+    --shadow-composer: 0 16px 44px rgba(31, 42, 70, .12);
 }
 
-#MainMenu, footer {visibility: hidden;}
+html {
+    scroll-behavior: smooth;
+}
 
-.block-container {
-    max-width: 920px !important;
-    padding-top: 1.15rem !important;
-    padding-bottom: 7rem !important;
-    padding-left: clamp(.75rem, 2.5vw, 1.35rem) !important;
-    padding-right: clamp(.75rem, 2.5vw, 1.35rem) !important;
+body,
+[data-testid="stAppViewContainer"],
+[data-testid="stSidebar"] {
+    font-family: Inter, "Noto Sans Thai", "Segoe UI", system-ui, sans-serif;
+}
+
+#MainMenu,
+footer {
+    visibility: hidden;
 }
 
 [data-testid="stAppViewContainer"] {
     background:
-        radial-gradient(circle at 14% -8%, rgba(118,87,246,.12), transparent 31rem),
-        radial-gradient(circle at 92% 6%, rgba(53,185,212,.10), transparent 27rem),
-        linear-gradient(180deg, #fbfcff 0%, #f7f9ff 44%, #ffffff 100%);
+        radial-gradient(circle at 15% -8%, rgba(91,91,214,.08), transparent 30rem),
+        radial-gradient(circle at 93% 2%, rgba(124,92,231,.055), transparent 25rem),
+        linear-gradient(180deg, #fbfbfe 0%, #f8f9fc 48%, #fbfcfe 100%);
 }
 
 [data-testid="stHeader"] {
     background: transparent;
 }
 
+.block-container {
+    max-width: 900px !important;
+    padding-top: .75rem !important;
+    padding-left: clamp(.9rem, 3vw, 1.65rem) !important;
+    padding-right: clamp(.9rem, 3vw, 1.65rem) !important;
+    padding-bottom: 8.5rem !important;
+}
+
+/* ----- compact learning workspace header ----- */
 .tutor-hero {
-    position: relative;
-    overflow: hidden;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 172px;
-    gap: 1.15rem;
+    display: flex;
     align-items: center;
-    background:
-        linear-gradient(135deg, rgba(255,255,255,.96), rgba(246,248,255,.90));
-    border: 1px solid var(--tutor-border);
-    border-radius: 28px;
-    padding: clamp(1.15rem, 3vw, 1.75rem);
-    box-shadow: var(--tutor-shadow);
-    margin-bottom: .8rem;
-    backdrop-filter: blur(16px);
-}
-
-.tutor-hero::after {
-    content: "";
-    position: absolute;
-    width: 210px;
-    height: 210px;
-    right: -82px;
-    top: -105px;
-    border-radius: 999px;
-    background: linear-gradient(135deg, rgba(79,110,247,.15), rgba(53,185,212,.10));
-    pointer-events: none;
-}
-
-.tutor-eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: .4rem;
-    font-size: .78rem;
-    font-weight: 700;
-    letter-spacing: .02em;
-    color: var(--tutor-blue);
-    background: rgba(66,99,235,.08);
-    border-radius: 999px;
-    padding: .3rem .58rem;
+    gap: .9rem;
+    min-height: 82px;
+    padding: .7rem .15rem 1rem;
+    border-bottom: 1px solid var(--line);
     margin-bottom: .55rem;
 }
 
+.tutor-brandmark {
+    flex: 0 0 auto;
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border-radius: 16px;
+    position: relative;
+    background: linear-gradient(145deg, #5b5bd6, #8062e9);
+    box-shadow: 0 10px 24px rgba(91,91,214,.20);
+}
+
+.tutor-brandmark::after {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    position: absolute;
+    right: -1px;
+    bottom: 3px;
+    background: #28b487;
+    border: 2px solid #fbfbfe;
+}
+
+.tutor-face {
+    width: 27px;
+    height: 22px;
+    border-radius: 9px 9px 11px 11px;
+    border: 2px solid rgba(255,255,255,.96);
+    position: relative;
+}
+
+.tutor-face::before,
+.tutor-face::after {
+    content: "";
+    position: absolute;
+    top: 6px;
+    width: 4px;
+    height: 5px;
+    border-radius: 999px;
+    background: white;
+    animation: tutorBlink 5.6s infinite;
+}
+
+.tutor-face::before { left: 5px; }
+.tutor-face::after { right: 5px; }
+
+.tutor-header-copy {
+    min-width: 0;
+    flex: 1;
+}
+
+.tutor-eyebrow {
+    color: var(--accent);
+    font-size: .72rem;
+    line-height: 1.3;
+    letter-spacing: .055em;
+    text-transform: uppercase;
+    font-weight: 750;
+    margin-bottom: .2rem;
+}
+
 .tutor-title {
-    color: var(--tutor-ink);
-    font-size: clamp(1.55rem, 4.2vw, 2.25rem);
-    line-height: 1.16;
-    font-weight: 800;
-    letter-spacing: -.035em;
+    color: var(--ink);
     margin: 0;
+    font-size: clamp(1.15rem, 3.1vw, 1.55rem);
+    line-height: 1.25;
+    letter-spacing: -.025em;
+    font-weight: 780;
 }
 
 .tutor-subtitle {
-    color: var(--tutor-muted);
-    font-size: clamp(.88rem, 2.4vw, 1rem);
-    line-height: 1.65;
-    margin: .55rem 0 0;
-    max-width: 680px;
+    color: var(--muted);
+    margin: .28rem 0 0;
+    line-height: 1.55;
+    font-size: .84rem;
 }
 
-.tutor-mascot-wrap {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    place-items: center;
-    min-height: 126px;
-    border: 1px solid rgba(79,110,247,.10);
-    border-radius: 22px;
-    background: linear-gradient(180deg, rgba(255,255,255,.72), rgba(245,247,255,.88));
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+.tutor-header-meta {
+    flex: 0 0 auto;
+    text-align: right;
+    color: var(--muted);
+    font-size: .72rem;
+    line-height: 1.5;
 }
 
-.tutor-mascot {
-    width: 76px;
-    height: 66px;
-    border-radius: 25px 25px 29px 29px;
-    background: linear-gradient(145deg, #5878f7, #7657f6);
-    box-shadow: 0 13px 28px rgba(79,110,247,.24);
-    position: relative;
-    animation: tutorFloat 5.2s ease-in-out infinite;
+.tutor-header-meta strong {
+    color: var(--ink-soft);
+    font-weight: 650;
+    display: block;
 }
 
-.tutor-mascot::before {
-    content: "";
-    position: absolute;
-    width: 34px;
-    height: 9px;
-    left: 22px;
-    top: -8px;
-    background: #4c6ef5;
-    border-radius: 999px 999px 0 0;
-}
-
-.tutor-mascot-eyes {
-    position: absolute;
-    left: 17px;
-    top: 22px;
-    display: flex;
-    gap: 18px;
-}
-
-.tutor-eye {
-    width: 10px;
-    height: 12px;
-    background: white;
-    border-radius: 999px;
-    animation: tutorBlink 5.5s infinite;
-}
-
-.tutor-mouth {
-    position: absolute;
-    width: 24px;
-    height: 10px;
-    left: 27px;
-    top: 44px;
-    border-bottom: 3px solid rgba(255,255,255,.94);
-    border-radius: 0 0 50% 50%;
-}
-
-.tutor-spark {
-    position: absolute;
-    right: 12px;
-    top: 8px;
-    font-size: 1rem;
-    color: #f59f00;
-    animation: tutorPulse 2.8s ease-in-out infinite;
-}
-
-.tutor-sort-bars {
-    position: absolute;
-    left: 50%;
-    bottom: 10px;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: end;
-    gap: 4px;
-    height: 24px;
-}
-
-.tutor-sort-bar {
-    width: 7px;
-    border-radius: 4px 4px 2px 2px;
-    background: linear-gradient(180deg, rgba(53,185,212,.95), rgba(79,110,247,.92));
-    opacity: .78;
-    animation: sortPulse 4.8s ease-in-out infinite;
-}
-
-.tutor-sort-bar:nth-child(1) { height: 9px; animation-delay: -.8s; }
-.tutor-sort-bar:nth-child(2) { height: 20px; animation-delay: -1.6s; }
-.tutor-sort-bar:nth-child(3) { height: 13px; animation-delay: -2.4s; }
-.tutor-sort-bar:nth-child(4) { height: 23px; animation-delay: -3.2s; }
-.tutor-sort-bar:nth-child(5) { height: 16px; animation-delay: -4s; }
-
+/* ----- quiet trust/status line ----- */
 .tutor-status-row {
     display: flex;
-    align-items: center;
     flex-wrap: wrap;
-    gap: .45rem;
-    margin: 0 0 .9rem;
+    align-items: center;
+    gap: .4rem;
+    min-height: 30px;
+    margin: 0 0 .75rem;
 }
 
 .tutor-chip {
     display: inline-flex;
     align-items: center;
-    gap: .3rem;
-    border: 1px solid rgba(102,112,133,.16);
-    background: rgba(255,255,255,.72);
-    color: #667085;
-    border-radius: 999px;
-    padding: .24rem .55rem;
-    font-size: .75rem;
+    gap: .28rem;
+    color: var(--muted);
+    background: transparent;
+    border: 0;
+    border-right: 1px solid var(--line);
+    padding: .08rem .5rem .08rem 0;
+    font-size: .72rem;
+    line-height: 1.35;
 }
 
+.tutor-chip:last-child {
+    border-right: 0;
+}
+
+.tutor-chip:first-child {
+    color: var(--success);
+    font-weight: 650;
+}
+
+/* ----- empty state ----- */
 .tutor-welcome {
-    border: 1px solid var(--tutor-border);
-    background: rgba(255,255,255,.80);
-    border-radius: 18px;
-    padding: .9rem 1rem;
-    color: var(--tutor-muted);
-    line-height: 1.6;
-    margin: .2rem 0 .8rem;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,.68);
+    border-radius: 19px;
+    padding: 1.15rem 1.2rem;
+    color: var(--muted);
+    line-height: 1.7;
+    margin: .3rem 0 .75rem;
+    box-shadow: 0 8px 26px rgba(31,42,70,.035);
 }
 
+.tutor-welcome::before {
+    content: "";
+    position: absolute;
+    width: 3px;
+    left: 0;
+    top: 14px;
+    bottom: 14px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, var(--accent), var(--accent-2));
+}
+
+.tutor-welcome-title {
+    display: block;
+    color: var(--ink);
+    font-size: .96rem;
+    font-weight: 720;
+    margin-bottom: .16rem;
+}
+
+/* ----- texting-app conversation hierarchy ----- */
 [data-testid="stChatMessage"] {
-    border: 1px solid rgba(15,23,42,.055);
-    border-radius: 20px;
-    padding: .78rem .9rem;
-    margin-bottom: .7rem;
-    background: rgba(255,255,255,.82);
-    box-shadow: 0 8px 24px rgba(31,45,74,.045);
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    padding: .32rem 0;
+    margin-bottom: .38rem;
+    display: flex;
+    align-items: flex-start;
+    gap: .5rem;
 }
 
-[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
-    margin-left: clamp(2rem, 9vw, 6rem);
-    background: linear-gradient(135deg, rgba(79,110,247,.10), rgba(118,87,246,.08));
-    border-color: rgba(79,110,247,.13);
+/* User = right */
+[data-testid="stChatMessage"]:has(
+    [data-testid="stChatMessageContent"][aria-label="Chat message from user"]
+) {
+    width: fit-content;
+    max-width: min(78%, 650px);
+    margin-left: auto;
+    margin-right: 0;
+    padding: .68rem .92rem;
+    border: 1px solid rgba(91,91,214,.12);
+    border-radius: 18px 18px 5px 18px;
+    background: linear-gradient(145deg, rgba(91,91,214,.12), rgba(124,92,231,.08));
+    box-shadow: 0 6px 18px rgba(91,91,214,.055);
+    flex-direction: row-reverse;
 }
 
-[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {
-    margin-right: clamp(.5rem, 5vw, 3rem);
+/* Sorty = left */
+[data-testid="stChatMessage"]:has(
+    [data-testid="stChatMessageContent"][aria-label="Chat message from assistant"]
+) {
+    width: fit-content;
+    max-width: min(86%, 720px);
+    margin-left: 0;
+    margin-right: auto;
+    padding: .74rem .95rem;
+    border: 1px solid var(--line);
+    border-radius: 18px 18px 18px 5px;
+    background: rgba(255,255,255,.78);
+    box-shadow: 0 7px 22px rgba(31,42,70,.045);
+}
+
+/* Keep emoji avatar visually attached to its own side */
+[data-testid="stChatMessage"] > :first-child {
+    transform: scale(.84);
+    flex: 0 0 auto;
+}
+
+[data-testid="stChatMessage"]:has(
+    [data-testid="stChatMessageContent"][aria-label="Chat message from user"]
+) > :first-child {
+    margin-left: .08rem;
+}
+
+[data-testid="stChatMessage"]:has(
+    [data-testid="stChatMessageContent"][aria-label="Chat message from assistant"]
+) > :first-child {
+    margin-right: .08rem;
 }
 
 [data-testid="stChatMessageContent"] {
-    line-height: 1.78;
-    font-size: .98rem;
+    color: var(--ink-soft);
+    font-size: .96rem;
+    line-height: 1.76;
 }
 
 [data-testid="stChatMessageContent"] p {
-    margin-bottom: .55rem;
+    margin-bottom: .62rem;
+}
+
+[data-testid="stChatMessageContent"] h1,
+[data-testid="stChatMessageContent"] h2,
+[data-testid="stChatMessageContent"] h3 {
+    color: var(--ink);
+    letter-spacing: -.018em;
+    margin-top: 1rem;
+    margin-bottom: .45rem;
+}
+
+[data-testid="stChatMessageContent"] ul,
+[data-testid="stChatMessageContent"] ol {
+    padding-left: 1.3rem;
+}
+
+[data-testid="stChatMessageContent"] code {
+    border-radius: 7px;
+}
+
+[data-testid="stChatMessageContent"] pre {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+}
+
+[data-testid="stChatMessageContent"] table {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Evidence is secondary, but visibly available */
+[data-testid="stChatMessage"] [data-testid="stExpander"] {
+    margin-top: .42rem;
+    border: 1px solid var(--line) !important;
+    border-radius: 13px !important;
+    background: rgba(248,249,252,.72);
+    box-shadow: none !important;
+}
+
+[data-testid="stChatMessage"] [data-testid="stExpander"] summary {
+    color: var(--muted);
+    font-size: .78rem;
+}
+
+/* ----- thinking / typing feedback ----- */
+.tutor-thinking {
+    display: inline-flex;
+    align-items: center;
+    gap: .48rem;
+    min-height: 34px;
+    padding: .35rem .65rem;
+    border-radius: 12px;
+    color: var(--muted);
+    background: rgba(255,255,255,.58);
+    border: 1px solid var(--line);
+    font-size: .78rem;
+    margin: .15rem 0 .45rem;
+}
+
+.tutor-thinking-orb {
+    color: var(--accent);
+    font-size: .78rem;
+    animation: tutorPulse 2.2s ease-in-out infinite;
+}
+
+.tutor-thinking-dots {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.tutor-thinking-dots i {
+    display: block;
+    width: 4px;
+    height: 4px;
+    border-radius: 999px;
+    background: #8b91a1;
+    animation: thinkingDot 1.15s ease-in-out infinite;
+}
+
+.tutor-thinking-dots i:nth-child(2) { animation-delay: .13s; }
+.tutor-thinking-dots i:nth-child(3) { animation-delay: .26s; }
+
+/* ----- composer ----- */
+[data-testid="stBottom"] {
+    background:
+        linear-gradient(180deg, rgba(248,249,252,0), rgba(248,249,252,.96) 31%, rgba(248,249,252,.99) 100%);
+    padding-top: 1.4rem;
 }
 
 div[data-testid="stChatInput"] {
-    border-radius: 20px;
-    border: 1px solid rgba(79,110,247,.14);
-    background: rgba(255,255,255,.92);
-    box-shadow: 0 14px 40px rgba(31,45,74,.10);
-    backdrop-filter: blur(16px);
+    border: 1px solid rgba(91,91,214,.14);
+    border-radius: 19px;
+    background: rgba(255,255,255,.96);
+    box-shadow: var(--shadow-composer);
+    backdrop-filter: blur(14px);
 }
 
-[data-testid="stBottom"] {
-    background: linear-gradient(180deg, rgba(255,255,255,0), rgba(248,250,255,.94) 34%);
-    padding-top: 1rem;
+div[data-testid="stChatInput"]:focus-within {
+    border-color: rgba(91,91,214,.32);
+    box-shadow: 0 17px 48px rgba(64,64,150,.15);
 }
 
+/* ----- prompt cards/buttons ----- */
 div.stButton > button {
-    border-radius: 14px;
-    min-height: 2.55rem;
-    border-color: rgba(66,99,235,.14);
-    transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+    border-radius: 13px;
+    min-height: 2.65rem;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,.74);
+    color: var(--ink-soft);
+    box-shadow: none;
+    justify-content: flex-start;
+    text-align: left;
+    transition: transform .14s ease, border-color .14s ease, background .14s ease;
 }
 
 div.stButton > button:hover {
     transform: translateY(-1px);
-    box-shadow: 0 8px 18px rgba(66,99,235,.09);
-    border-color: rgba(66,99,235,.30);
+    border-color: rgba(91,91,214,.24);
+    background: white;
+    color: var(--ink);
 }
 
+div.stButton > button:active {
+    transform: translateY(0);
+}
+
+/* ----- sidebar ----- */
 [data-testid="stSidebar"] {
-    border-right: 1px solid rgba(66,99,235,.08);
+    background: rgba(250,250,253,.97);
+    border-right: 1px solid var(--line);
 }
 
-@keyframes tutorFloat {
-    0%,100% { transform: translateY(0) rotate(-1deg); }
-    50% { transform: translateY(-7px) rotate(1deg); }
+[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
+    gap: .55rem;
 }
 
+[data-testid="stSidebar"] .stButton > button {
+    min-height: 2.35rem;
+    border-radius: 11px;
+    background: transparent;
+}
+
+[data-testid="stSidebar"] [data-testid="stExpander"] {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: rgba(255,255,255,.54);
+}
+
+/* ----- dialogs and form controls ----- */
+[data-testid="stDialog"] > div {
+    border-radius: 22px;
+}
+
+[data-baseweb="input"] > div,
+[data-baseweb="textarea"] > div {
+    border-radius: 12px !important;
+}
+
+/* ----- motion ----- */
 @keyframes tutorBlink {
-    0%, 46%, 50%, 100% { transform: scaleY(1); }
-    48% { transform: scaleY(.12); }
+    0%, 45%, 49%, 100% { transform: scaleY(1); }
+    47% { transform: scaleY(.12); }
 }
 
 @keyframes tutorPulse {
-    0%,100% { transform: scale(.9) rotate(0deg); opacity: .6; }
-    50% { transform: scale(1.10) rotate(7deg); opacity: 1; }
+    0%,100% { transform: scale(.92); opacity: .55; }
+    50% { transform: scale(1.08); opacity: 1; }
 }
 
-@keyframes sortPulse {
-    0%,100% { transform: scaleY(.86); opacity: .55; }
-    50% { transform: scaleY(1.05); opacity: .90; }
+@keyframes thinkingDot {
+    0%, 60%, 100% { transform: translateY(0); opacity: .35; }
+    30% { transform: translateY(-3px); opacity: 1; }
+}
+
+@media (max-width: 700px) {
+    .block-container {
+        padding-top: .45rem !important;
+        padding-left: .75rem !important;
+        padding-right: .75rem !important;
+        padding-bottom: 8rem !important;
+    }
+
+    .tutor-hero {
+        min-height: 72px;
+        padding-bottom: .75rem;
+    }
+
+    .tutor-brandmark {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+    }
+
+    .tutor-title {
+        font-size: 1.08rem;
+    }
+
+    .tutor-subtitle {
+        font-size: .78rem;
+        line-height: 1.45;
+    }
+
+    .tutor-header-meta {
+        display: none;
+    }
+
+    .tutor-status-row {
+        margin-bottom: .5rem;
+    }
+
+    [data-testid="stChatMessage"]:has(
+        [data-testid="stChatMessageContent"][aria-label="Chat message from user"]
+    ) {
+        max-width: 88%;
+    }
+
+    [data-testid="stChatMessage"]:has(
+        [data-testid="stChatMessageContent"][aria-label="Chat message from assistant"]
+    ) {
+        max-width: 92%;
+    }
+
+    .tutor-welcome {
+        border-radius: 16px;
+        padding: .95rem 1rem;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .tutor-mascot, .tutor-eye, .tutor-spark, .tutor-sort-bar,
-    div.stButton > button {
+    html { scroll-behavior: auto; }
+
+    .tutor-face::before,
+    .tutor-face::after,
+    .tutor-thinking-orb,
+    .tutor-thinking-dots i {
         animation: none !important;
+    }
+
+    div.stButton > button {
         transition: none !important;
         transform: none !important;
     }
 }
 
-@media (max-width: 640px) {
-    .tutor-hero {
-        grid-template-columns: 1fr 78px;
-        border-radius: 20px;
-        gap: .55rem;
-    }
-    .tutor-mascot {
-        width: 62px;
-        height: 56px;
-        border-radius: 20px 20px 23px 23px;
-    }
-    .tutor-mascot::before {
-        width: 26px;
-        left: 18px;
-    }
-    .tutor-mascot-eyes {
-        left: 13px;
-        top: 18px;
-        gap: 14px;
-    }
-    .tutor-eye { width: 8px; height: 10px; }
-    .tutor-mouth { width: 20px; left: 21px; top: 36px; }
-}
-
 @media (prefers-color-scheme: dark) {
     :root {
-        --tutor-ink: #f1f5f9;
-        --tutor-muted: #b7c0ce;
-        --tutor-surface: rgba(20, 25, 38, .82);
-        --tutor-border: rgba(134, 157, 255, .16);
-        --tutor-shadow: 0 18px 50px rgba(0,0,0,.20);
+        --ink: #f2f4f8;
+        --ink-soft: #d5dae4;
+        --muted: #9ca5b5;
+        --line: rgba(255,255,255,.085);
+        --line-strong: rgba(145,135,255,.18);
+        --surface: rgba(20,23,31,.88);
+        --surface-solid: #151820;
+        --surface-soft: #191c25;
+        --accent: #9b91ff;
+        --accent-2: #b08cff;
+        --accent-soft: rgba(155,145,255,.11);
     }
-    [data-testid="stChatMessage"] {
-        background: rgba(20,25,38,.72);
-        border-color: rgba(255,255,255,.06);
+
+    [data-testid="stAppViewContainer"] {
+        background:
+            radial-gradient(circle at 15% -8%, rgba(100,90,220,.12), transparent 30rem),
+            linear-gradient(180deg, #11141b 0%, #151821 100%);
     }
-    .tutor-chip {
-        background: rgba(20,25,38,.72);
-        color: #bdc7d6;
+
+    .tutor-brandmark::after {
+        border-color: #11141b;
+    }
+
+    .tutor-welcome,
+    .tutor-thinking,
+    div.stButton > button {
+        background: rgba(25,28,38,.72);
+    }
+
+    div[data-testid="stChatInput"] {
+        background: rgba(25,28,38,.96);
+    }
+
+    [data-testid="stBottom"] {
+        background: linear-gradient(180deg, rgba(17,20,27,0), rgba(17,20,27,.97) 32%);
+    }
+
+    [data-testid="stSidebar"] {
+        background: rgba(17,20,27,.98);
+    }
+
+    [data-testid="stChatMessage"] [data-testid="stExpander"] {
+        background: rgba(25,28,38,.72);
     }
 }
 </style>
@@ -373,32 +610,24 @@ def render_hero(
     )
     st.markdown(
         f"""
-<section class="tutor-hero">
-  <div>
-    <div class="tutor-eyebrow">AI TUTOR · {escape(course_level)}</div>
+<header class="tutor-hero">
+  <div class="tutor-brandmark" aria-hidden="true">
+    <div class="tutor-face"></div>
+  </div>
+
+  <div class="tutor-header-copy">
+    <div class="tutor-eyebrow">{escape(tutor_name)} · AI Tutor</div>
     <h1 class="tutor-title">{escape(course_title)}</h1>
     <p class="tutor-subtitle">
-      {greeting}{escape(tutor_name)} ช่วยค้นคำตอบจากเอกสารรายวิชา อธิบายให้เห็นภาพ
-      และอ้างอิงหน้าที่เกี่ยวข้องโดยไม่ยัดเนื้อหาที่คุณไม่ได้ถาม
+      {greeting}ถามสั้น ๆ หรือพิมพ์คำทับศัพท์ได้ ระบบจะช่วยตีความก่อนค้นจากเอกสาร
     </p>
   </div>
-  <div class="tutor-mascot-wrap" aria-hidden="true">
-    <span class="tutor-spark">{escape(mascot_symbol)}</span>
-    <div class="tutor-mascot">
-      <div class="tutor-mascot-eyes">
-        <span class="tutor-eye"></span><span class="tutor-eye"></span>
-      </div>
-      <div class="tutor-mouth"></div>
-    </div>
-    <div class="tutor-sort-bars">
-      <span class="tutor-sort-bar"></span>
-      <span class="tutor-sort-bar"></span>
-      <span class="tutor-sort-bar"></span>
-      <span class="tutor-sort-bar"></span>
-      <span class="tutor-sort-bar"></span>
-    </div>
+
+  <div class="tutor-header-meta">
+    <strong>{escape(course_level)}</strong>
+    ฐานความรู้รายวิชา
   </div>
-</section>
+</header>
 """,
         unsafe_allow_html=True,
     )
@@ -408,8 +637,9 @@ def render_welcome_panel(tutor_name: str) -> None:
     st.markdown(
         f"""
 <div class="tutor-welcome">
-  <b>{escape(tutor_name)} พร้อมแล้ว</b> — พิมพ์สั้น ๆ ก็ได้ เช่น “บับเบิลซอร์ท”
-  หรือถามต่อเนื่องแบบ “แล้วมันต่างกันยังไง” ระบบจะช่วยตีความก่อนค้นจากเอกสาร
+  <span class="tutor-welcome-title">เริ่มถาม {escape(tutor_name)} ได้เลย</span>
+  พิมพ์แบบธรรมชาติก็ได้ เช่น “บับเบิลซอร์ท”, “ต่างจาก Selection Sort ยังไง”
+  หรือ “ช่วย Trace 5, 1, 4, 2” — ถ้าข้อมูลไม่มีในเอกสาร ระบบจะไม่เดาคำตอบให้
 </div>
 """,
         unsafe_allow_html=True,

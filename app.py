@@ -1,10 +1,8 @@
-import json
 import os
 from time import perf_counter
 from uuid import uuid4
 
 import streamlit as st
-import streamlit.components.v1 as components
 from dotenv import load_dotenv
 
 from rag.bootstrap import build_rag_service
@@ -14,6 +12,7 @@ from ui import inject_theme, render_hero, render_welcome_panel
 
 load_dotenv()
 page_settings = Settings.from_env()
+APP_CACHE_VERSION = "2026-09-19-ui-v2"
 
 st.set_page_config(
     page_title=f"{page_settings.course_title} · AI Tutor",
@@ -36,11 +35,36 @@ def get_secret(name: str) -> str:
     return ""
 
 
-def track_stream(stream, timing: dict[str, float | None], started: float):
+def track_stream(
+    stream,
+    timing: dict[str, float | None],
+    started: float,
+    thinking_placeholder=None,
+):
+    first_chunk = True
     for chunk in stream:
+        if first_chunk:
+            first_chunk = False
+            if thinking_placeholder is not None:
+                thinking_placeholder.empty()
         if timing["ttft_ms"] is None:
             timing["ttft_ms"] = (perf_counter() - started) * 1000.0
         yield chunk
+
+
+def render_thinking(placeholder, label: str) -> None:
+    placeholder.markdown(
+        f"""
+<div class="tutor-thinking" role="status" aria-live="polite">
+  <span class="tutor-thinking-orb">✦</span>
+  <span class="tutor-thinking-label">{label}</span>
+  <span class="tutor-thinking-dots" aria-hidden="true">
+    <i></i><i></i><i></i>
+  </span>
+</div>
+""",
+        unsafe_allow_html=True,
+    )
 
 
 def compact_sources(hits) -> list[dict[str, object]]:
@@ -84,29 +108,12 @@ def render_sources(sources: list[dict[str, object]]) -> None:
                 st.caption(preview)
 
 
-def render_copy_button(text_to_copy: str, element_id: str) -> None:
-    escaped_text = json.dumps(text_to_copy)
-    html_code = f"""
-    <div style="display:flex;justify-content:flex-end;margin-top:2px;margin-bottom:4px;">
-        <button id="copy_btn_{element_id}" onclick='
-            navigator.clipboard.writeText({escaped_text}).then(() => {{
-                const btn = document.getElementById("copy_btn_{element_id}");
-                btn.innerHTML = "✓ คัดลอกแล้ว";
-                setTimeout(() => btn.innerHTML = "คัดลอกคำตอบ", 1500);
-            }});
-        ' style="
-            background:transparent;color:#667085;border:1px solid rgba(102,112,133,.18);
-            border-radius:10px;padding:4px 9px;font-size:12px;
-            font-family:inherit;cursor:pointer;">
-            คัดลอกคำตอบ
-        </button>
-    </div>
-    """
-    components.html(html_code, height=32)
-
-
 @st.cache_resource(show_spinner=False)
-def create_rag_service(api_key: str, database_url: str):
+def create_rag_service(
+    api_key: str,
+    database_url: str,
+    cache_version: str,
+):
     settings = Settings.from_env(
         api_key=api_key,
         database_url=database_url,
@@ -154,7 +161,11 @@ service_error = None
 if api_key:
     try:
         with st.spinner("กำลังเชื่อมต่อฐานความรู้..."):
-            service, settings = create_rag_service(api_key, database_url)
+            service, settings = create_rag_service(
+                api_key,
+                database_url,
+                APP_CACHE_VERSION,
+            )
     except Exception as exc:
         service_error = f"{type(exc).__name__}: {exc}"
 
@@ -243,11 +254,6 @@ render_hero(
 )
 
 if service is not None:
-    mode_label = (
-        "PostgreSQL + pgvector"
-        if service.store_mode == "postgres-pgvector"
-        else "Local lexical RAG"
-    )
     profile_label = (
         "จำประวัติแล้ว"
         if st.session_state.get("profile_persisted")
@@ -314,7 +320,9 @@ with st.sidebar:
         st.caption(f"Model: {settings.generation_model}")
         st.caption(f"Retrieval: {service.store_mode if service else 'unavailable'}")
         if service is not None:
-            st.caption(f"Query lexicon: {service.lexicon_size} aliases")
+            lexicon_size = getattr(service, "lexicon_size", None)
+            if lexicon_size is not None:
+                st.caption(f"Query lexicon: {lexicon_size} aliases")
         st.caption(
             f"top-k {settings.top_k} · threshold {settings.min_relevance_score:.2f}"
         )
@@ -381,9 +389,17 @@ if user_query:
     with st.chat_message("assistant", avatar="🧠"):
         try:
             request_started = perf_counter()
-            with st.spinner("กำลังค้นส่วนที่เกี่ยวข้องในเอกสาร..."):
-                result = service.retrieve(user_query, history_before)
+            thinking_placeholder = st.empty()
+            render_thinking(
+                thinking_placeholder,
+                "กำลังค้นส่วนที่เกี่ยวข้องในเอกสาร",
+            )
+            result = service.retrieve(user_query, history_before)
 
+            render_thinking(
+                thinking_placeholder,
+                "กำลังเรียบเรียงคำตอบ",
+            )
             stream = service.stream_answer(
                 query=user_query,
                 result=result,
@@ -392,8 +408,14 @@ if user_query:
             )
             timing = {"ttft_ms": None}
             response_text = st.write_stream(
-                track_stream(stream, timing, request_started)
+                track_stream(
+                    stream,
+                    timing,
+                    request_started,
+                    thinking_placeholder,
+                )
             ) or ""
+            thinking_placeholder.empty()
 
             total_ms = (perf_counter() - request_started) * 1000.0
             ttft_ms = timing["ttft_ms"] or total_ms
@@ -405,11 +427,6 @@ if user_query:
                 else []
             )
             render_sources(answer_sources)
-
-            render_copy_button(
-                response_text,
-                f"latest_{len(st.session_state['messages'])}",
-            )
 
             if settings.max_images_per_answer > 0:
                 images = service.store.images_for_pages(
@@ -500,6 +517,8 @@ if user_query:
                 ]
 
         except Exception as exc:
+            if "thinking_placeholder" in locals():
+                thinking_placeholder.empty()
             error_text = (
                 "เกิดข้อผิดพลาดระหว่างค้นข้อมูลหรือสร้างคำตอบ: "
                 f"{type(exc).__name__}: {exc}"
