@@ -49,6 +49,7 @@
 
 ### Conversational robustness
 - Alias coverage count
+- Clarification dictionary coverage count
 - Exact alias recognition accuracy
 - Substring alias recognition accuracy
 - Fuzzy alias recognition accuracy
@@ -57,9 +58,15 @@
 - Concept-only query acceptance rate
 - Typo / transliteration recovery rate
 - Follow-up rewrite success rate
+- Clarification trigger precision
+- Unnecessary-clarification rate
+- Clarification resolution rate
+- Average clarification turns before retrieval
+- Context-resolved clarification accuracy
 - Short-query retrieval Hit@K
 - False topic mapping rate
 - Query-understanding P50/P95 latency
+- Clarification-router P50/P95 latency
 - Raw query vs normalized/expanded query Hit@K
 
 ควรมี negative questions อย่างน้อย 20-30 ข้อเพื่อ tune ค่า RAG_MIN_SCORE

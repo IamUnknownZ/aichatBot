@@ -32,8 +32,15 @@ html {
 
 body,
 [data-testid="stAppViewContainer"],
-[data-testid="stSidebar"] {
-    font-family: Inter, "Noto Sans Thai", "Segoe UI", system-ui, sans-serif;
+[data-testid="stSidebar"],
+[data-testid="stMarkdownContainer"],
+[data-testid="stChatMessageContent"],
+button,
+input,
+textarea {
+    font-family:
+        -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Thai",
+        Tahoma, Arial, sans-serif !important;
 }
 
 #MainMenu,
@@ -585,8 +592,45 @@ div.stButton > button:active {
         background: rgba(17,20,27,.98);
     }
 
+    [data-testid="stChatMessage"]:has(
+        [data-testid="stChatMessageContent"][aria-label="Chat message from assistant"]
+    ) {
+        background: rgba(30, 34, 46, .96);
+        border-color: rgba(255,255,255,.09);
+        box-shadow: 0 8px 24px rgba(0,0,0,.16);
+    }
+
+    [data-testid="stChatMessage"]:has(
+        [data-testid="stChatMessageContent"][aria-label="Chat message from user"]
+    ) {
+        background: linear-gradient(
+            145deg,
+            rgba(112, 102, 230, .28),
+            rgba(132, 90, 220, .20)
+        );
+        border-color: rgba(166, 154, 255, .18);
+    }
+
+    [data-testid="stChatMessageContent"],
+    [data-testid="stChatMessageContent"] p,
+    [data-testid="stChatMessageContent"] li {
+        color: #e6e9f0 !important;
+    }
+
+    [data-testid="stChatMessageContent"] strong,
+    [data-testid="stChatMessageContent"] h1,
+    [data-testid="stChatMessageContent"] h2,
+    [data-testid="stChatMessageContent"] h3 {
+        color: #f7f8fb !important;
+    }
+
     [data-testid="stChatMessage"] [data-testid="stExpander"] {
-        background: rgba(25,28,38,.72);
+        background: rgba(24,27,36,.92);
+        border-color: rgba(255,255,255,.08) !important;
+    }
+
+    [data-testid="stChatMessage"] [data-testid="stExpander"] summary {
+        color: #c5cad5 !important;
     }
 }
 </style>

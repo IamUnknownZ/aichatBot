@@ -8,6 +8,10 @@ from google.genai import types
 
 from prompt import PROMPT_SORTING_TUTOR
 
+from .clarifications import (
+    TOTAL_CLARIFICATION_ALIASES,
+    match_clarification,
+)
 from .config import Settings
 from .embeddings import GeminiEmbedder
 from .models import RetrievalResult, SearchHit
@@ -58,43 +62,69 @@ class RAGService:
     def lexicon_size(self) -> int:
         return TOTAL_ALIASES
 
-    def direct_response(self, query: str) -> str | None:
+    @property
+    def clarification_lexicon_size(self) -> int:
+        return TOTAL_CLARIFICATION_ALIASES
+
+    @staticmethod
+    def _previous_topic(history: list[dict[str, str]]) -> str | None:
+        for item in reversed(history):
+            if item.get("role") != "user":
+                continue
+            content = item.get("content", "").strip()
+            if not content:
+                continue
+            match = match_alias(content, "topics")
+            if match is not None:
+                return match.canonical
+        return None
+
+    def direct_response(
+        self,
+        query: str,
+        history: list[dict[str, str]] | None = None,
+    ) -> str | None:
         social = match_alias(
             query,
             "social",
             allow_substring=False,
             allow_fuzzy=True,
         )
-        if social is None:
-            return None
+        if social is not None:
+            if social.canonical == "greeting":
+                return (
+                    "ไงครับ 👋 พร้อมช่วยเรื่อง Sorting Algorithms ครับ "
+                    "พิมพ์สั้น ๆ ได้เลย เช่น **บับเบิลซอร์ท**, **Quick Sort** "
+                    "หรือถามให้เปรียบเทียบสองอัลกอริทึมก็ได้"
+                )
 
-        if social.canonical == "greeting":
-            return (
-                "ไงครับ 👋 พร้อมช่วยเรื่อง Sorting Algorithms ครับ "
-                "พิมพ์สั้น ๆ ได้เลย เช่น **บับเบิลซอร์ท**, **Quick Sort** "
-                "หรือถามให้เปรียบเทียบสองอัลกอริทึมก็ได้"
-            )
+            if social.canonical == "thanks":
+                return "ยินดีครับ 🙂 ถ้ามีหัวข้อถัดไป พิมพ์ชื่อสั้น ๆ มาได้เลย"
 
-        if social.canonical == "thanks":
-            return "ยินดีครับ 🙂 ถ้ามีหัวข้อถัดไป พิมพ์ชื่อสั้น ๆ มาได้เลย"
+            if social.canonical == "farewell":
+                return "ได้เลยครับ 👋 ไว้กลับมาถามต่อเรื่อง Sorting Algorithms ได้ตลอด"
 
-        if social.canonical == "farewell":
-            return "ได้เลยครับ 👋 ไว้กลับมาถามต่อเรื่อง Sorting Algorithms ได้ตลอด"
+            if social.canonical == "help":
+                return (
+                    f"ผมคือ **{self.settings.tutor_name}** ผู้ช่วยเรียนเรื่อง "
+                    f"**{self.settings.course_title}** ครับ\n\n"
+                    "ลองถามได้หลายแบบ เช่น **บับเบิลซอร์ท**, "
+                    "**อธิบาย Quick Sort**, **Selection Sort ต่างจาก Bubble Sort ยังไง** "
+                    "หรือ **ช่วย Trace Bubble Sort 5, 1, 4, 2**"
+                )
 
-        if social.canonical == "help":
-            return (
-                f"ผมคือ **{self.settings.tutor_name}** ผู้ช่วยเรียนเรื่อง "
-                f"**{self.settings.course_title}** ครับ\n\n"
-                "ลองถามได้หลายแบบ เช่น **บับเบิลซอร์ท**, "
-                "**อธิบาย Quick Sort**, **Selection Sort ต่างจาก Bubble Sort ยังไง** "
-                "หรือ **ช่วย Trace Bubble Sort 5, 1, 4, 2**"
-            )
+            if social.canonical == "identity":
+                return (
+                    f"ผมชื่อ **{self.settings.tutor_name}** ครับ เป็น AI Tutor สำหรับ "
+                    f"**{self.settings.course_title}**"
+                )
 
-        if social.canonical == "identity":
-            return (
-                f"ผมชื่อ **{self.settings.tutor_name}** ครับ เป็น AI Tutor สำหรับ "
-                f"**{self.settings.course_title}**"
-            )
+        clarification = match_clarification(query)
+        if clarification is not None:
+            previous_topic = self._previous_topic(history or [])
+            if clarification.use_topic_context and previous_topic:
+                return None
+            return clarification.prompt
 
         return None
 
@@ -102,6 +132,13 @@ class RAGService:
         self, query: str, history: list[dict[str, str]]
     ) -> str:
         query = query.strip()
+
+        clarification = match_clarification(query)
+        if clarification is not None and clarification.use_topic_context:
+            previous_topic = self._previous_topic(history)
+            if previous_topic:
+                return f"{previous_topic} {query}".strip()
+
         topic_match = match_alias(query, "topics")
         concept_match = match_alias(query, "concepts")
         action_match = match_alias(query, "actions")
@@ -166,7 +203,7 @@ class RAGService:
     def retrieve(
         self, query: str, history: list[dict[str, str]]
     ) -> RetrievalResult:
-        if self.direct_response(query):
+        if self.direct_response(query, history):
             return RetrievalResult(
                 query=query,
                 retrieval_query="__conversation__",
@@ -269,7 +306,7 @@ class RAGService:
         history: list[dict[str, str]],
         model_name: str | None = None,
     ) -> Iterable[str]:
-        direct_text = self.direct_response(query)
+        direct_text = self.direct_response(query, history)
         if direct_text:
             yield direct_text
             return

@@ -323,6 +323,15 @@ with st.sidebar:
             lexicon_size = getattr(service, "lexicon_size", None)
             if lexicon_size is not None:
                 st.caption(f"Query lexicon: {lexicon_size} aliases")
+            clarification_size = getattr(
+                service,
+                "clarification_lexicon_size",
+                None,
+            )
+            if clarification_size is not None:
+                st.caption(
+                    f"Clarification dictionary: {clarification_size} aliases"
+                )
         st.caption(
             f"top-k {settings.top_k} · threshold {settings.min_relevance_score:.2f}"
         )

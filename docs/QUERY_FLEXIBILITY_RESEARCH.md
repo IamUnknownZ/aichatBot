@@ -1,6 +1,6 @@
 # Query Flexibility & Conversational Retrieval Research
 
-Updated: 18 September 2026
+Updated: 19 September 2026
 
 ## Problem observed in the tutor
 
@@ -50,12 +50,19 @@ Design consequence:
 
 ### 4. Clarification for genuinely ambiguous requests
 
-Cao et al. (2025), ICR: Iterative Clarification and Rewriting for Conversational Search, demonstrates a clarification-rewriting strategy for queries containing fuzzy expressions.
+Cao et al. (2025), ICR: Iterative Clarification and Rewriting for Conversational Search, alternates clarification questions with rewritten queries and reports continuing retrieval gains through the clarification-rewriting process.
+
+Mass et al. (2022), Conversational Search with Mixed-Initiative, explicitly studies under-specified or ambiguous user queries where the system asks a clarification question before continuing retrieval.
+
+Qian & Dou (2022) report that making only necessary query modifications can improve both query-rewriting quality and efficiency. This supports resolving common ambiguity deterministically before considering a more expensive model rewrite.
 
 Design consequence:
-- deterministic aliases should resolve obvious cases
-- when a query remains genuinely ambiguous, ask a concise clarification rather than hallucinating
-- do not add an extra LLM classification request for every message; clarification should be conditional to protect latency
+- deterministic aliases resolve obvious course terms first
+- genuinely under-specified whole utterances trigger a clarification question
+- context-resolvable intents such as "code", "trace", "example", or "complexity" reuse the previous explicit algorithm topic instead of asking again
+- intents requiring missing information, such as "compare", still ask for the missing target(s)
+- clarification routing does not call Gemini and does not perform document retrieval
+- after clarification, normal query expansion/retrieval handles the user's more specific reply
 
 ### 5. Educational-chatbot interaction design
 
@@ -71,11 +78,13 @@ Design consequence:
 
 ## Implemented architecture
 
-Current lexicon: **644 unique normalized aliases** across four groups:
+Current query lexicon: **644 unique normalized aliases** across four groups:
 - topics: algorithm names, Thai transliterations, common misspellings and descriptive names
 - concepts: Big-O, memory/space, stability, in-place, comparison sorting, divide-and-conquer, recursion and tracing
 - actions: explain, compare, example, trace, code, summarize and why/reason
 - social: greetings, thanks, farewell, help and tutor identity
+
+Current clarification dictionary: **534 ambiguity aliases** across situations such as generic sort/algorithm requests, compare, code, trace, complexity, stability, memory, examples, summaries, visualization, steps, pros/cons, use cases, ordering direction, pivot, recursion, data input, swap and partition.
 
 User message
 → Unicode/punctuation normalization
@@ -104,11 +113,17 @@ Implementation details:
 - normalized queries and match results use bounded LRU caches
 - no additional Gemini request is used for normal alias correction/query expansion
 - social messages bypass document retrieval entirely
+- ambiguous whole-message clarification uses a separate exact/compact hash index
+- clarification fuzzy matching is length-bucketed and cached
+- clarification responses bypass both retrieval and Gemini generation
+- contextual clarification can reuse a previous explicit algorithm topic without another clarification turn
 
-Development benchmark on the current machine (18 Sep 2026):
+Development benchmark on the current machine (19 Sep 2026):
 - 644 unique normalized aliases
 - validation of all configured aliases: 0 canonical mismatches
-- representative first-seen exact/fuzzy routing sample: about 0.395 ms/query average
+- representative first-seen exact/fuzzy query routing sample: about 0.395 ms/query average
+- clarification dictionary: 534 ambiguity aliases
+- representative first-seen clarification sample: about 0.46 ms/query average
 - an earlier broader noisy/fuzzy sample before per-kind indexing averaged about 1.8 ms/query
 
 These timings are engineering measurements, not research outcomes. Chapter 4 should measure the deployed Streamlit environment separately (P50/P95) before reporting final performance claims.
@@ -128,6 +143,11 @@ Report:
 - retrieval Hit@K after normalization
 - false rejection rate
 - out-of-domain rejection rate
+- clarification trigger precision
+- unnecessary-clarification rate
+- clarification resolution rate
+- average clarification turns before retrieval
+- clarification-router P50/P95 latency
 - latency added by query understanding
 - comparison: raw query vs normalized/expanded query
 
@@ -139,6 +159,7 @@ Report:
 - Wang, L., Yang, N., & Wei, F. (2023). Query2doc: Query Expansion with Large Language Models. EMNLP 2023. https://aclanthology.org/2023.emnlp-main.585/
 - Tasawong, P. et al. (2023). Typo-Robust Representation Learning for Dense Retrieval. ACL 2023. https://aclanthology.org/2023.acl-short.95/
 - Sidiropoulos, G., & Kanoulas, E. (2022). Analysing the Robustness of Dual Encoders for Dense Retrieval Against Misspellings.
-- Cao, Z., Li, P., & Zhu, Q. (2025). ICR: Iterative Clarification and Rewriting for Conversational Search. EMNLP 2025.
+- Cao, Z., Li, P., & Zhu, Q. (2025). ICR: Iterative Clarification and Rewriting for Conversational Search. EMNLP 2025. https://aclanthology.org/2025.emnlp-main.496/
+- Mass, Y., Cohen, D., Yehudai, A., & Konopnicki, D. (2022). Conversational Search with Mixed-Initiative - Asking Good Clarification Questions backed-up by Passage Retrieval. DialDoc 2022. https://aclanthology.org/2022.dialdoc-1.7/
 - Kuhail, M. A. et al. (2023). Interacting with educational chatbots: A systematic review. Education and Information Technologies, 28, 973–1018.
 - Debets, T. et al. (2025). Chatbots in education: A systematic review of objectives, underlying technology and theory, evaluation criteria, and impacts. Computers & Education, 234, 105323.
