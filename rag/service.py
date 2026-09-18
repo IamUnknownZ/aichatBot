@@ -11,7 +11,28 @@ from prompt import PROMPT_SORTING_TUTOR
 from .config import Settings
 from .embeddings import GeminiEmbedder
 from .models import RetrievalResult, SearchHit
+from .query_lexicon import (
+    TOTAL_ALIASES,
+    compact_text as lexicon_compact_text,
+    match_alias,
+    normalize_text as lexicon_normalize_text,
+    primary_thai_alias,
+)
 from .store import VectorStore
+
+
+FOLLOW_UP_MARKERS = (
+    "แล้ว", "มัน", "ตัวนี้", "อันนี้", "ตัวนั้น", "อันนั้น",
+    "เมื่อกี้", "ข้างบน", "ต่างกัน", "ดีกว่า", "ทำไม",
+)
+
+
+def _normalize_text(value: str) -> str:
+    return lexicon_normalize_text(value)
+
+
+def _compact_text(value: str) -> str:
+    return lexicon_compact_text(value)
 
 
 class RAGService:
@@ -33,30 +54,126 @@ class RAGService:
     def store_mode(self) -> str:
         return self.store.mode
 
+    @property
+    def lexicon_size(self) -> int:
+        return TOTAL_ALIASES
+
+    def direct_response(self, query: str) -> str | None:
+        social = match_alias(
+            query,
+            "social",
+            allow_substring=False,
+            allow_fuzzy=True,
+        )
+        if social is None:
+            return None
+
+        if social.canonical == "greeting":
+            return (
+                "ไงครับ 👋 พร้อมช่วยเรื่อง Sorting Algorithms ครับ "
+                "พิมพ์สั้น ๆ ได้เลย เช่น **บับเบิลซอร์ท**, **Quick Sort** "
+                "หรือถามให้เปรียบเทียบสองอัลกอริทึมก็ได้"
+            )
+
+        if social.canonical == "thanks":
+            return "ยินดีครับ 🙂 ถ้ามีหัวข้อถัดไป พิมพ์ชื่อสั้น ๆ มาได้เลย"
+
+        if social.canonical == "farewell":
+            return "ได้เลยครับ 👋 ไว้กลับมาถามต่อเรื่อง Sorting Algorithms ได้ตลอด"
+
+        if social.canonical == "help":
+            return (
+                f"ผมคือ **{self.settings.tutor_name}** ผู้ช่วยเรียนเรื่อง "
+                f"**{self.settings.course_title}** ครับ\n\n"
+                "ลองถามได้หลายแบบ เช่น **บับเบิลซอร์ท**, "
+                "**อธิบาย Quick Sort**, **Selection Sort ต่างจาก Bubble Sort ยังไง** "
+                "หรือ **ช่วย Trace Bubble Sort 5, 1, 4, 2**"
+            )
+
+        if social.canonical == "identity":
+            return (
+                f"ผมชื่อ **{self.settings.tutor_name}** ครับ เป็น AI Tutor สำหรับ "
+                f"**{self.settings.course_title}**"
+            )
+
+        return None
+
     def _retrieval_query(
         self, query: str, history: list[dict[str, str]]
     ) -> str:
         query = query.strip()
-        if len(query) >= 70:
-            return query
+        topic_match = match_alias(query, "topics")
+        concept_match = match_alias(query, "concepts")
+        action_match = match_alias(query, "actions")
 
-        previous_user = next(
-            (
-                item.get("content", "").strip()
-                for item in reversed(history)
-                if item.get("role") == "user"
-                and item.get("content", "").strip()
-                and item.get("content", "").strip() != query
-            ),
-            "",
+        # Expand clean topic-only or typo-only utterances without an extra LLM call.
+        # Example: "บับเบิลซอร์ท" -> a richer standalone retrieval query.
+        if topic_match:
+            topic = topic_match.canonical
+            thai_alias = primary_thai_alias("topics", topic)
+
+            if (
+                topic_match.match_type in {"exact", "fuzzy"}
+                and concept_match is None
+                and action_match is None
+            ):
+                return (
+                    f"{topic} {thai_alias} คืออะไร หลักการทำงาน "
+                    "ขั้นตอน ตัวอย่าง การทำงาน"
+                ).strip()
+
+            parts = [topic, thai_alias, query]
+            if concept_match:
+                parts.append(concept_match.canonical)
+            if action_match:
+                parts.append(action_match.canonical)
+            return " ".join(part for part in parts if part).strip()
+
+        # Concept-only utterances such as "บิ๊กโอ" are also expanded into the
+        # course domain so lexical/vector retrieval gets enough context.
+        if concept_match:
+            if concept_match.match_type in {"exact", "fuzzy"}:
+                return (
+                    f"{concept_match.canonical} sorting algorithms "
+                    "อัลกอริทึมการเรียงลำดับ ความหมาย ตัวอย่าง"
+                )
+            return f"{query} {concept_match.canonical}".strip()
+
+        # Context is added only for genuine follow-up utterances instead of
+        # blindly prepending the previous question to every short query.
+        normalized = _normalize_text(query)
+        should_use_context = (
+            len(query) <= 55
+            and any(marker in normalized for marker in FOLLOW_UP_MARKERS)
         )
-        if previous_user:
-            return f"{previous_user}\nคำถามต่อเนื่อง: {query}"
+
+        if should_use_context:
+            previous_user = next(
+                (
+                    item.get("content", "").strip()
+                    for item in reversed(history)
+                    if item.get("role") == "user"
+                    and item.get("content", "").strip()
+                    and item.get("content", "").strip() != query
+                ),
+                "",
+            )
+            if previous_user:
+                return f"{previous_user}\nคำถามต่อเนื่อง: {query}"
+
         return query
 
     def retrieve(
         self, query: str, history: list[dict[str, str]]
     ) -> RetrievalResult:
+        if self.direct_response(query):
+            return RetrievalResult(
+                query=query,
+                retrieval_query="__conversation__",
+                hits=[],
+                elapsed_ms=0.0,
+            )
+
         retrieval_query = self._retrieval_query(query, history)
         started = perf_counter()
         query_vector = (
@@ -79,9 +196,28 @@ class RAGService:
         )
 
     def answerable(self, result: RetrievalResult) -> bool:
-        return bool(result.hits) and (
-            result.top_score >= self.settings.min_relevance_score
-        )
+        if result.retrieval_query == "__conversation__":
+            return True
+        if not result.hits:
+            return False
+
+        threshold = self.settings.min_relevance_score
+
+        # Short in-domain terms can produce lower lexical similarity than
+        # full questions. Relax the gate only when the lexicon strongly
+        # recognizes a course topic/concept; unrelated queries keep the
+        # original threshold.
+        domain_matches = [
+            match_alias(result.query, "topics"),
+            match_alias(result.query, "concepts"),
+        ]
+        if any(
+            match is not None and match.score >= 0.80
+            for match in domain_matches
+        ):
+            threshold = max(0.30, threshold - 0.10)
+
+        return result.top_score >= threshold
 
     def _context_text(self, hits: list[SearchHit]) -> str:
         blocks: list[str] = []
@@ -133,6 +269,11 @@ class RAGService:
         history: list[dict[str, str]],
         model_name: str | None = None,
     ) -> Iterable[str]:
+        direct_text = self.direct_response(query)
+        if direct_text:
+            yield direct_text
+            return
+
         if not self.answerable(result):
             yield (
                 "ผมยังไม่พบข้อมูลที่เพียงพอในเอกสารที่ใช้เป็นฐานความรู้"
@@ -174,6 +315,6 @@ class RAGService:
             if text:
                 yield text
 
-        suffix = self._citation_suffix(result.hits)
-        if suffix:
-            yield suffix
+        # Citations are rendered as structured UI by Streamlit instead of
+        # being appended to the teaching prose. This keeps answers readable
+        # while preserving inspectable evidence.

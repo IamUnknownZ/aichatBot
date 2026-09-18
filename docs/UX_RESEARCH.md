@@ -107,7 +107,68 @@ Applied choices:
 - recent questions are loaded once on profile registration and then updated in Session State
 - no database read is performed on every app rerun merely to redraw history
 
-## 8. Evaluation additions for Chapter 4
+## 8. Conversational flexibility: intent routing + query rewriting
+
+ปัญหาที่ผู้ใช้พิมพ์สั้น ๆ เช่น "ไง", "บับเบิลซอร์ท", "แล้วมันต่างกันยังไง" ไม่ควรถูกปฏิบัติเป็น document-search query แบบเดียวกันทั้งหมด
+
+งาน CONQRR (Wu et al., EMNLP 2022) แสดงแนวคิด conversational query rewriting โดยเปลี่ยน utterance ที่ขึ้นกับบริบทให้เป็น standalone query ก่อนส่งเข้า retriever เพื่อให้ retrieval เข้าใจความต้องการได้ดีขึ้น
+
+งาน MaFeRw (AAAI 2025) ระบุชัดว่า query ในระบบ RAG จริงมักมี ellipsis และ reference ที่กำกวมจากบทสนทนา จึงต้องมี query rewriting ก่อน retrieval
+
+Review เรื่อง university chatbots ปี 2025 ระบุว่า greeting/farewell เป็น intent พื้นฐานของ chatbot และคำ intent เดียวกันสามารถถูกพูดได้หลายรูปแบบ เช่น Hello, Hi, Hey
+
+Query Understanding for Search Engines (2020) แยก query understanding ออกเป็น query classification, intent understanding, spelling correction และ query rewriting ซึ่งตรงกับปัญหาคำทับศัพท์/พิมพ์ผิดของระบบนี้
+
+Design decision:
+- greeting / thanks / farewell / help ตอบด้วย local intent router ไม่เรียก RAG และไม่เรียก Gemini
+- topic-only query เช่น "บับเบิลซอร์ท" rewrite เป็น standalone query ที่มี canonical term "Bubble Sort"
+- เก็บ alias ไทย/อังกฤษ/คำทับศัพท์หลายรูป
+- short typo ใช้ conservative fuzzy matching เฉพาะข้อความสั้น เพื่อลด false mapping
+- follow-up context ถูกพ่วงเฉพาะเมื่อมี marker เช่น "แล้ว", "มัน", "ตัวนี้" แทนการพ่วงคำถามก่อนหน้ากับทุก short query
+- out-of-domain ยังต้องผ่าน relevance gate เหมือนเดิม
+
+References:
+Wu, Z. et al. (2022). CONQRR: Conversational Query Rewriting for Retrieval with Reinforcement Learning. EMNLP 2022.
+https://aclanthology.org/2022.emnlp-main.679/
+
+Wang, Y. et al. (2025). MaFeRw: Query Rewriting with Multi-Aspect Feedbacks for Retrieval-Augmented Large Language Models. AAAI 2025.
+https://ojs.aaai.org/index.php/AAAI/article/view/34732
+
+A review of university chatbots for student support: FAQs and beyond. Discover Education (2025).
+https://link.springer.com/article/10.1007/s44217-025-00397-7
+
+Deng, H. & Chang, Y. (eds.) (2020). Query Understanding for Search Engines. Springer.
+https://link.springer.com/book/10.1007/978-3-030-58334-7
+
+## 9. Educational chatbot UX evaluation
+
+A 2025 study proposed evaluating educational-chatbot UX by combining Chatbot Usability Questionnaire (CUQ), User Engagement Scale short form (UES-SF), error rate and response time rather than judging visual appeal alone.
+
+Design decision:
+- UI evaluation must include usability + engagement + objective task performance
+- compare conversational success/error rate before and after query router
+- collect perceived readability and distraction, not only "สวย/ไม่สวย"
+- measure response time for local social intent separately from RAG questions
+
+Reference:
+A Weighted Composite Metric for Evaluating User Experience in Educational Chatbots: Balancing Usability, Engagement, and Effectiveness. Future Internet, 17(2), 64 (2025).
+https://www.mdpi.com/1999-5903/17/2/64
+
+## 10. Pedagogical-agent cognitive-load caution
+
+Li et al. (2025) meta-analysis จาก 24 studies พบว่า pedagogical agents ลด cognitive load โดยรวมเพียงเล็กน้อย และผลขึ้นกับ appearance, role, subject domain, media form และ learning pace งานทบทวนยังกล่าวถึงกรณีที่ agent ดึง visual attention จากงานเรียนได้
+
+Design decision:
+- mascot ทำหน้าที่เป็น guide cue ขนาดเล็ก
+- sorting-bar animation ใช้เฉพาะ hero และเคลื่อนไหวช้า
+- prefers-reduced-motion ปิด animation ได้
+- ไม่ใช้ full-screen character หรือ animation ต่อเนื่องในพื้นที่คำตอบ
+
+Reference:
+Li, H., Wang, Z., Ding, L., Zhang, J., & Wang, G. (2025). The facts about the effects of pedagogical agents on learners' cognitive load: a meta-analysis based on 24 studies. Frontiers in Psychology, 16.
+https://doi.org/10.3389/fpsyg.2025.1635465
+
+## 11. Evaluation additions for Chapter 4
 
 UI/profile experiment should measure:
 - SUS or another usability instrument

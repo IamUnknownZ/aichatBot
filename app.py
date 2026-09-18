@@ -43,6 +43,47 @@ def track_stream(stream, timing: dict[str, float | None], started: float):
         yield chunk
 
 
+def compact_sources(hits) -> list[dict[str, object]]:
+    seen: set[tuple[str, int]] = set()
+    sources: list[dict[str, object]] = []
+    for hit in hits:
+        key = (hit.source_file, hit.page_number)
+        if key in seen:
+            continue
+        seen.add(key)
+        sources.append(
+            {
+                "source_file": hit.source_file,
+                "page_number": hit.page_number,
+                "preview": hit.content[:260].strip(),
+                "score": hit.score,
+            }
+        )
+        if len(sources) >= 4:
+            break
+    return sources
+
+
+def render_sources(sources: list[dict[str, object]]) -> None:
+    if not sources:
+        return
+
+    pages = [str(item["page_number"]) for item in sources]
+    label = f"📚 แหล่งอ้างอิง · หน้า {', '.join(pages)}"
+    with st.expander(label, expanded=False):
+        st.caption(
+            "หลักฐานที่ระบบใช้ค้นคำตอบจากเอกสารรายวิชา "
+            "เปิดดูเมื่อต้องการตรวจสอบที่มา"
+        )
+        for item in sources:
+            st.markdown(
+                f"**หน้า {item['page_number']}** · {item['source_file']}"
+            )
+            preview = str(item.get("preview", "")).strip()
+            if preview:
+                st.caption(preview)
+
+
 def render_copy_button(text_to_copy: str, element_id: str) -> None:
     escaped_text = json.dumps(text_to_copy)
     html_code = f"""
@@ -215,8 +256,8 @@ if service is not None:
     st.markdown(
         f"""
 <div class="tutor-status-row">
-  <span class="tutor-chip">● ฐานความรู้พร้อม</span>
-  <span class="tutor-chip">{mode_label}</span>
+  <span class="tutor-chip">✦ พร้อมตอบจากเอกสาร</span>
+  <span class="tutor-chip">ไทย · English · คำทับศัพท์</span>
   <span class="tutor-chip">{profile_label}</span>
 </div>
 """,
@@ -271,6 +312,9 @@ with st.sidebar:
             help="ใช้ตอนพัฒนา/เก็บผลการทดลองบทที่ 4",
         )
         st.caption(f"Model: {settings.generation_model}")
+        st.caption(f"Retrieval: {service.store_mode if service else 'unavailable'}")
+        if service is not None:
+            st.caption(f"Query lexicon: {service.lexicon_size} aliases")
         st.caption(
             f"top-k {settings.top_k} · threshold {settings.min_relevance_score:.2f}"
         )
@@ -287,6 +331,8 @@ for message in messages:
     avatar = "🧠" if role == "assistant" else "🙂"
     with st.chat_message(role, avatar=avatar):
         st.markdown(message["content"])
+        if role == "assistant":
+            render_sources(message.get("sources", []))
 
 
 preset_query = None
@@ -294,10 +340,10 @@ if service is not None and len(messages) <= 1:
     render_welcome_panel(settings.tutor_name)
     st.caption("ลองเริ่มด้วยคำถามเหล่านี้")
     quick_prompts = [
-        ("เห็นภาพ", "อธิบาย Bubble Sort ให้เห็นภาพแบบเข้าใจง่าย"),
-        ("เปรียบเทียบ", "Bubble Sort กับ Selection Sort ต่างกันอย่างไร"),
-        ("Trace", "ช่วย Trace Bubble Sort กับข้อมูล 5, 1, 4, 2 ทีละรอบ"),
-        ("Big-O", "สรุป Big-O ของอัลกอริทึมการเรียงลำดับในบทเรียน"),
+        ("🫧 Bubble Sort · เริ่มจากภาพรวม", "อธิบาย Bubble Sort ให้เห็นภาพแบบเข้าใจง่าย"),
+        ("↔️ เปรียบเทียบสองวิธี", "Bubble Sort กับ Selection Sort ต่างกันอย่างไร"),
+        ("🧩 Trace ทีละรอบ", "ช่วย Trace Bubble Sort กับข้อมูล 5, 1, 4, 2 ทีละรอบ"),
+        ("⏱️ Big-O แบบเข้าใจง่าย", "สรุป Big-O ของอัลกอริทึมการเรียงลำดับในบทเรียน"),
     ]
     cols = st.columns(2)
     for idx, (label, prompt) in enumerate(quick_prompts):
@@ -353,6 +399,13 @@ if user_query:
             ttft_ms = timing["ttft_ms"] or total_ms
             answered = service.answerable(result)
 
+            answer_sources = (
+                compact_sources(result.hits)
+                if answered and result.retrieval_query != "__conversation__"
+                else []
+            )
+            render_sources(answer_sources)
+
             render_copy_button(
                 response_text,
                 f"latest_{len(st.session_state['messages'])}",
@@ -400,7 +453,11 @@ if user_query:
                     )
 
             st.session_state["messages"].append(
-                {"role": "assistant", "content": response_text}
+                {
+                    "role": "assistant",
+                    "content": response_text,
+                    "sources": answer_sources,
+                }
             )
 
             # Persist only after the visible response is complete.

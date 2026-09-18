@@ -10,13 +10,14 @@ def inject_theme() -> None:
         """
 <style>
 :root {
-    --tutor-ink: #172033;
-    --tutor-muted: #667085;
-    --tutor-blue: #4263eb;
-    --tutor-indigo: #7048e8;
+    --tutor-ink: #111827;
+    --tutor-muted: #697386;
+    --tutor-blue: #4f6ef7;
+    --tutor-indigo: #7657f6;
+    --tutor-cyan: #35b9d4;
     --tutor-surface: rgba(255, 255, 255, 0.88);
-    --tutor-border: rgba(66, 99, 235, 0.12);
-    --tutor-shadow: 0 18px 50px rgba(31, 45, 74, 0.09);
+    --tutor-border: rgba(79, 110, 247, 0.13);
+    --tutor-shadow: 0 22px 60px rgba(49, 61, 100, 0.10);
 }
 
 #MainMenu, footer {visibility: hidden;}
@@ -31,22 +32,42 @@ def inject_theme() -> None:
 
 [data-testid="stAppViewContainer"] {
     background:
-        radial-gradient(circle at 10% 0%, rgba(112,72,232,.07), transparent 30rem),
-        radial-gradient(circle at 95% 8%, rgba(66,99,235,.07), transparent 28rem);
+        radial-gradient(circle at 14% -8%, rgba(118,87,246,.12), transparent 31rem),
+        radial-gradient(circle at 92% 6%, rgba(53,185,212,.10), transparent 27rem),
+        linear-gradient(180deg, #fbfcff 0%, #f7f9ff 44%, #ffffff 100%);
+}
+
+[data-testid="stHeader"] {
+    background: transparent;
 }
 
 .tutor-hero {
+    position: relative;
+    overflow: hidden;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 112px;
+    grid-template-columns: minmax(0, 1fr) 172px;
     gap: 1.15rem;
     align-items: center;
-    background: var(--tutor-surface);
+    background:
+        linear-gradient(135deg, rgba(255,255,255,.96), rgba(246,248,255,.90));
     border: 1px solid var(--tutor-border);
-    border-radius: 24px;
-    padding: clamp(1.05rem, 3vw, 1.55rem);
+    border-radius: 28px;
+    padding: clamp(1.15rem, 3vw, 1.75rem);
     box-shadow: var(--tutor-shadow);
-    margin-bottom: .85rem;
-    backdrop-filter: blur(12px);
+    margin-bottom: .8rem;
+    backdrop-filter: blur(16px);
+}
+
+.tutor-hero::after {
+    content: "";
+    position: absolute;
+    width: 210px;
+    height: 210px;
+    right: -82px;
+    top: -105px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(79,110,247,.15), rgba(53,185,212,.10));
+    pointer-events: none;
 }
 
 .tutor-eyebrow {
@@ -82,19 +103,24 @@ def inject_theme() -> None:
 
 .tutor-mascot-wrap {
     position: relative;
+    z-index: 1;
     display: grid;
     place-items: center;
-    min-height: 96px;
+    min-height: 126px;
+    border: 1px solid rgba(79,110,247,.10);
+    border-radius: 22px;
+    background: linear-gradient(180deg, rgba(255,255,255,.72), rgba(245,247,255,.88));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
 }
 
 .tutor-mascot {
-    width: 78px;
-    height: 68px;
-    border-radius: 24px 24px 28px 28px;
-    background: linear-gradient(145deg, #597ef7, #7950f2);
-    box-shadow: 0 12px 28px rgba(66,99,235,.25);
+    width: 76px;
+    height: 66px;
+    border-radius: 25px 25px 29px 29px;
+    background: linear-gradient(145deg, #5878f7, #7657f6);
+    box-shadow: 0 13px 28px rgba(79,110,247,.24);
     position: relative;
-    animation: tutorFloat 4.8s ease-in-out infinite;
+    animation: tutorFloat 5.2s ease-in-out infinite;
 }
 
 .tutor-mascot::before {
@@ -136,12 +162,37 @@ def inject_theme() -> None:
 
 .tutor-spark {
     position: absolute;
-    right: 5px;
-    top: 0;
-    font-size: 1.1rem;
+    right: 12px;
+    top: 8px;
+    font-size: 1rem;
     color: #f59f00;
-    animation: tutorPulse 2.6s ease-in-out infinite;
+    animation: tutorPulse 2.8s ease-in-out infinite;
 }
+
+.tutor-sort-bars {
+    position: absolute;
+    left: 50%;
+    bottom: 10px;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: end;
+    gap: 4px;
+    height: 24px;
+}
+
+.tutor-sort-bar {
+    width: 7px;
+    border-radius: 4px 4px 2px 2px;
+    background: linear-gradient(180deg, rgba(53,185,212,.95), rgba(79,110,247,.92));
+    opacity: .78;
+    animation: sortPulse 4.8s ease-in-out infinite;
+}
+
+.tutor-sort-bar:nth-child(1) { height: 9px; animation-delay: -.8s; }
+.tutor-sort-bar:nth-child(2) { height: 20px; animation-delay: -1.6s; }
+.tutor-sort-bar:nth-child(3) { height: 13px; animation-delay: -2.4s; }
+.tutor-sort-bar:nth-child(4) { height: 23px; animation-delay: -3.2s; }
+.tutor-sort-bar:nth-child(5) { height: 16px; animation-delay: -4s; }
 
 .tutor-status-row {
     display: flex;
@@ -174,16 +225,27 @@ def inject_theme() -> None:
 }
 
 [data-testid="stChatMessage"] {
-    border: 1px solid rgba(15,23,42,.06);
-    border-radius: 18px;
-    padding: .72rem .82rem;
-    margin-bottom: .55rem;
-    background: rgba(255,255,255,.78);
-    box-shadow: 0 5px 18px rgba(31,45,74,.035);
+    border: 1px solid rgba(15,23,42,.055);
+    border-radius: 20px;
+    padding: .78rem .9rem;
+    margin-bottom: .7rem;
+    background: rgba(255,255,255,.82);
+    box-shadow: 0 8px 24px rgba(31,45,74,.045);
+}
+
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
+    margin-left: clamp(2rem, 9vw, 6rem);
+    background: linear-gradient(135deg, rgba(79,110,247,.10), rgba(118,87,246,.08));
+    border-color: rgba(79,110,247,.13);
+}
+
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {
+    margin-right: clamp(.5rem, 5vw, 3rem);
 }
 
 [data-testid="stChatMessageContent"] {
-    line-height: 1.72;
+    line-height: 1.78;
+    font-size: .98rem;
 }
 
 [data-testid="stChatMessageContent"] p {
@@ -191,7 +253,16 @@ def inject_theme() -> None:
 }
 
 div[data-testid="stChatInput"] {
-    border-radius: 18px;
+    border-radius: 20px;
+    border: 1px solid rgba(79,110,247,.14);
+    background: rgba(255,255,255,.92);
+    box-shadow: 0 14px 40px rgba(31,45,74,.10);
+    backdrop-filter: blur(16px);
+}
+
+[data-testid="stBottom"] {
+    background: linear-gradient(180deg, rgba(255,255,255,0), rgba(248,250,255,.94) 34%);
+    padding-top: 1rem;
 }
 
 div.stButton > button {
@@ -223,11 +294,16 @@ div.stButton > button:hover {
 
 @keyframes tutorPulse {
     0%,100% { transform: scale(.9) rotate(0deg); opacity: .6; }
-    50% { transform: scale(1.12) rotate(8deg); opacity: 1; }
+    50% { transform: scale(1.10) rotate(7deg); opacity: 1; }
+}
+
+@keyframes sortPulse {
+    0%,100% { transform: scaleY(.86); opacity: .55; }
+    50% { transform: scaleY(1.05); opacity: .90; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .tutor-mascot, .tutor-eye, .tutor-spark,
+    .tutor-mascot, .tutor-eye, .tutor-spark, .tutor-sort-bar,
     div.stButton > button {
         animation: none !important;
         transition: none !important;
@@ -314,6 +390,13 @@ def render_hero(
       </div>
       <div class="tutor-mouth"></div>
     </div>
+    <div class="tutor-sort-bars">
+      <span class="tutor-sort-bar"></span>
+      <span class="tutor-sort-bar"></span>
+      <span class="tutor-sort-bar"></span>
+      <span class="tutor-sort-bar"></span>
+      <span class="tutor-sort-bar"></span>
+    </div>
   </div>
 </section>
 """,
@@ -325,8 +408,8 @@ def render_welcome_panel(tutor_name: str) -> None:
     st.markdown(
         f"""
 <div class="tutor-welcome">
-  <b>{escape(tutor_name)} พร้อมแล้ว</b> — ถามเป็นภาษาธรรมชาติได้เลย
-  ถ้าข้อมูลไม่มีในเอกสาร ระบบควรบอกว่าไม่พบข้อมูล แทนการเดาคำตอบ
+  <b>{escape(tutor_name)} พร้อมแล้ว</b> — พิมพ์สั้น ๆ ก็ได้ เช่น “บับเบิลซอร์ท”
+  หรือถามต่อเนื่องแบบ “แล้วมันต่างกันยังไง” ระบบจะช่วยตีความก่อนค้นจากเอกสาร
 </div>
 """,
         unsafe_allow_html=True,

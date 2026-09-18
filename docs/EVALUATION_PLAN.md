@@ -16,6 +16,11 @@
 8. In-domain but absent คืออยู่เรื่อง sorting แต่ข้อมูลนั้นไม่มีในเอกสาร
 9. Follow-up เช่น แล้วตัวเมื่อกี้ต่างกันยังไง
 10. Figure-based สำหรับเวอร์ชันที่เอกสารมีภาพ
+11. Social intent เช่น ไง, สวัสดี, ขอบคุณ, help
+12. Topic-only short query เช่น บับเบิลซอร์ท, quick sort
+13. Transliteration variants เช่น บับเบิลซอร์ต / บับเบิ้ลซอร์ท
+14. Typo / noisy query เช่น บับเบิ้ลซอท, seletion sort
+15. Ambiguous short follow-up ที่ต้องใช้บริบท เช่น แล้วตัวนี้ล่ะ
 
 แต่ละข้อควรมี question, category, expected_pages, reference_answer, should_abstain, needs_code และ notes
 
@@ -39,6 +44,23 @@
 - Unsupported-question rejection rate
 - False-answer rate: ควรปฏิเสธแต่กลับตอบ
 - False-rejection rate: เอกสารมีคำตอบแต่ระบบปฏิเสธ
+- Adaptive-gate false-positive rate
+- Adaptive-gate false-negative rate
+
+### Conversational robustness
+- Alias coverage count
+- Exact alias recognition accuracy
+- Substring alias recognition accuracy
+- Fuzzy alias recognition accuracy
+- Social-intent accuracy
+- Topic normalization accuracy
+- Concept-only query acceptance rate
+- Typo / transliteration recovery rate
+- Follow-up rewrite success rate
+- Short-query retrieval Hit@K
+- False topic mapping rate
+- Query-understanding P50/P95 latency
+- Raw query vs normalized/expanded query Hit@K
 
 ควรมี negative questions อย่างน้อย 20-30 ข้อเพื่อ tune ค่า RAG_MIN_SCORE
 
