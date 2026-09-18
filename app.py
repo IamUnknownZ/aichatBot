@@ -1,266 +1,453 @@
-import os
 import json
-import io
+import os
+from time import perf_counter
+from uuid import uuid4
+
 import streamlit as st
 import streamlit.components.v1 as components
-from pypdf import PdfReader
-import google.generativeai as genai
 from dotenv import load_dotenv
-from prompt import PROMPT_SORTING_TUTOR
 
-# 1. โหลด Environment Variables
+from rag.bootstrap import build_rag_service
+from rag.config import Settings
+from ui import inject_theme, render_hero, render_welcome_panel
+
+
 load_dotenv()
+page_settings = Settings.from_env()
 
-# ตั้งค่าหน้าเว็บ Streamlit
 st.set_page_config(
-    page_title="AI Chatbot ประจำกลุ่ม - อัลกอริทึมการเรียงลำดับข้อมูล",
+    page_title=f"{page_settings.course_title} · AI Tutor",
     page_icon="🎓",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="collapsed",
 )
+inject_theme()
 
-# Custom CSS เพื่อรองรับการแสดงผลแบบ Responsive บน iPad และ Mobile
-st.markdown("""
-<style>
-    /* ซ่อน Header และ Footer ส่วนเกินของ Streamlit */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    
-    /* ควบคุมขนาด Container ให้พอดีทุกขนาดหน้าจอ (Desktop, iPad, Mobile) */
-    .block-container {
-        max-width: 860px !important;
-        padding-top: 1.5rem !important;
-        padding-bottom: 5rem !important;
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
-        margin: auto !important;
-    }
-    
-    /* สไตล์หัวเรื่องแบบ Responsive */
-    .main-title {
-        font-size: clamp(1.3rem, 4vw, 1.85rem);
-        font-weight: 700;
-        color: #1a73e8;
-        margin-bottom: 0.2rem;
-        line-height: 1.3;
-    }
-    .sub-title {
-        font-size: clamp(0.82rem, 2.5vw, 0.95rem);
-        color: #5f6368;
-        margin-bottom: 1.2rem;
-        line-height: 1.4;
-    }
-    
-    /* ปรับแต่งกล่องข้อความแชต */
-    .stChatMessage {
-        padding: clamp(0.6rem, 2vw, 0.9rem) clamp(0.8rem, 2.5vw, 1.2rem);
-        border-radius: 12px;
-        margin-bottom: 0.6rem;
-        font-size: clamp(0.9rem, 2.5vw, 1rem);
-        line-height: 1.6;
-    }
 
-    /* ปรับแต่งโค้ดบล็อกให้เลื่อนในแนวนอนได้ดีบนมือถือ ไม่ล้นจอ */
-    pre, code {
-        max-width: 100%;
-        overflow-x: auto;
-        border-radius: 8px;
-    }
-
-    /* สไตล์สำหรับแท็บเล็ตและไอแพด (iPad / Tablet: 768px - 1024px) */
-    @media (max-width: 1024px) {
-        .block-container {
-            padding-left: 1.2rem !important;
-            padding-right: 1.2rem !important;
-        }
-    }
-
-    /* สไตล์สำหรับมือถือ (Mobile: ต่ำกว่า 768px) */
-    @media (max-width: 768px) {
-        .block-container {
-            padding-top: 1rem !important;
-            padding-bottom: 4.5rem !important;
-            padding-left: 0.6rem !important;
-            padding-right: 0.6rem !important;
-        }
-        .stChatMessage {
-            border-radius: 8px;
-        }
-    }
-</style>
-""", unsafe_allow_html=True)
-
-# 2. ดึง API Key จาก .env หรือ Secrets อย่างปลอดภัย
-api_key = os.getenv("GEMINI_API_KEY")
-if not api_key:
+def get_secret(name: str) -> str:
+    value = os.getenv(name, "")
+    if value:
+        return value.strip()
     try:
-        if "GEMINI_API_KEY" in st.secrets:
-            api_key = st.secrets["GEMINI_API_KEY"]
+        if name in st.secrets:
+            return str(st.secrets[name]).strip()
     except Exception:
         pass
-
-# 3. แถบเมนูด้านข้าง (Sidebar แบบ Minimal)
-with st.sidebar:
-    st.title("⚙️ เมนูและการตั้งค่า")
-    
-    if not api_key:
-        api_key = st.text_input("🔑 Gemini API Key:", type="password", help="ใส่ API Key ที่ได้จาก Google AI Studio")
-        if not api_key:
-            st.warning("⚠️ กรุณาระบุ API Key เพื่อเริ่มใช้งาน")
-    else:
-        st.success("✅ เชื่อมต่อระบบ AI สำเร็จ")
-
-    selected_model = st.selectbox(
-        "โมเดล AI ที่ใช้:",
-        options=["gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.1-flash-lite", "gemini-3.6-flash"],
-        index=0
-    )
-
-    st.markdown("---")
-    if st.button("🗑️ ล้างการสนทนา (Clear Chat)", use_container_width=True):
-        st.session_state["messages"] = []
-        st.rerun()
-
-# 4. ฟังก์ชันดึงเนื้อหาจาก PDF อัตโนมัติในเบื้องหลัง (Cache ไว้ไม่ให้อ่านซ้ำ)
-@st.cache_data(show_spinner=False)
-def load_group_pdf_content() -> str:
-    """โหลดเนื้อหาจากไฟล์ PDF ของกลุ่มโดยอัตโนมัติ"""
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    possible_paths = [
-        os.path.join(base_dir, "docs", "อัลกอริทึมการเรียงลำดับข้อมูล_ระดับมหาวิทยาลัยปี1.pdf"),
-        os.path.join(base_dir, "อัลกอริทึมการเรียงลำดับข้อมูล_ระดับมหาวิทยาลัยปี1.pdf")
-    ]
-    
-    for path in possible_paths:
-        if os.path.exists(path):
-            try:
-                reader = PdfReader(path)
-                pages_text = []
-                for idx, page in enumerate(reader.pages):
-                    text = page.extract_text()
-                    if text:
-                        pages_text.append(f"[หน้า {idx+1}]\n{text.strip()}")
-                return "\n\n".join(pages_text)
-            except Exception as e:
-                return f"Error reading PDF: {e}"
     return ""
 
-pdf_knowledge_base = load_group_pdf_content()
 
-# 5. ฟังก์ชันสร้างปุ่ม Copy to Clipboard
-def render_copy_button(text_to_copy: str, element_id: str):
-    """สร้างปุ่มคัดลอกข้อความลง Clipboard ผ่าน JavaScript โดยตรง"""
+def track_stream(stream, timing: dict[str, float | None], started: float):
+    for chunk in stream:
+        if timing["ttft_ms"] is None:
+            timing["ttft_ms"] = (perf_counter() - started) * 1000.0
+        yield chunk
+
+
+def render_copy_button(text_to_copy: str, element_id: str) -> None:
     escaped_text = json.dumps(text_to_copy)
     html_code = f"""
-    <div style="display: flex; justify-content: flex-end; margin-top: 2px; margin-bottom: 6px;">
+    <div style="display:flex;justify-content:flex-end;margin-top:2px;margin-bottom:4px;">
         <button id="copy_btn_{element_id}" onclick='
             navigator.clipboard.writeText({escaped_text}).then(() => {{
-                var btn = document.getElementById("copy_btn_{element_id}");
-                btn.innerHTML = "✅ คัดลอกสำเร็จ!";
-                btn.style.backgroundColor = "#e6f4ea";
-                btn.style.color = "#137333";
-                setTimeout(() => {{
-                    btn.innerHTML = "📋 คัดลอกคำตอบ";
-                    btn.style.backgroundColor = "#f8f9fa";
-                    btn.style.color = "#3c4043";
-                }}, 2000);
-            }}).catch(err => {{
-                console.error("Copy error:", err);
+                const btn = document.getElementById("copy_btn_{element_id}");
+                btn.innerHTML = "✓ คัดลอกแล้ว";
+                setTimeout(() => btn.innerHTML = "คัดลอกคำตอบ", 1500);
             }});
         ' style="
-            background-color: #f8f9fa;
-            color: #3c4043;
-            border: 1px solid #dadce0;
-            border-radius: 6px;
-            padding: 4px 10px;
-            font-size: 12px;
-            font-family: inherit;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        " onmouseover="this.style.backgroundColor='#e8eaed'" onmouseout="this.style.backgroundColor='#f8f9fa'">
-            📋 คัดลอกคำตอบ
+            background:transparent;color:#667085;border:1px solid rgba(102,112,133,.18);
+            border-radius:10px;padding:4px 9px;font-size:12px;
+            font-family:inherit;cursor:pointer;">
+            คัดลอกคำตอบ
         </button>
     </div>
     """
-    components.html(html_code, height=35)
+    components.html(html_code, height=32)
 
-# 6. ส่วนหัวของหน้าเว็บ (Header)
-st.markdown('<div class="main-title">🎓 AI Chatbot ประจำกลุ่ม</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">ระบบตอบคำถามตรงประเด็นจากเอกสาร: <b>อัลกอริทึมการเรียงลำดับข้อมูล_ระดับมหาวิทยาลัยปี1.pdf</b></div>', unsafe_allow_html=True)
 
-# 7. จัดการประวัติการสนทนา (Session State)
-if "messages" not in st.session_state or len(st.session_state["messages"]) == 0:
-    st.session_state["messages"] = [
-        {
-            "role": "model",
-            "content": "สวัสดีครับ! ผมคือ AI Chatbot ประจำกลุ่ม พร้อมตอบคำถามเรื่อง **อัลกอริทึมการเรียงลำดับข้อมูล (Sorting Algorithms)** จากเอกสารประกอบการเรียน พิมพ์คำถามที่ต้องการได้เลยครับ"
-        }
+@st.cache_resource(show_spinner=False)
+def create_rag_service(api_key: str, database_url: str):
+    settings = Settings.from_env(
+        api_key=api_key,
+        database_url=database_url,
+    )
+    service = build_rag_service(settings)
+    return service, settings
+
+
+def refresh_recent_questions(service, settings) -> list[str]:
+    profile = st.session_state.get("profile")
+    if not profile:
+        return []
+    try:
+        return service.store.get_recent_questions(
+            profile["user_id"],
+            limit=settings.recent_question_limit,
+        )
+    except Exception:
+        return []
+
+
+def ensure_chat_state(settings: Settings) -> None:
+    if "chat_session_id" not in st.session_state:
+        st.session_state["chat_session_id"] = str(uuid4())
+
+    if "messages" not in st.session_state or not st.session_state["messages"]:
+        st.session_state["messages"] = [
+            {
+                "role": "assistant",
+                "content": (
+                    f"ถามเรื่อง **{settings.course_title}** ได้เลยครับ "
+                    "ผมจะค้นจากเอกสารรายวิชาก่อนตอบ และถ้าข้อมูลไม่พอจะบอกตรง ๆ"
+                ),
+            }
+        ]
+
+
+api_key = get_secret("GEMINI_API_KEY")
+database_url = get_secret("DATABASE_URL")
+
+service = None
+settings = page_settings
+service_error = None
+
+if api_key:
+    try:
+        with st.spinner("กำลังเชื่อมต่อฐานความรู้..."):
+            service, settings = create_rag_service(api_key, database_url)
+    except Exception as exc:
+        service_error = f"{type(exc).__name__}: {exc}"
+
+
+if service is not None and settings.profile_enabled:
+
+    @st.dialog("ยินดีต้อนรับ 👋", width="small")
+    def profile_dialog():
+        st.write(
+            f"ก่อนเริ่มคุยกับ **{settings.tutor_name}** บอกชื่อที่อยากให้เรียกสั้น ๆ "
+            "เพื่อให้ระบบจำประวัติคำถามของคุณได้"
+        )
+        with st.form("profile_form", border=False):
+            display_name = st.text_input(
+                "ชื่อ / ชื่อเล่น",
+                placeholder="เช่น บาส",
+                max_chars=40,
+            )
+            submitted = st.form_submit_button(
+                "เริ่มเรียน",
+                type="primary",
+                use_container_width=True,
+            )
+
+        st.caption(
+            "นี่เป็นโปรไฟล์เพื่อจดจำประวัติ ไม่ใช่ระบบยืนยันตัวตน "
+            "ถ้าใช้ในห้องเรียนควรเลือกชื่อที่ไม่ซ้ำกับเพื่อน"
+        )
+
+        if submitted:
+            name = display_name.strip()
+            if not name:
+                st.warning("กรอกชื่อก่อนเริ่มใช้งานครับ")
+                return
+
+            persisted = service.store_mode == "postgres-pgvector"
+            try:
+                profile = service.store.get_or_create_profile(name)
+            except Exception:
+                profile = None
+                persisted = False
+
+            if profile is None:
+                profile = {
+                    "user_id": str(uuid4()),
+                    "display_name": name,
+                }
+                persisted = False
+
+            st.session_state["profile"] = profile
+            st.session_state["profile_persisted"] = persisted
+            st.session_state["chat_session_id"] = str(uuid4())
+
+            try:
+                st.session_state["recent_questions"] = (
+                    service.store.get_recent_questions(
+                        profile["user_id"],
+                        limit=settings.recent_question_limit,
+                    )
+                    if persisted
+                    else []
+                )
+            except Exception:
+                st.session_state["recent_questions"] = []
+
+            st.rerun()
+
+
+if settings.profile_enabled and service is not None and "profile" not in st.session_state:
+    profile_dialog()
+    st.stop()
+
+
+ensure_chat_state(settings)
+
+student_name = None
+if st.session_state.get("profile"):
+    student_name = st.session_state["profile"].get("display_name")
+
+render_hero(
+    course_title=settings.course_title,
+    course_level=settings.course_level,
+    tutor_name=settings.tutor_name,
+    mascot_symbol=settings.mascot_emoji,
+    student_name=student_name,
+)
+
+if service is not None:
+    mode_label = (
+        "PostgreSQL + pgvector"
+        if service.store_mode == "postgres-pgvector"
+        else "Local lexical RAG"
+    )
+    profile_label = (
+        "จำประวัติแล้ว"
+        if st.session_state.get("profile_persisted")
+        else "ประวัติใน session"
+    )
+    st.markdown(
+        f"""
+<div class="tutor-status-row">
+  <span class="tutor-chip">● ฐานความรู้พร้อม</span>
+  <span class="tutor-chip">{mode_label}</span>
+  <span class="tutor-chip">{profile_label}</span>
+</div>
+""",
+        unsafe_allow_html=True,
+    )
+elif service_error:
+    st.error(f"ระบบฐานความรู้ยังไม่พร้อม: {service_error}")
+else:
+    st.info("ยังไม่ได้ตั้งค่า GEMINI_API_KEY สำหรับระบบ AI")
+
+
+with st.sidebar:
+    if student_name:
+        st.markdown(f"### 👋 {student_name}")
+        st.caption(f"กำลังเรียน: {settings.course_title}")
+
+    recent_questions = st.session_state.get("recent_questions", [])
+    if recent_questions:
+        st.markdown("#### คำถามล่าสุด")
+        for idx, question in enumerate(recent_questions[: settings.recent_question_limit]):
+            label = question if len(question) <= 44 else question[:41] + "…"
+            if st.button(
+                label,
+                key=f"recent_question_{idx}",
+                use_container_width=True,
+            ):
+                st.session_state["queued_prompt"] = question
+
+    st.divider()
+
+    if st.button("เริ่มแชตใหม่", use_container_width=True):
+        st.session_state["messages"] = []
+        st.session_state["chat_session_id"] = str(uuid4())
+        st.rerun()
+
+    if settings.profile_enabled and student_name:
+        if st.button("เปลี่ยนชื่อ", use_container_width=True):
+            for key in (
+                "profile",
+                "profile_persisted",
+                "recent_questions",
+                "messages",
+                "chat_session_id",
+            ):
+                st.session_state.pop(key, None)
+            st.rerun()
+
+    with st.expander("Advanced", expanded=False):
+        show_debug = st.checkbox(
+            "แสดง RAG debug",
+            value=False,
+            help="ใช้ตอนพัฒนา/เก็บผลการทดลองบทที่ 4",
+        )
+        st.caption(f"Model: {settings.generation_model}")
+        st.caption(
+            f"top-k {settings.top_k} · threshold {settings.min_relevance_score:.2f}"
+        )
+        if service is not None and service.startup_note:
+            st.warning(service.startup_note)
+
+if "show_debug" not in locals():
+    show_debug = False
+
+
+messages = st.session_state["messages"]
+for message in messages:
+    role = "assistant" if message["role"] in {"assistant", "model"} else "user"
+    avatar = "🧠" if role == "assistant" else "🙂"
+    with st.chat_message(role, avatar=avatar):
+        st.markdown(message["content"])
+
+
+preset_query = None
+if service is not None and len(messages) <= 1:
+    render_welcome_panel(settings.tutor_name)
+    st.caption("ลองเริ่มด้วยคำถามเหล่านี้")
+    quick_prompts = [
+        ("เห็นภาพ", "อธิบาย Bubble Sort ให้เห็นภาพแบบเข้าใจง่าย"),
+        ("เปรียบเทียบ", "Bubble Sort กับ Selection Sort ต่างกันอย่างไร"),
+        ("Trace", "ช่วย Trace Bubble Sort กับข้อมูล 5, 1, 4, 2 ทีละรอบ"),
+        ("Big-O", "สรุป Big-O ของอัลกอริทึมการเรียงลำดับในบทเรียน"),
     ]
+    cols = st.columns(2)
+    for idx, (label, prompt) in enumerate(quick_prompts):
+        with cols[idx % 2]:
+            if st.button(
+                label,
+                key=f"quick_{idx}",
+                use_container_width=True,
+                help=prompt,
+            ):
+                preset_query = prompt
 
-# 8. แสดงข้อความในแชต พร้อมปุ่ม Copy สำหรับข้อความของ AI
-for idx, msg in enumerate(st.session_state["messages"]):
-    with st.chat_message(msg["role"]):
-        st.write(msg["content"])
-        if msg["role"] == "model" and idx > 0:
-            render_copy_button(msg["content"], f"msg_{idx}")
 
-# 9. การรับคำถามจากผู้ใช้
-if user_query := st.chat_input("พิมพ์คำถามที่ต้องการสอบถามที่นี่..."):
-    if not api_key:
-        st.error("กรุณาระบุ Gemini API Key ในแถบด้านซ้ายก่อนส่งคำถามครับ")
+queued_query = st.session_state.pop("queued_prompt", None)
+typed_query = st.chat_input(
+    f"ถามเกี่ยวกับ {settings.course_title}...",
+    disabled=service is None,
+)
+user_query = preset_query or queued_query or typed_query
+
+
+if user_query:
+    if service is None:
+        st.error("ระบบฐานความรู้ยังไม่พร้อม")
         st.stop()
 
-    # แสดงข้อความของผู้ใช้
-    st.session_state["messages"].append({"role": "user", "content": user_query})
-    with st.chat_message("user"):
-        st.write(user_query)
-
-    # กำหนดคำสั่งเฉพาะเจาะจง เน้นสั้น ตรงประเด็น ได้ใจความครบ
-    system_instruction_with_context = f"""{PROMPT_SORTING_TUTOR}
-
-=== ฐานข้อมูลเอกสาร PDF ของกลุ่ม (PDF KNOWLEDGE BASE) ===
-{pdf_knowledge_base if pdf_knowledge_base.strip() else "ไม่มีเอกสารเพิ่มเติม ให้ตอบตามหลักการอัลกอริทึมทั่วไป"}
-======================================================
-"""
-
-    genai.configure(api_key=api_key)
-    generation_config = {
-        "temperature": 0.1,  # ค่าต่ำเพื่อให้ตอบตรงประเด็น ไม่เยิ่นเย้อ
-        "top_p": 0.95,
-        "max_output_tokens": 2048,
-    }
-
-    model = genai.GenerativeModel(
-        model_name=selected_model,
-        generation_config=generation_config,
-        system_instruction=system_instruction_with_context,
+    history_before = list(st.session_state["messages"])
+    st.session_state["messages"].append(
+        {"role": "user", "content": user_query}
     )
 
-    # สร้างและแสดงคำตอบของ AI
-    with st.chat_message("model"):
-        with st.spinner("กำลังค้นหาคำตอบ..."):
-            try:
-                gemini_history = [
-                    {
-                        "role": "user" if m["role"] == "user" else "model",
-                        "parts": [m["content"]]
-                    }
-                    for m in st.session_state["messages"][:-1]
+    with st.chat_message("user", avatar="🙂"):
+        st.markdown(user_query)
+
+    with st.chat_message("assistant", avatar="🧠"):
+        try:
+            request_started = perf_counter()
+            with st.spinner("กำลังค้นส่วนที่เกี่ยวข้องในเอกสาร..."):
+                result = service.retrieve(user_query, history_before)
+
+            stream = service.stream_answer(
+                query=user_query,
+                result=result,
+                history=history_before,
+                model_name=settings.generation_model,
+            )
+            timing = {"ttft_ms": None}
+            response_text = st.write_stream(
+                track_stream(stream, timing, request_started)
+            ) or ""
+
+            total_ms = (perf_counter() - request_started) * 1000.0
+            ttft_ms = timing["ttft_ms"] or total_ms
+            answered = service.answerable(result)
+
+            render_copy_button(
+                response_text,
+                f"latest_{len(st.session_state['messages'])}",
+            )
+
+            if settings.max_images_per_answer > 0:
+                images = service.store.images_for_pages(
+                    result.pages,
+                    limit=settings.max_images_per_answer,
+                )
+                if images:
+                    with st.expander("ภาพประกอบจากหน้าที่เกี่ยวข้อง"):
+                        for image in images:
+                            st.image(
+                                image.image_bytes,
+                                caption=f"หน้า {image.page_number}",
+                            )
+
+            if show_debug:
+                with st.expander("RAG debug"):
+                    st.write(
+                        {
+                            "retrieval_query": result.retrieval_query,
+                            "retrieval_ms": round(result.elapsed_ms, 1),
+                            "ttft_ms": round(ttft_ms, 1),
+                            "total_ms": round(total_ms, 1),
+                            "top_score": round(result.top_score, 4),
+                            "answerable": answered,
+                            "pages": result.pages,
+                        }
+                    )
+                    st.dataframe(
+                        [
+                            {
+                                "page": hit.page_number,
+                                "score": round(hit.score, 4),
+                                "vector": round(hit.vector_score, 4),
+                                "lexical": round(hit.lexical_score, 4),
+                                "preview": hit.content[:180],
+                            }
+                            for hit in result.hits
+                        ],
+                        use_container_width=True,
+                        hide_index=True,
+                    )
+
+            st.session_state["messages"].append(
+                {"role": "assistant", "content": response_text}
+            )
+
+            # Persist only after the visible response is complete.
+            service.store.log_answer(
+                query=user_query,
+                retrieval_ms=result.elapsed_ms,
+                ttft_ms=ttft_ms,
+                total_ms=total_ms,
+                top_score=result.top_score,
+                answered=answered,
+                model_name=settings.generation_model,
+                pages=result.pages,
+                answer_chars=len(response_text),
+            )
+
+            profile = st.session_state.get("profile")
+            if profile:
+                service.store.save_exchange(
+                    user_id=profile["user_id"],
+                    session_id=st.session_state["chat_session_id"],
+                    question=user_query,
+                    answer=response_text,
+                    metadata={
+                        "pages": result.pages,
+                        "top_score": round(result.top_score, 6),
+                        "answered": answered,
+                        "retrieval_ms": round(result.elapsed_ms, 2),
+                        "ttft_ms": round(ttft_ms, 2),
+                        "total_ms": round(total_ms, 2),
+                        "model": settings.generation_model,
+                    },
+                )
+
+                recent = st.session_state.get("recent_questions", [])
+                updated = [user_query] + [
+                    q for q in recent if q.casefold() != user_query.casefold()
+                ]
+                st.session_state["recent_questions"] = updated[
+                    : settings.recent_question_limit
                 ]
 
-                chat_session = model.start_chat(history=gemini_history)
-                response = chat_session.send_message(user_query)
-                
-                response_text = response.text.strip()
-                st.write(response_text)
-                
-                # แสดงปุ่ม Copy สำหรับข้อความล่าสุด
-                new_msg_idx = len(st.session_state["messages"])
-                render_copy_button(response_text, f"msg_{new_msg_idx}")
-
-                st.session_state["messages"].append({"role": "model", "content": response_text})
-            except Exception as e:
-                error_msg = f"เกิดข้อผิดพลาด: {e}"
-                st.error(error_msg)
-                st.session_state["messages"].append({"role": "model", "content": error_msg})
+        except Exception as exc:
+            error_text = (
+                "เกิดข้อผิดพลาดระหว่างค้นข้อมูลหรือสร้างคำตอบ: "
+                f"{type(exc).__name__}: {exc}"
+            )
+            st.error(error_text)
+            st.session_state["messages"].append(
+                {"role": "assistant", "content": error_text}
+            )
