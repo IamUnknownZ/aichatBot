@@ -552,6 +552,60 @@ class PgVectorStore:
                             ],
                         )
 
+    def replace_images(self, document: ParsedDocument) -> None:
+        from psycopg.types.json import Jsonb
+
+        with self._connect() as conn:
+            with conn.transaction():
+                with conn.cursor() as cur:
+                    cur.execute(
+                        "SELECT 1 FROM rag_documents WHERE source_id = %s LIMIT 1",
+                        (document.source_id,),
+                    )
+                    if cur.fetchone() is None:
+                        raise RuntimeError(
+                            "Document must be indexed before image-only refresh: "
+                            f"{document.source_file}"
+                        )
+
+                    cur.execute(
+                        "DELETE FROM rag_document_images WHERE source_id = %s",
+                        (document.source_id,),
+                    )
+                    if document.images:
+                        cur.executemany(
+                            """
+                            INSERT INTO rag_document_images (
+                                source_id, source_file, page_number, image_index,
+                                mime_type, image_bytes, width, height, sha256,
+                                metadata, embedding
+                            )
+                            VALUES (
+                                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NULL
+                            )
+                            """,
+                            [
+                                (
+                                    image.source_id,
+                                    image.source_file,
+                                    image.page_number,
+                                    image.image_index,
+                                    image.mime_type,
+                                    image.image_bytes,
+                                    image.width,
+                                    image.height,
+                                    image.sha256,
+                                    Jsonb(image.metadata),
+                                )
+                                for image in document.images
+                            ],
+                        )
+                    cur.execute(
+                        "UPDATE rag_documents SET updated_at = now() "
+                        "WHERE source_id = %s",
+                        (document.source_id,),
+                    )
+
     def search(
         self,
         query: str,

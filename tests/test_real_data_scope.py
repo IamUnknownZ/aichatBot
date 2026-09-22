@@ -61,12 +61,24 @@ class RealDataScopeTests(unittest.TestCase):
                 image_bytes=b"crop",
                 metadata={"kind": "figure_crop"},
             ),
+            ExtractedImage(
+                source_id="s",
+                source_file="x.pdf",
+                page_number=1,
+                image_index=2001,
+                mime_type="image/png",
+                image_bytes=b"trace",
+                metadata={"kind": "trace_crop"},
+            ),
         ]
 
         visible = RAGService.select_user_visible_images(images, limit=3)
 
-        self.assertEqual(len(visible), 1)
-        self.assertEqual(visible[0].metadata["kind"], "figure_crop")
+        self.assertEqual(len(visible), 2)
+        self.assertEqual(
+            [image.metadata["kind"] for image in visible],
+            ["figure_crop", "trace_crop"],
+        )
 
     def test_image_lookup_is_bound_to_source_and_page(self):
         images = [
@@ -150,6 +162,35 @@ class RealDataScopeTests(unittest.TestCase):
             "embedded_then_render",
         )
         self.assertTrue(page_2_image.metadata["source_only"])
+
+    def test_selection_sort_trace_is_cropped_instead_of_full_page(self):
+        textbook = next(
+            path
+            for path in resolve_pdf_paths()
+            if path.name.startswith("เอกสารหน่วยที่ 8")
+        )
+        document = parse_pdf(
+            textbook,
+            extract_images=True,
+            render_vector_pages=True,
+        )
+        page_4 = [
+            image for image in document.images if image.page_number == 4
+        ]
+        trace = next(
+            image
+            for image in page_4
+            if image.metadata.get("kind") == "trace_crop"
+        )
+
+        self.assertIn("Selection sort", trace.metadata.get("caption", ""))
+        self.assertGreater(trace.width, trace.height)
+        self.assertFalse(
+            any(
+                image.metadata.get("kind") == "vector_page_render"
+                for image in page_4
+            )
+        )
 
     def test_textbook_figure_is_cropped_instead_of_full_page(self):
         textbook = next(

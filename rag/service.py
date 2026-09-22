@@ -96,7 +96,7 @@ class RAGService:
         return [
             image
             for image in images
-            if image.metadata.get("kind") == "figure_crop"
+            if image.metadata.get("kind") in {"figure_crop", "trace_crop"}
         ][: max(0, limit)]
 
     @staticmethod
@@ -459,20 +459,49 @@ class RAGService:
         return "\n\n📚 อ้างอิงจากเอกสาร: " + ", ".join(refs)
 
     @staticmethod
-    def _fast_grounded_fallback(hits: list[SearchHit]) -> str:
-        if not hits:
-            return (
-                "ระบบสร้างคำตอบใช้เวลานานเกินกำหนด "
-                "และไม่พบข้อความที่เหมาะสำหรับแสดงแทนจากเอกสาร"
-            )
-
-        text = " ".join(hits[0].content.split()).strip()
+    def _clean_evidence_text(hit: SearchHit) -> str:
+        text = " ".join(hit.content.split()).strip()
         text = re.sub(
             r"^หน่วยที่\s*\d+\s+การเรียงล\s*า?ดับข้อมูล\s*\d*\s*",
             "",
             text,
             flags=re.IGNORECASE,
         )
+        return text
+
+    @staticmethod
+    def _evidence_points(text: str, *, limit: int = 4) -> list[str]:
+        words = text.split()
+        if not words:
+            return []
+        points: list[str] = []
+        current: list[str] = []
+        current_len = 0
+        for word in words:
+            current.append(word)
+            current_len += len(word) + 1
+            if current_len >= 170:
+                points.append(" ".join(current).rstrip(" ,;:-"))
+                current = []
+                current_len = 0
+                if len(points) >= limit:
+                    break
+        if current and len(points) < limit:
+            points.append(" ".join(current).rstrip(" ,;:-"))
+        return points
+
+    def _fast_grounded_fallback(
+        self,
+        query: str,
+        hits: list[SearchHit],
+    ) -> str:
+        if not hits:
+            return (
+                "ระบบสร้างคำตอบใช้เวลานานเกินกำหนด "
+                "และไม่พบข้อความที่เหมาะสำหรับแสดงแทนจากเอกสาร"
+            )
+
+        text = self._clean_evidence_text(hits[0])
         anchors = (
             "การเรียงลำดับข้อมูล หรือการจัดเรียงข้อมูล",
             "การเรียงลำดับข้อมูลแบบ",
@@ -483,13 +512,37 @@ class RAGService:
                 text = text[pos:]
                 break
 
-        if len(text) > 520:
-            text = text[:520].rsplit(" ", 1)[0].rstrip(" ,;:-") + "…"
+        points = self._evidence_points(text)
+        if not points:
+            return (
+                "ระบบสร้างคำตอบใช้เวลานานเกินกำหนด "
+                "และไม่พบข้อความที่เหมาะสำหรับแสดงแทนจากเอกสาร"
+            )
 
-        return text or (
-            "ระบบสร้างคำตอบใช้เวลานานเกินกำหนด "
-            "และไม่พบข้อความที่เหมาะสำหรับแสดงแทนจากเอกสาร"
-        )
+        topic_match = match_alias(query, "topics")
+        if topic_match is not None and topic_match.score >= 0.80:
+            title = topic_match.canonical
+            answer = [f"### {title}", "", "**ความหมาย**", f"- {points[0]}"]
+            if len(points) > 1:
+                answer.extend(["", "**หลักการทำงาน**"])
+                answer.extend(
+                    f"{idx}. {point}"
+                    for idx, point in enumerate(points[1:], start=1)
+                )
+            return "\n".join(answer)
+
+        if self._is_general_sort_definition(query):
+            return "\n".join(
+                [
+                    "### การเรียงลำดับข้อมูล",
+                    "",
+                    "**ความหมาย**",
+                    f"- {points[0]}",
+                    *[f"- {point}" for point in points[1:]],
+                ]
+            )
+
+        return "\n".join(f"- {point}" for point in points)
 
     def stream_answer(
         self,
@@ -513,7 +566,7 @@ class RAGService:
             return
 
         if self._is_general_sort_definition(query):
-            yield self._fast_grounded_fallback(result.hits)
+            yield self._fast_grounded_fallback(query, result.hits)
             return
 
         context = self._context_text(result.hits)
@@ -557,7 +610,7 @@ class RAGService:
                     yield text
         except Exception:
             if not emitted:
-                yield self._fast_grounded_fallback(result.hits)
+                yield self._fast_grounded_fallback(query, result.hits)
 
         # Citations are rendered as structured UI by Streamlit instead of
         # being appended to the teaching prose. This keeps answers readable

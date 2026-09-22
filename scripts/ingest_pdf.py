@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 
 from rag.bootstrap import build_rag_service, resolve_pdf_paths
 from rag.config import Settings
+from rag.pdf_ingest import parse_pdf
+from rag.store import PgVectorStore
 
 
 def main() -> None:
@@ -26,7 +28,17 @@ def main() -> None:
         action="store_true",
         help="Skip internal PDF image extraction/page rendering for this ingest.",
     )
+    parser.add_argument(
+        "--images-only",
+        action="store_true",
+        help=(
+            "Refresh source-only PDF visuals without recomputing text embeddings. "
+            "Requires the same PDF hashes to already exist in PostgreSQL."
+        ),
+    )
     args = parser.parse_args()
+    if args.text_only and args.images_only:
+        parser.error("--text-only and --images-only cannot be used together")
 
     load_dotenv()
     settings = Settings.from_env()
@@ -44,6 +56,35 @@ def main() -> None:
         )
 
     approved = resolve_pdf_paths()
+
+    if args.images_only:
+        store = PgVectorStore(
+            settings.database_url,
+            embedding_dim=settings.embedding_dim,
+        )
+        store.ensure_schema()
+        visual_count = 0
+        for pdf_path in approved:
+            document = parse_pdf(
+                pdf_path,
+                extract_images=True,
+                render_vector_pages=True,
+                chunk_size=settings.chunk_chars,
+                overlap=settings.chunk_overlap,
+            )
+            store.replace_images(document)
+            visual_count += len(document.images)
+            print(
+                f"Refreshed visuals: {pdf_path.name} "
+                f"images={len(document.images)}"
+            )
+        print(
+            "RAG visual catalog ready. "
+            f"sources={len(approved)}, store={store.mode}, "
+            f"internal_visuals={visual_count}"
+        )
+        return
+
     service = build_rag_service(
         settings,
         force_reindex=args.force,

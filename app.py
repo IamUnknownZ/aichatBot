@@ -12,7 +12,7 @@ from ui import inject_theme, render_hero, render_welcome_panel
 
 load_dotenv()
 page_settings = Settings.from_env()
-APP_CACHE_VERSION = "2026-09-22-vector-prod-v5"
+APP_CACHE_VERSION = "2026-09-22-format-visual-v6"
 
 st.set_page_config(
     page_title=f"{page_settings.course_title} · AI Tutor",
@@ -412,6 +412,12 @@ if user_query:
             answered = service.answerable(result)
             visual_request = service.is_visual_request(user_query)
 
+            current_references = list(
+                dict.fromkeys(
+                    (hit.source_id, hit.page_number)
+                    for hit in result.hits
+                )
+            )
             previous_references = []
             if visual_request:
                 for message in reversed(history_before):
@@ -424,10 +430,11 @@ if user_query:
                     if previous_references:
                         break
 
-            image_references = previous_references or list(
+            image_references = list(
                 dict.fromkeys(
-                    (hit.source_id, hit.page_number)
-                    for hit in result.hits
+                    (previous_references + current_references)
+                    if visual_request
+                    else current_references
                 )
             )
             images = []

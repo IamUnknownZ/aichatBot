@@ -107,9 +107,10 @@ Course identity ปรับได้โดยไม่แก้ UI code:
 คำสั่ง `python -m scripts.ingest_pdf --force` เตรียมภาพจาก PDF ภายใน `real_data/` ให้อัตโนมัติ:
 - embedded raster image จาก PDF จริง
 - `figure_crop` ที่ isolate จาก caption + vector bounds
+- `trace_crop` จากกลุ่ม vector ที่เป็น array/table/step-by-step trace แม้ไม่มี caption รูป
 - page render ภายในใช้เป็น extraction fallback เท่านั้น
 
-**User-facing rule:** UI แสดงเฉพาะ `figure_crop` ที่ isolate แล้วเท่านั้น ไม่แสดง full-page render หรือ raw embedded image เพื่อป้องกันหน้ากระดาษเต็ม/ภาพดำหลุดมาถึงผู้ใช้
+**User-facing rule:** UI แสดงเฉพาะ `figure_crop` และ `trace_crop` ที่ isolate แล้วเท่านั้น ไม่แสดง full-page render หรือ raw embedded image เพื่อป้องกันหน้ากระดาษเต็ม/ภาพดำหลุดมาถึงผู้ใช้
 
 ค่า config ที่เทียบเท่าคือ:
 
@@ -118,6 +119,8 @@ Course identity ปรับได้โดยไม่แก้ UI code:
     RAG_INDEX_IMAGES=false
 
 `RAG_INDEX_IMAGES` เป็น optional multimodal vector; retrieval ปกติผูกรูปตาม text hit จึงไม่จำเป็นต้องเปิด
+
+ถ้าแก้เฉพาะ logic การ crop/ภาพและ PDF hash เดิมยังอยู่ในฐานข้อมูล ให้ใช้ `python -m scripts.ingest_pdf --images-only` เพื่อ refresh `rag_document_images` โดยไม่ recompute text embeddings และไม่กิน embedding quota ซ้ำ
 
 ภาพถูกเลือกด้วยคู่ `source_id + page_number` เพื่อป้องกันรูปหน้าเดียวกันจากคนละ PDF ปะปนกัน
 

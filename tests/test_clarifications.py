@@ -94,14 +94,13 @@ class ClarificationServiceTests(unittest.TestCase):
             {"role": "user", "content": "อธิบาย Bubble Sort ให้เข้าใจง่าย"},
             {"role": "assistant", "content": "คำอธิบายก่อนหน้า"},
         ]
-        query = "มีรูปประกอบไหม"
-
-        self.assertTrue(self.service.is_visual_request(query))
-        self.assertIsNone(self.service.direct_response(query, history))
-        self.assertEqual(
-            self.service._retrieval_query(query, history),
-            "อธิบาย Bubble Sort ให้เข้าใจง่าย",
-        )
+        for query in ("มีรูปประกอบไหม", "ภาพ"):
+            self.assertTrue(self.service.is_visual_request(query))
+            self.assertIsNone(self.service.direct_response(query, history))
+            self.assertEqual(
+                self.service._retrieval_query(query, history),
+                "อธิบาย Bubble Sort ให้เข้าใจง่าย",
+            )
 
     def test_specific_algorithm_query_reranks_exact_topic_first(self):
         result = self.service.retrieve("insertion sort คืออะไร", [])
@@ -131,11 +130,16 @@ class ClarificationServiceTests(unittest.TestCase):
 
     def test_grounded_fallback_is_readable_not_raw_chunk_dump(self):
         result = self.service.retrieve("การเรียงลำดับข้อมูลคือ", [])
-        fallback = self.service._fast_grounded_fallback(result.hits)
+        fallback = self.service._fast_grounded_fallback(
+            "การเรียงลำดับข้อมูลคือ",
+            result.hits,
+        )
 
         self.assertNotIn("คำตอบแบบเร็วจากหลักฐาน", fallback)
         self.assertNotIn("อธิบายหลักการเรียงลำดับข้อมูลแบบ Selection Sort ได้", fallback)
-        self.assertIn("การเรียงลำดับข้อมูล", fallback)
+        self.assertIn("### การเรียงลำดับข้อมูล", fallback)
+        self.assertIn("**ความหมาย**", fallback)
+        self.assertIn("- ", fallback)
 
     def test_general_sort_definition_skips_generation(self):
         query = "การเรียงลำดับข้อมูลคือ"
@@ -150,6 +154,18 @@ class ClarificationServiceTests(unittest.TestCase):
 
         self.assertIn("Data Sorting", answer)
         self.assertNotIn("คำตอบแบบเร็วจากหลักฐาน", answer)
+
+    def test_algorithm_fallback_is_structured_markdown(self):
+        result = self.service.retrieve("selection sort", [])
+        answer = self.service._fast_grounded_fallback(
+            "selection sort",
+            result.hits,
+        )
+
+        self.assertIn("### Selection Sort", answer)
+        self.assertIn("**ความหมาย**", answer)
+        self.assertIn("**หลักการทำงาน**", answer)
+        self.assertIn("1. ", answer)
 
     def test_insufficient_evidence_stream_has_single_fallback(self):
         result = RetrievalResult(

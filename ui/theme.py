@@ -317,7 +317,17 @@ footer {
 
 [data-testid="stChatMessageContent"] ul,
 [data-testid="stChatMessageContent"] ol {
-    padding-left: 1.3rem;
+    padding-left: 1.35rem;
+    margin: .35rem 0 .8rem;
+}
+
+[data-testid="stChatMessageContent"] li {
+    margin: .28rem 0;
+}
+
+[data-testid="stChatMessageContent"] strong {
+    color: var(--ink);
+    font-weight: 650;
 }
 
 [data-testid="stChatMessageContent"] code {

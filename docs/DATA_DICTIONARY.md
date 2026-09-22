@@ -47,7 +47,7 @@ Index ที่ใช้:
 
 ## 3. rag_document_images — Prepared Visual Catalog
 
-ตารางนี้เป็นสารานุกรมภาพภายในของ RAG: เก็บเฉพาะ embedded image, `figure_crop` และ page render fallback ที่มาจาก `real_data/` พร้อมตำแหน่งอ้างอิงกลับไปยังเอกสารจริง เพื่อให้ visual request ดึงภาพได้โดยไม่ต้องค้นเว็บหรือเรียก LLM เพื่อสร้างภาพ. ถ้าตรวจพบ caption/figure region ระบบต้องใช้ `figure_crop` และไม่เก็บ full-page render ของหน้านั้น
+ตารางนี้เป็นสารานุกรมภาพภายในของ RAG: เก็บเฉพาะ embedded image, `figure_crop`, `trace_crop` และ page render fallback ที่มาจาก `real_data/` พร้อมตำแหน่งอ้างอิงกลับไปยังเอกสารจริง เพื่อให้ visual request ดึงภาพได้โดยไม่ต้องค้นเว็บหรือเรียก LLM เพื่อสร้างภาพ. `figure_crop` ใช้กับรูปที่มี caption/figure region ชัดเจน ส่วน `trace_crop` ใช้กับกลุ่ม vector ที่เป็น array/table/step-by-step trace แม้ไม่มี caption รูป. ถ้าตรวจพบ crop ที่แม่นยำ ระบบต้องไม่ใช้ full-page render ของหน้านั้น
 
 | Field | Type | Meaning |
 |---|---|---|

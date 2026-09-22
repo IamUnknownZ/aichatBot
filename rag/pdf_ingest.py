@@ -215,6 +215,79 @@ def _figure_clips(page) -> list[tuple[object, str]]:
     return clips
 
 
+def _trace_clips(page) -> list[object]:
+    rects = []
+    for drawing in page.get_drawings():
+        rect = drawing.get("rect")
+        if rect is None:
+            continue
+        if rect.y0 < 70 or rect.y1 > page.rect.y1 - 45:
+            continue
+        if max(rect.width, rect.height) < 16 or min(rect.width, rect.height) < 2.5:
+            continue
+        if rect.width > page.rect.width * 0.9 and rect.height < 6:
+            continue
+        rects.append(rect)
+
+    if len(rects) < 5:
+        return []
+
+    groups: list[list[object]] = []
+    for rect in sorted(rects, key=lambda item: (item.y0, item.x0)):
+        if not groups:
+            groups.append([rect])
+            continue
+        group_bottom = max(item.y1 for item in groups[-1])
+        if rect.y0 <= group_bottom + 35:
+            groups[-1].append(rect)
+        else:
+            groups.append([rect])
+
+    clips: list[object] = []
+    for group in groups:
+        if len(group) < 5:
+            continue
+        x0 = min(rect.x0 for rect in group)
+        y0 = min(rect.y0 for rect in group)
+        x1 = max(rect.x1 for rect in group)
+        y1 = max(rect.y1 for rect in group)
+        if x1 - x0 < 180 or y1 - y0 < 25:
+            continue
+
+        padding_x = 14.0
+        padding_y = 18.0
+        clip = page.rect & type(group[0])(
+            x0 - padding_x,
+            y0 - padding_y,
+            x1 + padding_x,
+            y1 + padding_y,
+        )
+        if clip.width * clip.height > page.rect.width * page.rect.height * 0.35:
+            continue
+        clips.append(clip)
+
+    return clips
+
+
+def _trace_caption(page, visual_metadata: dict[str, object]) -> str:
+    subtopic = str(visual_metadata.get("subtopic") or "").strip()
+    if subtopic:
+        return subtopic
+    section = str(visual_metadata.get("section") or "").strip()
+    if section:
+        return section.replace("_", " ").title()
+
+    for line in page.get_text().splitlines():
+        cleaned = " ".join(line.split()).strip()
+        if re.search(
+            r"(?:Selection|Insertion|Bubble|Shell|Quick|Merge|Heap|Cocktail|Counting|Radix|Bucket)\s+sort",
+            cleaned,
+            re.IGNORECASE,
+        ):
+            return cleaned[:140]
+    return f"ภาพขั้นตอนจากหน้า {page.number + 1}"
+
+
 def _extract_images_with_pymupdf(
     pdf_path: Path,
     source_id: str,
@@ -289,6 +362,11 @@ def _extract_images_with_pymupdf(
                 )
 
             figure_clips = _figure_clips(page) if render_vector_pages else []
+            trace_clips = (
+                _trace_clips(page)
+                if render_vector_pages and not figure_clips
+                else []
+            )
             for figure_idx, (clip, caption) in enumerate(figure_clips, start=1):
                 pix = page.get_pixmap(
                     matrix=fitz.Matrix(2.0, 2.0),
@@ -326,9 +404,52 @@ def _extract_images_with_pymupdf(
                     )
                 )
 
-            # Full-page rendering is only a fallback when no figure region
-            # could be isolated from the source page.
-            if render_vector_pages and page.get_drawings() and not figure_clips:
+            trace_caption = _trace_caption(page, visual_metadata)
+            for trace_idx, clip in enumerate(trace_clips, start=1):
+                pix = page.get_pixmap(
+                    matrix=fitz.Matrix(2.0, 2.0),
+                    clip=clip,
+                    alpha=False,
+                )
+                trace_bytes = pix.tobytes("png")
+                trace_hash = hashlib.sha256(trace_bytes).hexdigest()
+                if trace_hash in seen_hashes:
+                    continue
+                seen_hashes.add(trace_hash)
+                images.append(
+                    ExtractedImage(
+                        source_id=source_id,
+                        source_file=pdf_path.name,
+                        page_number=page_number,
+                        image_index=2000 + trace_idx,
+                        mime_type="image/png",
+                        image_bytes=trace_bytes,
+                        width=pix.width,
+                        height=pix.height,
+                        sha256=trace_hash,
+                        metadata={
+                            **visual_metadata,
+                            "kind": "trace_crop",
+                            "caption": trace_caption,
+                            "clip": [
+                                round(float(clip.x0), 2),
+                                round(float(clip.y0), 2),
+                                round(float(clip.x1), 2),
+                                round(float(clip.y1), 2),
+                            ],
+                            "source_only": True,
+                        },
+                    )
+                )
+
+            # Full-page rendering remains internal fallback only when no
+            # precise figure/trace region could be isolated.
+            if (
+                render_vector_pages
+                and page.get_drawings()
+                and not figure_clips
+                and not trace_clips
+            ):
                 pix = page.get_pixmap(matrix=fitz.Matrix(1.5, 1.5), alpha=False)
                 page_bytes = pix.tobytes("png")
                 page_hash = hashlib.sha256(page_bytes).hexdigest()
