@@ -1,6 +1,6 @@
 import unittest
 
-from rag.query_lexicon import TOTAL_ALIASES, match_alias
+from rag.query_lexicon import PRIMARY_SORT_TOPICS, TOTAL_ALIASES, match_alias
 
 
 class QueryLexiconTests(unittest.TestCase):
@@ -25,12 +25,28 @@ class QueryLexiconTests(unittest.TestCase):
             "อินเซิรชันซอท": "Insertion Sort",
             "เมิจซอท": "Merge Sort",
             "ควิกซอท": "Quick Sort",
-            "ฮีบซอท": "Heap Sort",
         }
         for query, expected in cases.items():
             match = match_alias(query, "topics")
             self.assertIsNotNone(match, query)
             self.assertEqual(match.canonical, expected)
+
+    def test_primary_curriculum_has_exactly_six_algorithms(self):
+        self.assertEqual(
+            PRIMARY_SORT_TOPICS,
+            (
+                "Selection Sort",
+                "Insertion Sort",
+                "Bubble Sort",
+                "Shell Sort",
+                "Merge Sort",
+                "Quick Sort",
+            ),
+        )
+        self.assertIsNone(match_alias("heap sort", "topics"))
+        excluded = match_alias("heap sort", "non_curriculum_topics")
+        self.assertIsNotNone(excluded)
+        self.assertEqual(excluded.canonical, "Heap Sort")
 
     def test_concept_variants(self):
         cases = {

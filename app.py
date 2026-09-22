@@ -597,6 +597,11 @@ if user_query:
                     : settings.recent_question_limit
                 ]
 
+            # Re-render the completed exchange from session history so the
+            # streamed assistant block does not remain as a stale/ghost
+            # element during the next Streamlit rerun.
+            st.rerun()
+
         except Exception as exc:
             if "thinking_placeholder" in locals():
                 thinking_placeholder.empty()

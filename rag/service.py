@@ -17,6 +17,7 @@ from .config import Settings
 from .embeddings import GeminiEmbedder
 from .models import ExtractedImage, RetrievalResult, SearchHit
 from .query_lexicon import (
+    PRIMARY_SORT_TOPICS,
     TOTAL_ALIASES,
     compact_text as lexicon_compact_text,
     match_alias,
@@ -129,11 +130,53 @@ class RAGService:
         normalized = normalized.replace("ภาพรวม", "").replace("รูปแบบ", "")
         return any(marker in normalized for marker in VISUAL_MARKERS)
 
+    @staticmethod
+    def _asks_primary_topic_list(query: str) -> bool:
+        normalized = _normalize_text(query)
+        scope_markers = (
+            "sorting algorithm",
+            "sorting algorithms",
+            "อัลกอริทึมการเรียงลำดับ",
+            "การเรียงลำดับข้อมูล",
+        )
+        list_markers = (
+            "มีอะไรบ้าง",
+            "หัวข้อ",
+            "กี่แบบ",
+            "กี่ชนิด",
+            "ประเภท",
+            "which",
+            "list",
+            "types",
+        )
+        return (
+            any(_normalize_text(marker) in normalized for marker in scope_markers)
+            and any(_normalize_text(marker) in normalized for marker in list_markers)
+        )
+
     def direct_response(
         self,
         query: str,
         history: list[dict[str, str]] | None = None,
     ) -> str | None:
+        if self._asks_primary_topic_list(query):
+            return (
+                "### อัลกอริทึมการเรียงลำดับข้อมูลในบทเรียน\n\n"
+                + "\n".join(
+                    f"{index}. **{topic}**"
+                    for index, topic in enumerate(PRIMARY_SORT_TOPICS, start=1)
+                )
+            )
+
+        non_curriculum = match_alias(query, "non_curriculum_topics")
+        if non_curriculum is not None:
+            return (
+                f"**{non_curriculum.canonical}** ถูกกล่าวถึงในเอกสารบางส่วน "
+                "แต่ไม่ใช่หนึ่งใน 6 อัลกอริทึมหลักของบทเรียนนี้ครับ\n\n"
+                "หัวข้อหลักคือ **Selection, Insertion, Bubble, Shell, "
+                "Merge และ Quick Sort**"
+            )
+
         social = match_alias(
             query,
             "social",

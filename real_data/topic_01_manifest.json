@@ -6,6 +6,15 @@
   "closed_source": true,
   "external_content_allowed": false,
   "external_images_allowed": false,
+  "primary_curriculum_algorithms": [
+    "Selection Sort",
+    "Insertion Sort",
+    "Bubble Sort",
+    "Shell Sort",
+    "Merge Sort",
+    "Quick Sort"
+  ],
+  "other_algorithms_in_sources_are_reference_only": true,
   "section_keywords": {
     "overview": [
       "sorting",

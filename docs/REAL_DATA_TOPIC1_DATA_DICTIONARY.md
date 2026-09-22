@@ -171,28 +171,25 @@ QA result with `extract_images=true` and `render_vector_pages=true`:
 | 20 | performance | Timing comparisons across Shell/Heap/Merge/Quick variants | benchmark table | page render |
 | 21 | comparison_summary | Auxiliary memory comparison + summary | comparison, summary | page render |
 
-## Topic coverage confirmed in Topic 1
+## Curriculum scope vs source coverage
 
-The approved real data currently covers:
+The **primary curriculum contains exactly six sorting algorithms**:
 
-- sorting definition and ordering requirements
-- in-place, stable, adaptive, internal/external, comparison/non-comparison concepts
-- Insertion Sort
-- Selection Sort
-- Bubble Sort
-- Cocktail Sort
-- Shell Sort and gap sequences
-- Heap Sort
-- Merge Sort and merge operation
-- Batcher odd-even merge
-- Quick Sort, partition and pivot selection
-- square-root sorting
-- comparison-sorting lower bound and decision-tree model
-- Counting Sort
-- Radix Sort
-- Bucket Sort
-- external sorting, runs, balanced merge, polyphase merge
-- runtime / comparison-count / auxiliary-memory comparisons
+1. Selection Sort
+2. Insertion Sort
+3. Bubble Sort
+4. Shell Sort
+5. Merge Sort
+6. Quick Sort
+
+The approved PDFs may also mention Heap Sort, Cocktail Sort, Counting Sort,
+Radix Sort, Bucket Sort, Batcher odd-even merge, square-root sorting, or
+external sorting. These are **reference-only source content** and must not be
+promoted into the tutor's primary topic list.
+
+The sources also cover sorting definitions, ordering requirements, stability,
+in-place/adaptive concepts, complexity, performance comparisons, partition,
+pivot selection, and merge operations.
 
 ## Ingestion policy for the six-topic future dataset
 

@@ -771,6 +771,27 @@ RAW_ALIASES = {
 }
 
 
+PRIMARY_SORT_TOPICS = (
+    "Selection Sort",
+    "Insertion Sort",
+    "Bubble Sort",
+    "Shell Sort",
+    "Merge Sort",
+    "Quick Sort",
+)
+
+_all_topic_aliases = RAW_ALIASES["topics"]
+RAW_ALIASES["non_curriculum_topics"] = {
+    canonical: aliases
+    for canonical, aliases in _all_topic_aliases.items()
+    if canonical not in PRIMARY_SORT_TOPICS
+}
+RAW_ALIASES["topics"] = {
+    canonical: _all_topic_aliases[canonical]
+    for canonical in PRIMARY_SORT_TOPICS
+}
+
+
 @lru_cache(maxsize=4096)
 def normalize_text(value: str) -> str:
     value = unicodedata.normalize("NFKC", value).casefold().strip()
@@ -855,6 +876,14 @@ def match_alias(
         )
     if exact is not None:
         return exact
+
+    if kind == "topics":
+        excluded_exact = (
+            _EXACT_BY_KIND.get("non_curriculum_topics", {}).get(normalized)
+            or _COMPACT_BY_KIND.get("non_curriculum_topics", {}).get(compact)
+        )
+        if excluded_exact is not None:
+            return None
 
     # Social intents should be whole-message matches so words such as "ไง"
     # inside an unrelated question do not turn it into a greeting.
