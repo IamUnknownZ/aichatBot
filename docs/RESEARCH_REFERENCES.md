@@ -130,16 +130,37 @@
     https://arxiv.org/abs/2212.10496
 
 13. Yu et al. (2024), VisRAG
-    reference สำหรับ phase ภาพประกอบและ multimodal PDF
+    vision-based RAG ที่ embed/retrieve หน้าเอกสารในรูปภาพโดยตรง เหมาะกับ diagram, layout, table และภาพที่ text extraction ทำข้อมูลหาย
     https://arxiv.org/abs/2410.10594
 
-14. Jin et al. (2024), FlashRAG
+14. Faysse et al. (2024), ColPali: Efficient Document Retrieval with Vision Language Models
+    visual document retrieval แบบ page-image embedding + late interaction ใช้เป็นฐานคิดของการค้น visual/page ที่เตรียมไว้
+    https://arxiv.org/abs/2407.01449
+
+15. Ma et al. (2024), VISA: Retrieval Augmented Generation with Visual Source Attribution
+    เชื่อมคำตอบกับ visual evidence และตำแหน่งหลักฐานบนภาพเอกสาร เหมาะกับการต่อยอด citation ที่ผู้เรียนตรวจสอบด้วยตาได้
+    https://arxiv.org/abs/2412.14457
+
+16. Nantha Kumar Subramaniam (2024/2025), Enabling Learning of Programming through Educational Chatbot
+    educational chatbot สำหรับ programming ที่ใช้ multimodal content, animations, visualizations, interactive exercises และ context-sensitive hints เพื่อช่วยอธิบายแนวคิดยากและลด cognitive load
+    DOI: 10.51584/IJRIAS.2024.912042
+    Local reference PDF may be kept outside Git; the repository uses this citation only as design evidence.
+
+17. Jin et al. (2024), FlashRAG
     reference ด้าน modular RAG และ reproducible evaluation
     https://arxiv.org/abs/2405.13576
 
-15. Ni et al. (2025), Towards Trustworthy Retrieval Augmented Generation for Large Language Models: A Survey
+18. Ni et al. (2025), Towards Trustworthy Retrieval Augmented Generation for Large Language Models: A Survey
     ใช้กรอบ reliability, privacy, safety, explainability และ accountability ในข้อจำกัด/future work
     https://arxiv.org/abs/2502.06872
+
+19. Clark and Divvala (2016), PDFFigures 2.0
+    งาน figure extraction ที่แยก figure, caption, table และ section title จาก PDF; ใช้เป็นฐานคิดสำหรับการ crop visual region แทนการคืนภาพทั้งหน้า
+    https://ai2-s2-pdfs.s3.amazonaws.com/eeed/56b9c612f98c3f7b671cc04b19debe5e10c7.pdf
+
+20. Song et al. (2025), FigEx: Aligned Extraction of Scientific Figures and Captions
+    ใช้ bounding boxes ของ figure/subfigure และจับคู่กับ caption เหมาะเป็น reference สำหรับ figure-level visual extraction
+    https://aclanthology.org/2025.findings-emnlp.899/
 
 ## C. Mapping งานวิจัยไปยัง feature ของระบบ
 
@@ -155,7 +176,12 @@
 | PostgreSQL + pgvector | engineering design สำหรับ relational metadata + vector search |
 | Streaming UI | วัด TTFT แยกจาก total latency |
 | PDF image extraction | UGM thesis; VisRAG |
-| Multimodal embedding ready | VisRAG |
+| Prepared internal visual catalog (source_id + page + metadata) | ColPali; VisRAG; engineering design ของระบบเรา |
+| Figure-level crop จาก PDF แทน full-page screenshot | PDFFigures 2.0; FigEx |
+| Visual source attribution / ตรวจหลักฐานด้วยตา | VISA |
+| Multimodal embedding ready | VisRAG; ColPali |
+| ภาพ/animation/visualization แบบ step-by-step สำหรับสอน programming | Subramaniam educational chatbot |
+| Visual-only request ไม่ต้องเรียก LLM | latency-driven engineering design; retrieval evidence remains source-only |
 | Faithfulness/relevance evaluation | RAGAS; ARES; RAGChecker |
 | Out-of-scope test set | RGB negative rejection; RAGTruth |
 | Chunk/top-k tuning | UNDIP thesis |

@@ -47,8 +47,8 @@ class VectorStore(Protocol):
     ) -> list[SearchHit]:
         ...
 
-    def images_for_pages(
-        self, pages: list[int], *, limit: int = 3
+    def images_for_references(
+        self, references: list[tuple[str, int]], *, limit: int = 3
     ) -> list[ExtractedImage]:
         ...
 
@@ -176,11 +176,25 @@ class LocalLexicalStore:
         hits.sort(key=lambda item: item.score, reverse=True)
         return hits[:top_k]
 
-    def images_for_pages(
-        self, pages: list[int], *, limit: int = 3
+    def images_for_references(
+        self, references: list[tuple[str, int]], *, limit: int = 3
     ) -> list[ExtractedImage]:
-        wanted = set(pages)
-        return [img for img in self.images if img.page_number in wanted][:limit]
+        if not references or limit <= 0:
+            return []
+        wanted = set(references)
+        rank = {ref: index for index, ref in enumerate(references)}
+        images = [
+            img
+            for img in self.images
+            if (img.source_id, img.page_number) in wanted
+        ]
+        images.sort(
+            key=lambda img: (
+                rank[(img.source_id, img.page_number)],
+                img.image_index,
+            )
+        )
+        return images[:limit]
 
     def log_retrieval(
         self,
@@ -286,11 +300,25 @@ class MemoryVectorStore:
         hits.sort(key=lambda item: item.score, reverse=True)
         return hits[:top_k]
 
-    def images_for_pages(
-        self, pages: list[int], *, limit: int = 3
+    def images_for_references(
+        self, references: list[tuple[str, int]], *, limit: int = 3
     ) -> list[ExtractedImage]:
-        wanted = set(pages)
-        return [img for img in self.images if img.page_number in wanted][:limit]
+        if not references or limit <= 0:
+            return []
+        wanted = set(references)
+        rank = {ref: index for index, ref in enumerate(references)}
+        images = [
+            img
+            for img in self.images
+            if (img.source_id, img.page_number) in wanted
+        ]
+        images.sort(
+            key=lambda img: (
+                rank[(img.source_id, img.page_number)],
+                img.image_index,
+            )
+        )
+        return images[:limit]
 
     def log_retrieval(
         self,
@@ -343,9 +371,18 @@ class PgVectorStore:
     mode = "postgres-pgvector"
     requires_query_embedding = True
 
-    def __init__(self, database_url: str, *, embedding_dim: int = 768) -> None:
+    def __init__(
+        self,
+        database_url: str,
+        *,
+        embedding_dim: int = 768,
+        allowed_source_ids: list[str] | None = None,
+    ) -> None:
         self.database_url = database_url
         self.embedding_dim = embedding_dim
+        self.allowed_source_ids = list(
+            dict.fromkeys(allowed_source_ids or [])
+        )
         self._pool = None
 
     def _connect(self, *, register: bool = True):
@@ -526,35 +563,56 @@ class PgVectorStore:
         query_arr = np.asarray(query_vector, dtype=np.float32)
         by_id: dict[int, dict[str, object]] = {}
 
-        vector_sql = """
+        scope_clause = (
+            "\n            AND source_id = ANY(%s)"
+            if self.allowed_source_ids
+            else ""
+        )
+        vector_sql = f"""
             SELECT
                 id, source_id, source_file, page_number, chunk_index,
                 content, metadata,
                 1 - (embedding <=> %s) AS vector_score,
                 similarity(content, %s) AS lexical_score
             FROM rag_document_chunks
-            WHERE embedding IS NOT NULL
+            WHERE embedding IS NOT NULL{scope_clause}
             ORDER BY embedding <=> %s
             LIMIT %s
         """
-        lexical_sql = """
+        lexical_sql = f"""
             SELECT
                 id, source_id, source_file, page_number, chunk_index,
                 content, metadata,
                 1 - (embedding <=> %s) AS vector_score,
                 similarity(content, %s) AS lexical_score
             FROM rag_document_chunks
-            WHERE embedding IS NOT NULL
+            WHERE embedding IS NOT NULL{scope_clause}
             ORDER BY similarity(content, %s) DESC
             LIMIT %s
         """
 
+        if self.allowed_source_ids:
+            vector_params = (
+                query_arr,
+                query,
+                self.allowed_source_ids,
+                query_arr,
+                candidate_k,
+            )
+            lexical_params = (
+                query_arr,
+                query,
+                self.allowed_source_ids,
+                query,
+                candidate_k,
+            )
+        else:
+            vector_params = (query_arr, query, query_arr, candidate_k)
+            lexical_params = (query_arr, query, query, candidate_k)
+
         with self._connect() as conn:
             with conn.cursor() as cur:
-                cur.execute(
-                    vector_sql,
-                    (query_arr, query, query_arr, candidate_k),
-                )
+                cur.execute(vector_sql, vector_params)
                 rows = cur.fetchall()
                 for vector_rank, row in enumerate(rows, start=1):
                     by_id[int(row[0])] = {
@@ -563,10 +621,7 @@ class PgVectorStore:
                         "lexical_rank": None,
                     }
 
-                cur.execute(
-                    lexical_sql,
-                    (query_arr, query, query, candidate_k),
-                )
+                cur.execute(lexical_sql, lexical_params)
                 for lexical_rank, row in enumerate(cur.fetchall(), start=1):
                     item = by_id.setdefault(
                         int(row[0]),
@@ -613,27 +668,33 @@ class PgVectorStore:
         hits.sort(key=lambda hit: hit.score, reverse=True)
         return hits[:top_k]
 
-    def images_for_pages(
-        self, pages: list[int], *, limit: int = 3
+    def images_for_references(
+        self, references: list[tuple[str, int]], *, limit: int = 3
     ) -> list[ExtractedImage]:
-        if not pages or limit <= 0:
+        if not references or limit <= 0:
             return []
 
+        unique_refs = list(dict.fromkeys(references))
+        rows = []
         with self._connect() as conn:
             with conn.cursor() as cur:
-                cur.execute(
-                    """
-                    SELECT
-                        source_id, source_file, page_number, image_index,
-                        mime_type, image_bytes, width, height, sha256, metadata
-                    FROM rag_document_images
-                    WHERE page_number = ANY(%s)
-                    ORDER BY page_number, image_index
-                    LIMIT %s
-                    """,
-                    (pages, limit),
-                )
-                rows = cur.fetchall()
+                for source_id, page_number in unique_refs:
+                    remaining = limit - len(rows)
+                    if remaining <= 0:
+                        break
+                    cur.execute(
+                        """
+                        SELECT
+                            source_id, source_file, page_number, image_index,
+                            mime_type, image_bytes, width, height, sha256, metadata
+                        FROM rag_document_images
+                        WHERE source_id = %s AND page_number = %s
+                        ORDER BY image_index
+                        LIMIT %s
+                        """,
+                        (source_id, page_number, remaining),
+                    )
+                    rows.extend(cur.fetchall())
 
         return [
             ExtractedImage(

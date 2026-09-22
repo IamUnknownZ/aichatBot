@@ -7,27 +7,35 @@ from .config import Settings
 from .embeddings import GeminiEmbedder
 from .pdf_ingest import parse_pdf
 from .service import RAGService
-from .store import LocalLexicalStore, MemoryVectorStore, PgVectorStore
+from .store import LocalLexicalStore, PgVectorStore
 
 
-def resolve_pdf_path(project_root: str | Path | None = None) -> Path:
+def resolve_pdf_paths(project_root: str | Path | None = None) -> list[Path]:
+    """Return only PDFs that belong to the approved real_data knowledge base."""
     root = (
         Path(project_root).resolve()
         if project_root is not None
         else Path(__file__).resolve().parents[1]
     )
-    candidates = [
-        root
-        / "docs"
-        / "อัลกอริทึมการเรียงลำดับข้อมูล_ระดับมหาวิทยาลัยปี1.pdf",
-        root / "อัลกอริทึมการเรียงลำดับข้อมูล_ระดับมหาวิทยาลัยปี1.pdf",
-    ]
-    for candidate in candidates:
-        if candidate.exists():
-            return candidate
-    raise FileNotFoundError(
-        "ไม่พบไฟล์ PDF ฐานความรู้ใน docs/ หรือโฟลเดอร์หลักของโปรเจกต์"
+    real_data_dir = root / "real_data"
+    if not real_data_dir.exists():
+        raise FileNotFoundError(
+            "ไม่พบโฟลเดอร์ real_data/ ซึ่งเป็นฐานความรู้จริงของระบบ"
+        )
+
+    pdf_paths = sorted(
+        (
+            path
+            for path in real_data_dir.rglob("*.pdf")
+            if path.is_file()
+        ),
+        key=lambda path: path.relative_to(real_data_dir).as_posix().casefold(),
     )
+    if not pdf_paths:
+        raise FileNotFoundError(
+            "ไม่พบไฟล์ PDF ใน real_data/ ระบบจะไม่ fallback ไปใช้ข้อมูลทดลอง"
+        )
+    return pdf_paths
 
 
 def _file_sha256(path: Path) -> str:
@@ -47,7 +55,9 @@ def _parse_document(pdf_path: Path, settings: Settings):
         render_vector_pages=settings.render_vector_pages,
     )
     if not document.chunks:
-        raise RuntimeError("PDF ไม่มีข้อความที่สามารถสร้าง RAG index ได้")
+        raise RuntimeError(
+            f"PDF ไม่มีข้อความที่สามารถสร้าง RAG index ได้: {pdf_path.name}"
+        )
     return document
 
 
@@ -71,11 +81,14 @@ def build_rag_service(
     *,
     project_root: str | Path | None = None,
     force_reindex: bool = False,
+    require_database: bool = False,
 ) -> RAGService:
     if not settings.gemini_api_key:
         raise ValueError("ยังไม่ได้ตั้งค่า GEMINI_API_KEY")
 
-    pdf_path = resolve_pdf_path(project_root)
+    pdf_paths = resolve_pdf_paths(project_root)
+    source_ids = [_file_sha256(path) for path in pdf_paths]
+
     embedder = GeminiEmbedder(
         api_key=settings.gemini_api_key,
         text_model=settings.embedding_model,
@@ -90,15 +103,21 @@ def build_rag_service(
             store = PgVectorStore(
                 settings.database_url,
                 embedding_dim=settings.embedding_dim,
+                allowed_source_ids=source_ids,
             )
             store.ensure_schema()
 
-            # Fast cold-start path: if this exact PDF hash already exists,
-            # skip PDF text extraction and all document embedding calls.
-            source_id = _file_sha256(pdf_path)
-            already_indexed = store.has_document(source_id)
+            indexed = {
+                source_id: store.has_document(source_id)
+                for source_id in source_ids
+            }
+            missing_paths = [
+                path
+                for path, source_id in zip(pdf_paths, source_ids, strict=True)
+                if force_reindex or not indexed[source_id]
+            ]
 
-            if already_indexed and not force_reindex:
+            if not missing_paths:
                 return RAGService(
                     settings=settings,
                     embedder=embedder,
@@ -107,25 +126,29 @@ def build_rag_service(
                 )
 
             if not settings.auto_ingest and not force_reindex:
+                missing_names = ", ".join(path.name for path in missing_paths)
                 raise RuntimeError(
-                    "ยังไม่มี index ของ PDF เวอร์ชันนี้ใน PostgreSQL "
-                    "และ RAG_AUTO_INGEST=false"
+                    "ยังไม่มี index ของเอกสาร real_data บางไฟล์ใน PostgreSQL "
+                    f"({missing_names}) และ RAG_AUTO_INGEST=false"
                 )
 
-            document = _parse_document(pdf_path, settings)
-            embeddings = embedder.embed_texts(
-                [chunk.content for chunk in document.chunks],
-                task_type="RETRIEVAL_DOCUMENT",
-            )
-            image_embeddings = _index_images(
-                embedder, document, settings.index_images
-            )
-            store.replace_document(
-                document,
-                embeddings,
-                embedding_model=settings.embedding_model,
-                image_embeddings=image_embeddings,
-            )
+            for pdf_path in missing_paths:
+                document = _parse_document(pdf_path, settings)
+                embeddings = embedder.embed_texts(
+                    [chunk.content for chunk in document.chunks],
+                    task_type="RETRIEVAL_DOCUMENT",
+                )
+                image_embeddings = _index_images(
+                    embedder,
+                    document,
+                    settings.index_images,
+                )
+                store.replace_document(
+                    document,
+                    embeddings,
+                    embedding_model=settings.embedding_model,
+                    image_embeddings=image_embeddings,
+                )
 
             return RAGService(
                 settings=settings,
@@ -134,23 +157,37 @@ def build_rag_service(
                 startup_note=startup_note,
             )
         except Exception as exc:
+            if require_database:
+                raise RuntimeError(
+                    "PostgreSQL/pgvector ใช้งานไม่ได้ — "
+                    "production จะไม่ fallback ไป local lexical RAG"
+                ) from exc
             startup_note = (
                 "PostgreSQL/pgvector ยังไม่พร้อม จึงใช้ local lexical RAG "
-                f"เพื่อให้แอปยังตอบจากเอกสารได้ ({type(exc).__name__})"
+                "จาก real_data/ เท่านั้น "
+                f"({type(exc).__name__})"
             )
     else:
+        if require_database:
+            raise RuntimeError(
+                "DATABASE_URL จำเป็นสำหรับ Streamlit production; "
+                "ปิดการ fallback ไป local lexical RAG แล้ว"
+            )
         startup_note = (
             "ยังไม่ได้ตั้ง DATABASE_URL — ใช้ local lexical RAG ชั่วคราว "
-            "โดยไม่สร้าง document embeddings ตอน cold-start"
+            "โดยอ่านเฉพาะเอกสารใน real_data/"
         )
 
-    # Safe deployment fallback: page-aware retrieval without bulk embedding.
-    # This keeps Streamlit responsive and avoids embedding quota spikes.
-    document = _parse_document(pdf_path, settings)
-    local_store = LocalLexicalStore(
-        document.chunks,
-        document.images,
-    )
+    # Strict fallback: combine only approved real_data PDFs.
+    # Never fall back to legacy/demo PDFs or external content.
+    chunks = []
+    images = []
+    for pdf_path in pdf_paths:
+        document = _parse_document(pdf_path, settings)
+        chunks.extend(document.chunks)
+        images.extend(document.images)
+
+    local_store = LocalLexicalStore(chunks, images)
     return RAGService(
         settings=settings,
         embedder=embedder,

@@ -101,7 +101,10 @@ Repository URLs:
 | Page citation | grounded retrieval metadata; Husain/Damanik เป็นงานเทียบเคียง |
 | PostgreSQL + vector | Pratama (PostgreSQL system); Farisy (vector DB performance); pgvector docs |
 | Streamlit performance | Prayanto; Agustin; Veijanen + Streamlit caching/streaming docs |
-| PDF image / multimodal future | Nesthi; VisRAG; Gemini multimodal embeddings |
+| PDF image / multimodal retrieval | Nesthi; VisRAG; ColPali |
+| Prepared visual encyclopedia/catalog จากเอกสารจริง | ColPali; VisRAG; source/page metadata design ของระบบเรา |
+| Visual source attribution | VISA |
+| Step-by-step visual/animation สำหรับ programming education | Subramaniam, Enabling Learning of Programming through Educational Chatbot |
 | Chunk size / overlap / top-k experiment | Bahtiar |
 | RAGAS / faithfulness | Husain; Fahrezy; RAGAS paper |
 | User evaluation | SUS/UAT จาก PNJ theses; QUEST จาก AI Tutor UPI |

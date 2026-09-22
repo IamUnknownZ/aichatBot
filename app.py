@@ -12,7 +12,7 @@ from ui import inject_theme, render_hero, render_welcome_panel
 
 load_dotenv()
 page_settings = Settings.from_env()
-APP_CACHE_VERSION = "2026-09-19-ui-v2"
+APP_CACHE_VERSION = "2026-09-22-vector-prod-v5"
 
 st.set_page_config(
     page_title=f"{page_settings.course_title} · AI Tutor",
@@ -77,6 +77,7 @@ def compact_sources(hits) -> list[dict[str, object]]:
         seen.add(key)
         sources.append(
             {
+                "source_id": hit.source_id,
                 "source_file": hit.source_file,
                 "page_number": hit.page_number,
                 "preview": hit.content[:260].strip(),
@@ -118,7 +119,11 @@ def create_rag_service(
         api_key=api_key,
         database_url=database_url,
     )
-    service = build_rag_service(settings)
+    service = build_rag_service(settings, require_database=True)
+    if service.store_mode != "postgres-pgvector":
+        raise RuntimeError(
+            f"ต้องใช้ postgres-pgvector แต่ได้ {service.store_mode}"
+        )
     return service, settings
 
 
@@ -262,7 +267,7 @@ if service is not None:
     st.markdown(
         f"""
 <div class="tutor-status-row">
-  <span class="tutor-chip">✦ พร้อมตอบจากเอกสาร</span>
+  <span class="tutor-chip">✦ Vector RAG · pgvector</span>
   <span class="tutor-chip">ไทย · English · คำทับศัพท์</span>
   <span class="tutor-chip">{profile_label}</span>
 </div>
@@ -404,31 +409,83 @@ if user_query:
                 "กำลังค้นส่วนที่เกี่ยวข้องในเอกสาร",
             )
             result = service.retrieve(user_query, history_before)
+            answered = service.answerable(result)
+            visual_request = service.is_visual_request(user_query)
+
+            previous_references = []
+            if visual_request:
+                for message in reversed(history_before):
+                    sources = message.get("sources", [])
+                    previous_references = [
+                        (str(source["source_id"]), int(source["page_number"]))
+                        for source in sources
+                        if source.get("source_id")
+                    ]
+                    if previous_references:
+                        break
+
+            image_references = previous_references or list(
+                dict.fromkeys(
+                    (hit.source_id, hit.page_number)
+                    for hit in result.hits
+                )
+            )
+            images = []
+            if answered and settings.max_images_per_answer > 0:
+                image_candidates = service.store.images_for_references(
+                    image_references,
+                    limit=settings.max_images_per_answer * 4,
+                )
+                images = service.select_user_visible_images(
+                    image_candidates,
+                    limit=settings.max_images_per_answer,
+                )
 
             render_thinking(
                 thinking_placeholder,
                 "กำลังเรียบเรียงคำตอบ",
             )
-            stream = service.stream_answer(
-                query=user_query,
-                result=result,
-                history=history_before,
-                model_name=settings.generation_model,
-            )
             timing = {"ttft_ms": None}
-            response_text = st.write_stream(
-                track_stream(
-                    stream,
-                    timing,
-                    request_started,
-                    thinking_placeholder,
+
+            if not answered:
+                stream = service.stream_answer(
+                    query=user_query,
+                    result=result,
+                    history=history_before,
+                    model_name=settings.generation_model,
                 )
-            ) or ""
-            thinking_placeholder.empty()
+                response_text = "".join(stream)
+                thinking_placeholder.empty()
+                st.markdown(response_text)
+                timing["ttft_ms"] = (perf_counter() - request_started) * 1000.0
+            elif visual_request:
+                thinking_placeholder.empty()
+                response_text = (
+                    "มีครับ ภาพประกอบจากเอกสารที่เกี่ยวข้องอยู่ด้านล่าง"
+                    if images
+                    else "จากหน้าที่ค้นเจอ ตอนนี้ไม่พบภาพประกอบที่ดึงมาแสดงได้ครับ"
+                )
+                st.markdown(response_text)
+                timing["ttft_ms"] = (perf_counter() - request_started) * 1000.0
+            else:
+                stream = service.stream_answer(
+                    query=user_query,
+                    result=result,
+                    history=history_before,
+                    model_name=settings.generation_model,
+                )
+                response_text = st.write_stream(
+                    track_stream(
+                        stream,
+                        timing,
+                        request_started,
+                        thinking_placeholder,
+                    )
+                ) or ""
+                thinking_placeholder.empty()
 
             total_ms = (perf_counter() - request_started) * 1000.0
             ttft_ms = timing["ttft_ms"] or total_ms
-            answered = service.answerable(result)
 
             answer_sources = (
                 compact_sources(result.hits)
@@ -437,17 +494,25 @@ if user_query:
             )
             render_sources(answer_sources)
 
-            if settings.max_images_per_answer > 0:
-                images = service.store.images_for_pages(
-                    result.pages,
-                    limit=settings.max_images_per_answer,
-                )
-                if images:
-                    with st.expander("ภาพประกอบจากหน้าที่เกี่ยวข้อง"):
+            if images:
+                if visual_request:
+                    st.caption("ภาพจากเอกสารฐานความรู้จริง")
+                    for index, image in enumerate(images, start=1):
+                        st.image(
+                            image.image_bytes,
+                            caption=(
+                                f"{image.metadata.get('caption') or f'ภาพ {index}'} · "
+                                f"{image.source_file} · หน้า {image.page_number}"
+                            ),
+                        )
+                else:
+                    with st.expander("ภาพประกอบจากเอกสารฐานความรู้"):
                         for image in images:
                             st.image(
                                 image.image_bytes,
-                                caption=f"หน้า {image.page_number}",
+                                caption=(
+                                    f"{image.source_file} · หน้า {image.page_number}"
+                                ),
                             )
 
             if show_debug:

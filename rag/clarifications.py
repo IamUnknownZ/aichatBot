@@ -194,6 +194,8 @@ CLARIFICATION_GROUPS: dict[str, dict[str, object]] = {
             "illustration", "animation", "show visually", "visual example",
             "graphical", "draw it", "show image", "รูป", "ภาพ", "แผนภาพ",
             "ไดอะแกรม", "ภาพประกอบ", "รูปประกอบ", "ขอรูป", "ขอภาพ",
+            "มีรูปไหม", "มีภาพไหม", "มีรูปประกอบไหม", "มีภาพประกอบไหม",
+            "ขอดูรูปประกอบ", "ขอดูภาพประกอบ",
             "ทำภาพ", "วาด", "แอนิเมชัน", "animation หน่อย", "เห็นภาพ",
         ),
     },

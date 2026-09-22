@@ -48,10 +48,12 @@ class Settings:
     chunk_overlap: int = 180
     history_messages: int = 6
 
-    extract_images: bool = False
-    render_vector_pages: bool = False
+    extract_images: bool = True
+    render_vector_pages: bool = True
     index_images: bool = False
     max_images_per_answer: int = 3
+    generation_timeout_ms: int = 12000
+    generation_max_output_tokens: int = 700
     auto_ingest: bool = False
     allow_memory_fallback: bool = False
 
@@ -100,11 +102,17 @@ class Settings:
             chunk_chars=max(400, _env_int("RAG_CHUNK_CHARS", 1200)),
             chunk_overlap=max(0, _env_int("RAG_CHUNK_OVERLAP", 180)),
             history_messages=max(0, _env_int("RAG_HISTORY_MESSAGES", 6)),
-            extract_images=_env_bool("RAG_EXTRACT_IMAGES", False),
-            render_vector_pages=_env_bool("RAG_RENDER_VECTOR_PAGES", False),
+            extract_images=_env_bool("RAG_EXTRACT_IMAGES", True),
+            render_vector_pages=_env_bool("RAG_RENDER_VECTOR_PAGES", True),
             index_images=_env_bool("RAG_INDEX_IMAGES", False),
             max_images_per_answer=max(
                 0, _env_int("RAG_MAX_IMAGES_PER_ANSWER", 3)
+            ),
+            generation_timeout_ms=max(
+                1000, _env_int("RAG_GENERATION_TIMEOUT_MS", 12000)
+            ),
+            generation_max_output_tokens=max(
+                128, _env_int("RAG_GENERATION_MAX_OUTPUT_TOKENS", 700)
             ),
             auto_ingest=_env_bool("RAG_AUTO_INGEST", False),
             allow_memory_fallback=_env_bool("RAG_ALLOW_MEMORY_FALLBACK", False),

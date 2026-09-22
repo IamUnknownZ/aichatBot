@@ -6,6 +6,7 @@ from rag.clarifications import (
     match_clarification,
 )
 from rag.config import Settings
+from rag.models import RetrievalResult
 
 
 class ClarificationDictionaryTests(unittest.TestCase):
@@ -27,6 +28,8 @@ class ClarificationDictionaryTests(unittest.TestCase):
             "ตัวอย่าง": "example",
             "สรุป": "summary",
             "ขอภาพ": "visualize",
+            "มีรูปประกอบไหม": "visualize",
+            "มีภาพไหม": "visualize",
             "ข้อดีข้อเสีย": "pros_cons",
         }
         for query, expected in cases.items():
@@ -78,6 +81,93 @@ class ClarificationServiceTests(unittest.TestCase):
         direct = self.service.direct_response("compare", history)
         self.assertIsNotNone(direct)
         self.assertIn("อัลกอริทึมไหน", direct)
+
+    def test_mixed_visual_topic_query_is_visual_request(self):
+        self.assertTrue(self.service.is_visual_request("รูป sort"))
+        self.assertTrue(self.service.is_visual_request("ภาพ Bubble Sort"))
+        self.assertFalse(self.service.is_visual_request("Bubble Sort คืออะไร"))
+        self.assertFalse(self.service.is_visual_request("ขอภาพรวม Bubble Sort"))
+        self.assertFalse(self.service.is_visual_request("รูปแบบของ Quick Sort"))
+
+    def test_visual_followup_reuses_previous_user_query(self):
+        history = [
+            {"role": "user", "content": "อธิบาย Bubble Sort ให้เข้าใจง่าย"},
+            {"role": "assistant", "content": "คำอธิบายก่อนหน้า"},
+        ]
+        query = "มีรูปประกอบไหม"
+
+        self.assertTrue(self.service.is_visual_request(query))
+        self.assertIsNone(self.service.direct_response(query, history))
+        self.assertEqual(
+            self.service._retrieval_query(query, history),
+            "อธิบาย Bubble Sort ให้เข้าใจง่าย",
+        )
+
+    def test_specific_algorithm_query_reranks_exact_topic_first(self):
+        result = self.service.retrieve("insertion sort คืออะไร", [])
+        self.assertTrue(result.hits)
+        self.assertIn(
+            "insertion sort",
+            result.hits[0].content.casefold(),
+        )
+        self.assertGreaterEqual(
+            result.hits[0].content.casefold().count("insertion sort"),
+            3,
+        )
+
+    def test_general_sort_definition_expands_to_definition_search(self):
+        query = "การเรียงลำดับข้อมูลคือ"
+        retrieval_query = self.service._retrieval_query(query, [])
+
+        self.assertTrue(self.service._is_general_sort_definition(query))
+        self.assertIn("Data Sorting", retrieval_query)
+        self.assertIn("ความหมาย", retrieval_query)
+
+        result = self.service.retrieve(query, [])
+        self.assertTrue(result.hits)
+        top_text = " ".join(result.hits[0].content.split())
+        self.assertIn("การจัดเรียงข้อมูล", top_text)
+        self.assertIn("Data Sorting", top_text)
+
+    def test_grounded_fallback_is_readable_not_raw_chunk_dump(self):
+        result = self.service.retrieve("การเรียงลำดับข้อมูลคือ", [])
+        fallback = self.service._fast_grounded_fallback(result.hits)
+
+        self.assertNotIn("คำตอบแบบเร็วจากหลักฐาน", fallback)
+        self.assertNotIn("อธิบายหลักการเรียงลำดับข้อมูลแบบ Selection Sort ได้", fallback)
+        self.assertIn("การเรียงลำดับข้อมูล", fallback)
+
+    def test_general_sort_definition_skips_generation(self):
+        query = "การเรียงลำดับข้อมูลคือ"
+        result = self.service.retrieve(query, [])
+        answer = "".join(
+            self.service.stream_answer(
+                query=query,
+                result=result,
+                history=[],
+            )
+        )
+
+        self.assertIn("Data Sorting", answer)
+        self.assertNotIn("คำตอบแบบเร็วจากหลักฐาน", answer)
+
+    def test_insufficient_evidence_stream_has_single_fallback(self):
+        result = RetrievalResult(
+            query="คำถามนอกฐานความรู้",
+            retrieval_query="คำถามนอกฐานความรู้",
+            hits=[],
+            elapsed_ms=0.0,
+        )
+        chunks = list(
+            self.service.stream_answer(
+                query=result.query,
+                result=result,
+                history=[],
+            )
+        )
+
+        self.assertEqual(len(chunks), 1)
+        self.assertEqual(chunks[0].count("ผมยังไม่พบข้อมูลที่เพียงพอ"), 1)
 
 
 if __name__ == "__main__":

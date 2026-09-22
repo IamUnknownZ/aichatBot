@@ -1,0 +1,1691 @@
+{
+  "manifest_version": 1,
+  "topic_id": "topic-01",
+  "topic_name": "หลักการเรียงลำดับข้อมูล",
+  "knowledge_scope": "real_data",
+  "closed_source": true,
+  "external_content_allowed": false,
+  "external_images_allowed": false,
+  "section_keywords": {
+    "overview": [
+      "sorting",
+      "การเรียงลำดับ",
+      "sorting algorithms"
+    ],
+    "fundamentals": [
+      "sorting",
+      "ordering relation",
+      "stable",
+      "adaptive",
+      "in-place",
+      "การเรียงลำดับ"
+    ],
+    "insertion_sort": [
+      "insertion sort",
+      "การเรียงลำดับแบบแทรก",
+      "แทรก"
+    ],
+    "selection_sort": [
+      "selection sort",
+      "การเรียงลำดับแบบเลือก",
+      "เลือก"
+    ],
+    "selection_bubble": [
+      "selection sort",
+      "bubble sort",
+      "เลือก",
+      "ฟอง"
+    ],
+    "bubble_sort": [
+      "bubble sort",
+      "การเรียงลำดับแบบฟอง",
+      "ฟอง"
+    ],
+    "bubble_insertion": [
+      "bubble sort",
+      "insertion sort",
+      "ฟอง",
+      "แทรก"
+    ],
+    "cocktail_sort": [
+      "cocktail sort",
+      "shaker sort",
+      "bidirectional bubble sort"
+    ],
+    "shell_sort": [
+      "shell sort",
+      "h-sequence",
+      "gap sequence",
+      "เชลล์"
+    ],
+    "merge_sort": [
+      "merge sort",
+      "merge",
+      "การเรียงลำดับแบบผสาน",
+      "ผสาน"
+    ],
+    "batcher_merge": [
+      "Batcher odd-even merge",
+      "odd-even merge"
+    ],
+    "quick_sort": [
+      "quick sort",
+      "quicksort",
+      "partition",
+      "pivot",
+      "การเรียงลำดับแบบเร็ว",
+      "เร็ว"
+    ],
+    "sqrt_sort": [
+      "square-root sorting"
+    ],
+    "lower_bound": [
+      "comparison sorting",
+      "decision tree",
+      "Stirling",
+      "lower bound",
+      "n log n"
+    ],
+    "counting_sort": [
+      "counting sort",
+      "count array",
+      "stable"
+    ],
+    "radix_sort": [
+      "radix sort",
+      "digit",
+      "stable sort"
+    ],
+    "bucket_sort": [
+      "bucket sort",
+      "bucket",
+      "uniform"
+    ],
+    "external_sort": [
+      "external sorting",
+      "runs",
+      "polyphase merge"
+    ],
+    "comparison": [
+      "sorting comparison",
+      "time complexity",
+      "space complexity"
+    ],
+    "performance": [
+      "benchmark",
+      "running time",
+      "เวลา"
+    ],
+    "performance_heap": [
+      "benchmark",
+      "heap sort",
+      "ฮีป"
+    ],
+    "heap_merge": [
+      "heap sort",
+      "merge sort",
+      "ฮีป",
+      "ผสาน"
+    ],
+    "merge_quick": [
+      "merge sort",
+      "quick sort",
+      "ผสาน",
+      "เร็ว"
+    ],
+    "comparison_summary": [
+      "space complexity",
+      "auxiliary memory",
+      "summary"
+    ],
+    "summary": [
+      "sorting summary",
+      "สรุป"
+    ]
+  },
+  "sources": {
+    "1.หลักการเรียงลำดับข้อมูล-1.pdf": {
+      "sha256": "600a03b28f49640967e08144e0739e5f78049f8d6ba28ef3aeadc357002e10f3",
+      "language": "en",
+      "physical_pages": 60,
+      "pages": {
+        "1": {
+          "section": "overview",
+          "subtopic": "Sorting algorithms title",
+          "content_types": [
+            "text"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "sorting",
+            "การเรียงลำดับ",
+            "sorting algorithms"
+          ],
+          "slide_labels": [
+            "1"
+          ]
+        },
+        "2": {
+          "section": "overview",
+          "subtopic": "Learning goals",
+          "content_types": [
+            "text"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "sorting",
+            "การเรียงลำดับ",
+            "sorting algorithms"
+          ],
+          "slide_labels": [
+            "2"
+          ]
+        },
+        "3": {
+          "section": "overview",
+          "subtopic": "Outline",
+          "content_types": [
+            "text"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "sorting",
+            "การเรียงลำดับ",
+            "sorting algorithms"
+          ],
+          "slide_labels": [
+            "3"
+          ]
+        },
+        "4": {
+          "section": "fundamentals",
+          "subtopic": "Relation",
+          "content_types": [
+            "definition",
+            "example",
+            "formula"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "sorting",
+            "ordering relation",
+            "stable",
+            "adaptive",
+            "in-place",
+            "การเรียงลำดับ"
+          ],
+          "slide_labels": [
+            "4"
+          ]
+        },
+        "5": {
+          "section": "fundamentals",
+          "subtopic": "Ordering relation",
+          "content_types": [
+            "definition",
+            "properties"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "sorting",
+            "ordering relation",
+            "stable",
+            "adaptive",
+            "in-place",
+            "การเรียงลำดับ"
+          ],
+          "slide_labels": [
+            "5"
+          ]
+        },
+        "6": {
+          "section": "fundamentals",
+          "subtopic": "Sorting definition and before-after example",
+          "content_types": [
+            "definition",
+            "example",
+            "diagram"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "sorting",
+            "ordering relation",
+            "stable",
+            "adaptive",
+            "in-place",
+            "การเรียงลำดับ"
+          ],
+          "slide_labels": [
+            "6"
+          ]
+        },
+        "7": {
+          "section": "fundamentals",
+          "subtopic": "Common sorting requirements",
+          "content_types": [
+            "table",
+            "definitions"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "sorting",
+            "ordering relation",
+            "stable",
+            "adaptive",
+            "in-place",
+            "การเรียงลำดับ"
+          ],
+          "slide_labels": [
+            "7"
+          ]
+        },
+        "8": {
+          "section": "fundamentals",
+          "subtopic": "Why non-optimal algorithms are useful",
+          "content_types": [
+            "explanation"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "sorting",
+            "ordering relation",
+            "stable",
+            "adaptive",
+            "in-place",
+            "การเรียงลำดับ"
+          ],
+          "slide_labels": [
+            "8"
+          ]
+        },
+        "9": {
+          "section": "insertion_sort",
+          "subtopic": "Insertion Sort idea",
+          "content_types": [
+            "explanation",
+            "array_diagram"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "insertion sort",
+            "การเรียงลำดับแบบแทรก",
+            "แทรก"
+          ],
+          "slide_labels": [
+            "9"
+          ]
+        },
+        "10": {
+          "section": "insertion_sort",
+          "subtopic": "Insertion Sort pseudocode",
+          "content_types": [
+            "pseudocode"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "insertion sort",
+            "การเรียงลำดับแบบแทรก",
+            "แทรก"
+          ],
+          "slide_labels": [
+            "10"
+          ]
+        },
+        "11": {
+          "section": "insertion_sort",
+          "subtopic": "Insertion Sort worked example",
+          "content_types": [
+            "table",
+            "trace"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "insertion sort",
+            "การเรียงลำดับแบบแทรก",
+            "แทรก"
+          ],
+          "slide_labels": [
+            "11"
+          ]
+        },
+        "12": {
+          "section": "insertion_sort",
+          "subtopic": "Insertion Sort running time and properties",
+          "content_types": [
+            "complexity",
+            "properties"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "insertion sort",
+            "การเรียงลำดับแบบแทรก",
+            "แทรก"
+          ],
+          "slide_labels": [
+            "12"
+          ]
+        },
+        "13": {
+          "section": "selection_sort",
+          "subtopic": "Selection Sort idea",
+          "content_types": [
+            "explanation",
+            "array_diagram"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "selection sort",
+            "การเรียงลำดับแบบเลือก",
+            "เลือก"
+          ],
+          "slide_labels": [
+            "13"
+          ]
+        },
+        "14": {
+          "section": "selection_sort",
+          "subtopic": "Selection Sort pseudocode",
+          "content_types": [
+            "pseudocode"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "selection sort",
+            "การเรียงลำดับแบบเลือก",
+            "เลือก"
+          ],
+          "slide_labels": [
+            "14"
+          ]
+        },
+        "15": {
+          "section": "selection_sort",
+          "subtopic": "Selection Sort worked example",
+          "content_types": [
+            "table",
+            "trace"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "selection sort",
+            "การเรียงลำดับแบบเลือก",
+            "เลือก"
+          ],
+          "slide_labels": [
+            "15"
+          ]
+        },
+        "16": {
+          "section": "selection_sort",
+          "subtopic": "Selection Sort running time and properties",
+          "content_types": [
+            "formula",
+            "complexity"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "selection sort",
+            "การเรียงลำดับแบบเลือก",
+            "เลือก"
+          ],
+          "slide_labels": [
+            "16"
+          ]
+        },
+        "17": {
+          "section": "bubble_sort",
+          "subtopic": "Bubble Sort idea",
+          "content_types": [
+            "explanation",
+            "swap_diagram"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "bubble sort",
+            "การเรียงลำดับแบบฟอง",
+            "ฟอง"
+          ],
+          "slide_labels": [
+            "17"
+          ]
+        },
+        "18": {
+          "section": "bubble_sort",
+          "subtopic": "Bubble Sort corrected pseudocode",
+          "content_types": [
+            "pseudocode"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "bubble sort",
+            "การเรียงลำดับแบบฟอง",
+            "ฟอง"
+          ],
+          "slide_labels": [
+            "18"
+          ]
+        },
+        "19": {
+          "section": "bubble_sort",
+          "subtopic": "Bubble Sort worked example",
+          "content_types": [
+            "table",
+            "trace",
+            "complexity"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "bubble sort",
+            "การเรียงลำดับแบบฟอง",
+            "ฟอง"
+          ],
+          "slide_labels": [
+            "19"
+          ]
+        },
+        "20": {
+          "section": "cocktail_sort",
+          "subtopic": "Cocktail Sort motivation and idea",
+          "content_types": [
+            "explanation"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "cocktail sort",
+            "shaker sort",
+            "bidirectional bubble sort"
+          ],
+          "slide_labels": [
+            "20"
+          ]
+        },
+        "21": {
+          "section": "cocktail_sort",
+          "subtopic": "Cocktail Sort pseudocode",
+          "content_types": [
+            "pseudocode"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "cocktail sort",
+            "shaker sort",
+            "bidirectional bubble sort"
+          ],
+          "slide_labels": [
+            "21"
+          ]
+        },
+        "22": {
+          "section": "cocktail_sort",
+          "subtopic": "Cocktail Sort worked example",
+          "content_types": [
+            "table",
+            "trace"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "cocktail sort",
+            "shaker sort",
+            "bidirectional bubble sort"
+          ],
+          "slide_labels": [
+            "22"
+          ]
+        },
+        "23": {
+          "section": "cocktail_sort",
+          "subtopic": "Cocktail Sort properties",
+          "content_types": [
+            "complexity",
+            "properties"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "cocktail sort",
+            "shaker sort",
+            "bidirectional bubble sort"
+          ],
+          "slide_labels": [
+            "23"
+          ]
+        },
+        "24": {
+          "section": "shell_sort",
+          "subtopic": "Shell Sort idea",
+          "content_types": [
+            "explanation",
+            "gap_diagram"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "shell sort",
+            "h-sequence",
+            "gap sequence",
+            "เชลล์"
+          ],
+          "slide_labels": [
+            "24"
+          ]
+        },
+        "25": {
+          "section": "shell_sort",
+          "subtopic": "Shell Sort gap sequences",
+          "content_types": [
+            "sequence",
+            "formula"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "shell sort",
+            "h-sequence",
+            "gap sequence",
+            "เชลล์"
+          ],
+          "slide_labels": [
+            "25"
+          ]
+        },
+        "26": {
+          "section": "shell_sort",
+          "subtopic": "Shell Sort pseudocode",
+          "content_types": [
+            "pseudocode"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "shell sort",
+            "h-sequence",
+            "gap sequence",
+            "เชลล์"
+          ],
+          "slide_labels": [
+            "26"
+          ]
+        },
+        "27": {
+          "section": "shell_sort",
+          "subtopic": "Shell Sort example with gaps 4, 2, 1",
+          "content_types": [
+            "table",
+            "trace",
+            "properties"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "shell sort",
+            "h-sequence",
+            "gap sequence",
+            "เชลล์"
+          ],
+          "slide_labels": [
+            "27"
+          ]
+        },
+        "28": {
+          "section": "merge_sort",
+          "subtopic": "Merge Sort divide-and-conquer idea",
+          "content_types": [
+            "tree",
+            "diagram",
+            "example"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "merge sort",
+            "merge",
+            "การเรียงลำดับแบบผสาน",
+            "ผสาน"
+          ],
+          "slide_labels": [
+            "28"
+          ]
+        },
+        "29": {
+          "section": "merge_sort",
+          "subtopic": "Merge operation",
+          "content_types": [
+            "pseudocode",
+            "explanation"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "merge sort",
+            "merge",
+            "การเรียงลำดับแบบผสาน",
+            "ผสาน"
+          ],
+          "slide_labels": [
+            "29"
+          ]
+        },
+        "30": {
+          "section": "merge_sort",
+          "subtopic": "Merge Sort pseudocode",
+          "content_types": [
+            "pseudocode",
+            "formula"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "merge sort",
+            "merge",
+            "การเรียงลำดับแบบผสาน",
+            "ผสาน"
+          ],
+          "slide_labels": [
+            "30"
+          ]
+        },
+        "31": {
+          "section": "merge_sort",
+          "subtopic": "Merge Sort running time",
+          "content_types": [
+            "recurrence",
+            "tree",
+            "complexity"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "merge sort",
+            "merge",
+            "การเรียงลำดับแบบผสาน",
+            "ผสาน"
+          ],
+          "slide_labels": [
+            "31"
+          ]
+        },
+        "32": {
+          "section": "batcher_merge",
+          "subtopic": "Batcher odd-even merge overview",
+          "content_types": [
+            "explanation"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "Batcher odd-even merge",
+            "odd-even merge"
+          ],
+          "slide_labels": [
+            "32"
+          ]
+        },
+        "33": {
+          "section": "batcher_merge",
+          "subtopic": "Batcher odd-even merge structure",
+          "content_types": [
+            "sequence",
+            "steps"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "Batcher odd-even merge",
+            "odd-even merge"
+          ],
+          "slide_labels": [
+            "33"
+          ]
+        },
+        "34": {
+          "section": "batcher_merge",
+          "subtopic": "Batcher odd-even merge worked example",
+          "content_types": [
+            "diagram",
+            "sequence"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "Batcher odd-even merge",
+            "odd-even merge"
+          ],
+          "slide_labels": [
+            "34"
+          ]
+        },
+        "35": {
+          "section": "quick_sort",
+          "subtopic": "Quick Sort idea",
+          "content_types": [
+            "divide_and_conquer",
+            "partition"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "quick sort",
+            "quicksort",
+            "partition",
+            "pivot",
+            "การเรียงลำดับแบบเร็ว",
+            "เร็ว"
+          ],
+          "slide_labels": [
+            "35"
+          ]
+        },
+        "36": {
+          "section": "quick_sort",
+          "subtopic": "Quick Sort pseudocode",
+          "content_types": [
+            "pseudocode"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "quick sort",
+            "quicksort",
+            "partition",
+            "pivot",
+            "การเรียงลำดับแบบเร็ว",
+            "เร็ว"
+          ],
+          "slide_labels": [
+            "36"
+          ]
+        },
+        "37": {
+          "section": "quick_sort",
+          "subtopic": "Quick Sort running time",
+          "content_types": [
+            "recurrence",
+            "complexity"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "quick sort",
+            "quicksort",
+            "partition",
+            "pivot",
+            "การเรียงลำดับแบบเร็ว",
+            "เร็ว"
+          ],
+          "slide_labels": [
+            "37"
+          ]
+        },
+        "38": {
+          "section": "quick_sort",
+          "subtopic": "Quick Sort example partition",
+          "content_types": [
+            "table",
+            "trace"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "quick sort",
+            "quicksort",
+            "partition",
+            "pivot",
+            "การเรียงลำดับแบบเร็ว",
+            "เร็ว"
+          ],
+          "slide_labels": [
+            "38"
+          ]
+        },
+        "39": {
+          "section": "sqrt_sort",
+          "subtopic": "Square-root sorting",
+          "content_types": [
+            "explanation",
+            "complexity"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "square-root sorting"
+          ],
+          "slide_labels": [
+            "39"
+          ]
+        },
+        "40": {
+          "section": "lower_bound",
+          "subtopic": "Decision tree model",
+          "content_types": [
+            "decision_tree",
+            "diagram"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "comparison sorting",
+            "decision tree",
+            "Stirling",
+            "lower bound",
+            "n log n"
+          ],
+          "slide_labels": [
+            "40"
+          ]
+        },
+        "41": {
+          "section": "lower_bound",
+          "subtopic": "Stirling formula",
+          "content_types": [
+            "formula"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "comparison sorting",
+            "decision tree",
+            "Stirling",
+            "lower bound",
+            "n log n"
+          ],
+          "slide_labels": [
+            "41"
+          ]
+        },
+        "42": {
+          "section": "lower_bound",
+          "subtopic": "Lower bound for comparison sorting",
+          "content_types": [
+            "theorem",
+            "proof"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "comparison sorting",
+            "decision tree",
+            "Stirling",
+            "lower bound",
+            "n log n"
+          ],
+          "slide_labels": [
+            "42"
+          ]
+        },
+        "43": {
+          "section": "lower_bound",
+          "subtopic": "Consequence of lower bound",
+          "content_types": [
+            "comparison",
+            "conclusion"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "comparison sorting",
+            "decision tree",
+            "Stirling",
+            "lower bound",
+            "n log n"
+          ],
+          "slide_labels": [
+            "43"
+          ]
+        },
+        "44": {
+          "section": "counting_sort",
+          "subtopic": "Counting Sort assumptions",
+          "content_types": [
+            "explanation",
+            "complexity"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "counting sort",
+            "count array",
+            "stable"
+          ],
+          "slide_labels": [
+            "44"
+          ]
+        },
+        "45": {
+          "section": "counting_sort",
+          "subtopic": "Counting Sort corrected pseudocode",
+          "content_types": [
+            "pseudocode"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "counting sort",
+            "count array",
+            "stable"
+          ],
+          "slide_labels": [
+            "45"
+          ]
+        },
+        "46": {
+          "section": "counting_sort",
+          "subtopic": "Counting Sort worked example",
+          "content_types": [
+            "count_table",
+            "trace"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "counting sort",
+            "count array",
+            "stable"
+          ],
+          "slide_labels": [
+            "46"
+          ]
+        },
+        "47": {
+          "section": "radix_sort",
+          "subtopic": "Radix Sort idea",
+          "content_types": [
+            "explanation",
+            "complexity"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "radix sort",
+            "digit",
+            "stable sort"
+          ],
+          "slide_labels": [
+            "47"
+          ]
+        },
+        "48": {
+          "section": "radix_sort",
+          "subtopic": "Radix Sort pseudocode",
+          "content_types": [
+            "pseudocode"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "radix sort",
+            "digit",
+            "stable sort"
+          ],
+          "slide_labels": [
+            "48"
+          ]
+        },
+        "49": {
+          "section": "radix_sort",
+          "subtopic": "Radix Sort worked example",
+          "content_types": [
+            "digit_pass_table"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "radix sort",
+            "digit",
+            "stable sort"
+          ],
+          "slide_labels": [
+            "49"
+          ]
+        },
+        "50": {
+          "section": "bucket_sort",
+          "subtopic": "Bucket Sort assumptions and procedure",
+          "content_types": [
+            "steps",
+            "formula"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "bucket sort",
+            "bucket",
+            "uniform"
+          ],
+          "slide_labels": [
+            "50"
+          ]
+        },
+        "51": {
+          "section": "bucket_sort",
+          "subtopic": "Bucket Sort pseudocode",
+          "content_types": [
+            "pseudocode"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "bucket sort",
+            "bucket",
+            "uniform"
+          ],
+          "slide_labels": [
+            "51"
+          ]
+        },
+        "52": {
+          "section": "bucket_sort",
+          "subtopic": "Bucket Sort worked example",
+          "content_types": [
+            "bucket_table",
+            "example"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "bucket sort",
+            "bucket",
+            "uniform"
+          ],
+          "slide_labels": [
+            "52"
+          ]
+        },
+        "53": {
+          "section": "external_sort",
+          "subtopic": "External sorting context",
+          "content_types": [
+            "explanation"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "external sorting",
+            "runs",
+            "polyphase merge"
+          ],
+          "slide_labels": [
+            "53"
+          ]
+        },
+        "54": {
+          "section": "external_sort",
+          "subtopic": "Runs",
+          "content_types": [
+            "definition"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "external sorting",
+            "runs",
+            "polyphase merge"
+          ],
+          "slide_labels": [
+            "54"
+          ]
+        },
+        "55": {
+          "section": "external_sort",
+          "subtopic": "Balanced two-way external merge",
+          "content_types": [
+            "steps",
+            "complexity"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "external sorting",
+            "runs",
+            "polyphase merge"
+          ],
+          "slide_labels": [
+            "55"
+          ]
+        },
+        "56": {
+          "section": "external_sort",
+          "subtopic": "Improving external sorting",
+          "content_types": [
+            "explanation"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "external sorting",
+            "runs",
+            "polyphase merge"
+          ],
+          "slide_labels": [
+            "56"
+          ]
+        },
+        "57": {
+          "section": "external_sort",
+          "subtopic": "Polyphase merge illustrative table",
+          "content_types": [
+            "table"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "external sorting",
+            "runs",
+            "polyphase merge"
+          ],
+          "slide_labels": [
+            "57"
+          ]
+        },
+        "58": {
+          "section": "comparison",
+          "subtopic": "Comparison of sorting methods",
+          "content_types": [
+            "comparison_table"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "sorting comparison",
+            "time complexity",
+            "space complexity"
+          ],
+          "slide_labels": [
+            "58"
+          ]
+        },
+        "59": {
+          "section": "summary",
+          "subtopic": "Key takeaways",
+          "content_types": [
+            "summary"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "sorting summary",
+            "สรุป"
+          ],
+          "slide_labels": [
+            "59"
+          ]
+        },
+        "60": {
+          "section": "summary",
+          "subtopic": "Corrections and additions included",
+          "content_types": [
+            "summary",
+            "corrections"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "sorting summary",
+            "สรุป"
+          ],
+          "slide_labels": [
+            "60"
+          ]
+        }
+      }
+    },
+    "1.หลักการเรียงลำดับข้อมูล-2.pdf": {
+      "sha256": "0fe3eb3084a97ee2e0a91f9c7859a87c7427143fb7af5e684bdee998ffd915d6",
+      "language": "th",
+      "physical_pages": 21,
+      "notes": "Each physical PDF page contains two original slide pages. Use physical_page for citations.",
+      "pages": {
+        "1": {
+          "section": "overview",
+          "subtopic": "Sorting title, topics, performance criteria",
+          "content_types": [
+            "text",
+            "outline"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "sorting",
+            "การเรียงลำดับ",
+            "sorting algorithms"
+          ],
+          "slide_labels": [
+            "1",
+            "2"
+          ]
+        },
+        "2": {
+          "section": "fundamentals",
+          "subtopic": "Sorting before-after and algorithm overview",
+          "content_types": [
+            "example",
+            "comparison",
+            "table"
+          ],
+          "visual_mode": "embedded_then_render",
+          "visual_available": true,
+          "keywords": [
+            "sorting",
+            "ordering relation",
+            "stable",
+            "adaptive",
+            "in-place",
+            "การเรียงลำดับ"
+          ],
+          "slide_labels": [
+            "3",
+            "4"
+          ]
+        },
+        "3": {
+          "section": "selection_sort",
+          "subtopic": "lessThan/swap helpers and Selection Sort idea",
+          "content_types": [
+            "code",
+            "explanation"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "selection sort",
+            "การเรียงลำดับแบบเลือก",
+            "เลือก"
+          ],
+          "slide_labels": [
+            "5",
+            "6"
+          ]
+        },
+        "4": {
+          "section": "selection_bubble",
+          "subtopic": "Selection implementation/analysis and Bubble Sort idea",
+          "content_types": [
+            "code",
+            "formula",
+            "explanation"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "selection sort",
+            "bubble sort",
+            "เลือก",
+            "ฟอง"
+          ],
+          "slide_labels": [
+            "7",
+            "8"
+          ]
+        },
+        "5": {
+          "section": "bubble_insertion",
+          "subtopic": "Bubble implementation/early stop and Insertion Sort idea",
+          "content_types": [
+            "code",
+            "example"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "bubble sort",
+            "insertion sort",
+            "ฟอง",
+            "แทรก"
+          ],
+          "slide_labels": [
+            "9",
+            "10"
+          ]
+        },
+        "6": {
+          "section": "insertion_sort",
+          "subtopic": "Insertion implementation and comparison counts",
+          "content_types": [
+            "code",
+            "formula",
+            "trace"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "insertion sort",
+            "การเรียงลำดับแบบแทรก",
+            "แทรก"
+          ],
+          "slide_labels": [
+            "11",
+            "12"
+          ]
+        },
+        "7": {
+          "section": "shell_sort",
+          "subtopic": "Shell Sort example and implementation",
+          "content_types": [
+            "example",
+            "code",
+            "trace"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "shell sort",
+            "h-sequence",
+            "gap sequence",
+            "เชลล์"
+          ],
+          "slide_labels": [
+            "13",
+            "14"
+          ]
+        },
+        "8": {
+          "section": "shell_sort",
+          "subtopic": "h-sequences and why Shell Sort is fast",
+          "content_types": [
+            "formula",
+            "explanation"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "shell sort",
+            "h-sequence",
+            "gap sequence",
+            "เชลล์"
+          ],
+          "slide_labels": [
+            "15",
+            "16"
+          ]
+        },
+        "9": {
+          "section": "performance",
+          "subtopic": "Timing for sorted and reverse-sorted inputs",
+          "content_types": [
+            "benchmark_table"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "benchmark",
+            "running time",
+            "เวลา"
+          ],
+          "slide_labels": [
+            "17",
+            "18"
+          ]
+        },
+        "10": {
+          "section": "performance_heap",
+          "subtopic": "Random-input timing and Heap Sort introduction",
+          "content_types": [
+            "benchmark_table",
+            "heap_diagram"
+          ],
+          "visual_mode": "embedded_then_render",
+          "visual_available": true,
+          "keywords": [
+            "benchmark",
+            "heap sort",
+            "ฮีป"
+          ],
+          "slide_labels": [
+            "19",
+            "20"
+          ]
+        },
+        "11": {
+          "section": "heap_merge",
+          "subtopic": "Heap Sort implementation and Merge Sort introduction",
+          "content_types": [
+            "code",
+            "diagram"
+          ],
+          "visual_mode": "embedded_then_render",
+          "visual_available": true,
+          "keywords": [
+            "heap sort",
+            "merge sort",
+            "ฮีป",
+            "ผสาน"
+          ],
+          "slide_labels": [
+            "21",
+            "22"
+          ]
+        },
+        "12": {
+          "section": "merge_sort",
+          "subtopic": "Merge Sort implementation and merge operation",
+          "content_types": [
+            "code",
+            "array_example"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "merge sort",
+            "merge",
+            "การเรียงลำดับแบบผสาน",
+            "ผสาน"
+          ],
+          "slide_labels": [
+            "23",
+            "24"
+          ]
+        },
+        "13": {
+          "section": "merge_sort",
+          "subtopic": "Merge analysis and upper-bound derivation",
+          "content_types": [
+            "recurrence",
+            "formula"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "merge sort",
+            "merge",
+            "การเรียงลำดับแบบผสาน",
+            "ผสาน"
+          ],
+          "slide_labels": [
+            "25",
+            "26"
+          ]
+        },
+        "14": {
+          "section": "merge_quick",
+          "subtopic": "Merge runtime conclusion and Quick Sort introduction",
+          "content_types": [
+            "complexity",
+            "partition_diagram"
+          ],
+          "visual_mode": "embedded_then_render",
+          "visual_available": true,
+          "keywords": [
+            "merge sort",
+            "quick sort",
+            "ผสาน",
+            "เร็ว"
+          ],
+          "slide_labels": [
+            "27",
+            "28"
+          ]
+        },
+        "15": {
+          "section": "quick_sort",
+          "subtopic": "Quick Sort implementation and partition",
+          "content_types": [
+            "code",
+            "partition_trace"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "quick sort",
+            "quicksort",
+            "partition",
+            "pivot",
+            "การเรียงลำดับแบบเร็ว",
+            "เร็ว"
+          ],
+          "slide_labels": [
+            "29",
+            "30"
+          ]
+        },
+        "16": {
+          "section": "quick_sort",
+          "subtopic": "Quick Sort recurrence and best case",
+          "content_types": [
+            "recurrence",
+            "formula",
+            "diagram"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "quick sort",
+            "quicksort",
+            "partition",
+            "pivot",
+            "การเรียงลำดับแบบเร็ว",
+            "เร็ว"
+          ],
+          "slide_labels": [
+            "31",
+            "32"
+          ]
+        },
+        "17": {
+          "section": "quick_sort",
+          "subtopic": "Quick Sort worst case and average-case setup",
+          "content_types": [
+            "formula",
+            "derivation"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "quick sort",
+            "quicksort",
+            "partition",
+            "pivot",
+            "การเรียงลำดับแบบเร็ว",
+            "เร็ว"
+          ],
+          "slide_labels": [
+            "33",
+            "34"
+          ]
+        },
+        "18": {
+          "section": "quick_sort",
+          "subtopic": "Quick Sort average-case derivation and pivot discussion",
+          "content_types": [
+            "formula",
+            "explanation"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "quick sort",
+            "quicksort",
+            "partition",
+            "pivot",
+            "การเรียงลำดับแบบเร็ว",
+            "เร็ว"
+          ],
+          "slide_labels": [
+            "35",
+            "36"
+          ]
+        },
+        "19": {
+          "section": "quick_sort",
+          "subtopic": "Median-of-three pivot and timing context",
+          "content_types": [
+            "code",
+            "pivot_diagram",
+            "benchmark"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "quick sort",
+            "quicksort",
+            "partition",
+            "pivot",
+            "การเรียงลำดับแบบเร็ว",
+            "เร็ว"
+          ],
+          "slide_labels": [
+            "37",
+            "38"
+          ]
+        },
+        "20": {
+          "section": "performance",
+          "subtopic": "Timing across Shell/Heap/Merge/Quick variants",
+          "content_types": [
+            "benchmark_table"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "benchmark",
+            "running time",
+            "เวลา"
+          ],
+          "slide_labels": [
+            "39",
+            "40"
+          ]
+        },
+        "21": {
+          "section": "comparison_summary",
+          "subtopic": "Auxiliary memory comparison and summary",
+          "content_types": [
+            "comparison",
+            "summary"
+          ],
+          "visual_mode": "page_render",
+          "visual_available": true,
+          "keywords": [
+            "space complexity",
+            "auxiliary memory",
+            "summary"
+          ],
+          "slide_labels": [
+            "41",
+            "42"
+          ]
+        }
+      }
+    }
+  }
+}

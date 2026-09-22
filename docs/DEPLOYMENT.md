@@ -10,7 +10,9 @@ User
 → Gemini generation
 → streamed answer + page citation
 
-PDF ทั้งเล่มจะถูก ingest เพียงครั้งเดียว ไม่ถูกส่งเข้า Gemini ในทุกคำถาม
+PDF ทุกไฟล์ที่ได้รับอนุมัติภายใต้ `real_data/` จะถูก ingest เป็นรายไฟล์ และไม่ถูกส่งทั้งเล่มเข้า Gemini ในทุกคำถาม
+
+**Closed-source rule:** runtime, retrieval และรูปประกอบใช้เฉพาะ `real_data/` เท่านั้น ไม่มี web/external fallback
 
 ## 1. เตรียม PostgreSQL
 
@@ -53,14 +55,18 @@ Course identity ปรับได้โดยไม่แก้ UI code:
 
 สร้าง/อัปเดต index:
 
-    python scripts/ingest_pdf.py --force
+    python -m scripts.ingest_pdf --force
 
 กระบวนการนี้จะ:
-1. อ่าน PDF
-2. แบ่งข้อความตามหน้า
-3. สร้าง embedding
-4. เก็บ text + page metadata + vector ลง PostgreSQL
-5. สร้าง HNSW / trigram indexes ผ่าน schema
+1. scan เฉพาะ `real_data/**/*.pdf`
+2. hash และ ingest แต่ละ PDF แยกกัน
+3. แบ่งข้อความตาม physical PDF page
+4. สร้าง text embedding
+5. เก็บ text + source_id + page metadata + vector ลง PostgreSQL
+6. ดึง embedded images และ render diagram/vector pages จาก PDF จริงไว้เป็น internal visuals
+7. สร้าง HNSW / trigram indexes ผ่าน schema
+
+ใช้ `--text-only` เฉพาะเมื่อจงใจไม่ต้องการเตรียมภาพภายใน PDF
 
 ถ้า API ติด rate limit ตัว embedder มี bounded exponential backoff แต่หากเป็น daily quota ต้องใช้ quota ที่พร้อมก่อน ingest
 
@@ -78,11 +84,13 @@ Course identity ปรับได้โดยไม่แก้ UI code:
 ## 5. Cold start หลัง ingest
 
 เมื่อ app เปิด:
-1. คำนวณ SHA-256 ของ PDF
-2. เช็ก hash ใน PostgreSQL
-3. ถ้ามี index แล้ว จะข้าม PDF text extraction และข้าม document embeddings
-4. สร้าง embedding เฉพาะคำถามของผู้ใช้
-5. retrieve top chunks แล้วตอบ
+1. scan รายชื่อ PDF ใน `real_data/`
+2. คำนวณ SHA-256 ของทุกไฟล์
+3. จำกัด retrieval scope ให้เฉพาะ source_id ที่ยังอยู่ใน `real_data/`
+4. เช็กแต่ละ hash ใน PostgreSQL
+5. ถ้าทุกไฟล์มี index แล้ว จะข้าม PDF extraction/document embeddings
+6. สร้าง embedding เฉพาะคำถามของผู้ใช้
+7. retrieve top chunks แล้วตอบ
 
 นี่คือ path ที่ควรใช้ใน production
 
@@ -90,25 +98,30 @@ Course identity ปรับได้โดยไม่แก้ UI code:
 
 เมื่อเปลี่ยนเนื้อหา PDF:
 1. commit PDF เวอร์ชันใหม่
-2. รัน python scripts/ingest_pdf.py --force ด้วย DATABASE_URL เดิม
+2. รัน python -m scripts.ingest_pdf --force ด้วย DATABASE_URL เดิม
 3. ระบบจะบันทึก index ของ hash ใหม่และลบ version เก่าของ source_file เดียวกัน
 4. deploy/reboot Streamlit
 
-## 7. Image / diagram mode
+## 7. Image / diagram mode — internal only
 
-ค่าเริ่มต้นปิดเพราะเอกสารปัจจุบันเน้นข้อความ
+คำสั่ง `python -m scripts.ingest_pdf --force` เตรียมภาพจาก PDF ภายใน `real_data/` ให้อัตโนมัติ:
+- embedded raster image จาก PDF จริง
+- `figure_crop` ที่ isolate จาก caption + vector bounds
+- page render ภายในใช้เป็น extraction fallback เท่านั้น
 
-เปิดเมื่อ PDF รุ่นใหม่มีภาพประกอบ:
+**User-facing rule:** UI แสดงเฉพาะ `figure_crop` ที่ isolate แล้วเท่านั้น ไม่แสดง full-page render หรือ raw embedded image เพื่อป้องกันหน้ากระดาษเต็ม/ภาพดำหลุดมาถึงผู้ใช้
+
+ค่า config ที่เทียบเท่าคือ:
 
     RAG_EXTRACT_IMAGES=true
     RAG_RENDER_VECTOR_PAGES=true
-    RAG_INDEX_IMAGES=true
+    RAG_INDEX_IMAGES=false
 
-- RAG_EXTRACT_IMAGES: ดึงรูป raster ที่ฝังใน PDF
-- RAG_RENDER_VECTOR_PAGES: render หน้าที่มี vector drawing เป็น PNG
-- RAG_INDEX_IMAGES: สร้าง multimodal embedding
+`RAG_INDEX_IMAGES` เป็น optional multimodal vector; retrieval ปกติผูกรูปตาม text hit จึงไม่จำเป็นต้องเปิด
 
-ระบบผูกภาพกับเลขหน้า เพื่อให้ UI แสดงภาพจากหน้าที่ retrieval พบได้
+ภาพถูกเลือกด้วยคู่ `source_id + page_number` เพื่อป้องกันรูปหน้าเดียวกันจากคนละ PDF ปะปนกัน
+
+**ห้าม** web image search, stock image, AI-generated image หรือ external image fallback
 
 ## 8. Debug / performance
 
@@ -127,14 +140,12 @@ PgVectorStore ใช้ Psycopg ConnectionPool ขนาดเล็ก (1-6 con
 
 ## 9. Production rule
 
-บน Streamlit Cloud ไม่แนะนำ in-memory fallback เพราะ cold start จะต้องสร้าง document embeddings ใหม่ทั้งหมดและอาจชน quota
-
-Production:
+Streamlit runtime เป็น **pgvector-only** และ fail-closed:
 - DATABASE_URL ต้องมี
-- ingest ก่อน deploy
+- PostgreSQL ต้องเปิด pgvector + pg_trgm
+- ต้อง ingest `real_data/` เข้า DATABASE_URL เดียวกันก่อน deploy
+- ถ้า DB ต่อไม่ได้หรือ index ไม่ครบ แอปจะ disable chatbot และไม่ fallback ไป local lexical
 - RAG_AUTO_INGEST=false
 - RAG_ALLOW_MEMORY_FALLBACK=false
 
-Development local:
-- ไม่มี DATABASE_URL ก็ใช้ in-memory ได้
-- เหมาะสำหรับทดสอบสั้น ๆ เท่านั้น
+การใช้ local lexical ยังอนุญาตเฉพาะ unit test / developer utility ที่เรียก `build_rag_service(..., require_database=False)` โดยตรง ไม่ใช่ runtime ของ Streamlit.

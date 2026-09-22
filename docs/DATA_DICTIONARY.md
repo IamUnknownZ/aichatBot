@@ -2,6 +2,15 @@
 
 เอกสารนี้กำหนดโครงสร้างข้อมูลสำหรับ PostgreSQL + pgvector เพื่อให้ระบบขยายต่อได้โดยไม่ต้องเปลี่ยนสถาปัตยกรรมหลัก
 
+## Source-of-truth policy
+
+- ฐานความรู้จริงอ่านจาก `real_data/` เท่านั้น
+- ห้าม fallback ไปยัง PDF ทดลอง/legacy
+- ห้ามเติมข้อมูลหรือรูปจากเว็บ แหล่งภายนอก หรือความจำของโมเดล
+- ภาพต้องผูกด้วย `source_id + page_number` ของ retrieval hit เดียวกัน
+- ถ้าหลักฐานใน `real_data/` ไม่พอ ระบบต้อง abstain แทนการเดา
+- Page audit และ content/visual map ของหัวข้อ 1 อยู่ที่ `docs/REAL_DATA_TOPIC1_DATA_DICTIONARY.md`
+
 ## 1. rag_documents
 
 | Field | Type | Meaning |
@@ -29,14 +38,16 @@
 | embedding | vector(768) | semantic vector |
 | created_at | TIMESTAMPTZ | เวลา ingest |
 
+สำหรับไฟล์ที่มี machine-readable manifest ใน `real_data/` ค่า `metadata` จะมีอย่างน้อย `topic_id`, `topic_name`, `source_part`, `knowledge_scope=real_data`, `physical_page`, `section`, `subtopic`, `content_types`, `keywords`, `visual_mode`, `slide_labels`, `manifest_file` และ `source_only=true`. Manifest ถูกตรวจด้วย SHA-256 ก่อนนำ metadata มาใช้เพื่อป้องกัน page map เก่าไปจับกับ PDF revision ใหม่
+
 Index ที่ใช้:
 - HNSW cosine index บน embedding สำหรับ semantic retrieval
 - GIN trigram index บน content สำหรับ lexical retrieval
 - B-tree บน source_id และ page_number สำหรับดึงข้อมูลตามหน้า
 
-## 3. rag_document_images
+## 3. rag_document_images — Prepared Visual Catalog
 
-ตารางนี้เตรียมไว้สำหรับ PDF ที่มีรูปหรือแผนภาพในอนาคต
+ตารางนี้เป็นสารานุกรมภาพภายในของ RAG: เก็บเฉพาะ embedded image, `figure_crop` และ page render fallback ที่มาจาก `real_data/` พร้อมตำแหน่งอ้างอิงกลับไปยังเอกสารจริง เพื่อให้ visual request ดึงภาพได้โดยไม่ต้องค้นเว็บหรือเรียก LLM เพื่อสร้างภาพ. ถ้าตรวจพบ caption/figure region ระบบต้องใช้ `figure_crop` และไม่เก็บ full-page render ของหน้านั้น
 
 | Field | Type | Meaning |
 |---|---|---|
@@ -49,10 +60,10 @@ Index ที่ใช้:
 | image_bytes | BYTEA | ข้อมูลภาพ |
 | width / height | INTEGER | ขนาดภาพ |
 | sha256 | TEXT | hash ป้องกันภาพซ้ำ |
-| metadata | JSONB | caption, alt-text, section ในอนาคต |
+| metadata | JSONB | topic, section, subtopic, visual_mode, source_only และ page metadata |
 | embedding | vector(768) | multimodal embedding แบบ optional |
 
-ปัจจุบันระบบมีตัว extract ภาพและผูกภาพกับเลขหน้าแล้ว แต่ค่าเริ่มต้นปิดไว้เพื่อให้ cold-start เร็ว เปิดได้ด้วยตัวแปร RAG_EXTRACT_IMAGES=true
+ค่าเริ่มต้น localhost เปิดการ extract รูปและ render หน้า vector แล้ว เพื่อสร้าง prepared visual catalog ตั้งแต่ตอน build service. การค้นปกติยังใช้ text retrieval ที่เร็วกว่า จากนั้น map ไปยังภาพด้วย `source_id + page_number`. `RAG_INDEX_IMAGES` ยังเป็น optional สำหรับ phase semantic visual retrieval เต็มรูปแบบ
 
 ## 4. rag_user_profiles
 
