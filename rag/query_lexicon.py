@@ -771,14 +771,16 @@ RAW_ALIASES = {
 }
 
 
-PRIMARY_SORT_TOPICS = (
+PRIMARY_CURRICULUM_TOPICS = (
+    "หลักการเรียงลำดับข้อมูล",
+    "Bubble Sort",
     "Selection Sort",
     "Insertion Sort",
-    "Bubble Sort",
-    "Shell Sort",
     "Merge Sort",
-    "Quick Sort",
+    "Counting Sort",
 )
+
+PRIMARY_SORT_TOPICS = PRIMARY_CURRICULUM_TOPICS[1:]
 
 _all_topic_aliases = RAW_ALIASES["topics"]
 RAW_ALIASES["non_curriculum_topics"] = {

@@ -1,6 +1,11 @@
 import unittest
 
-from rag.query_lexicon import PRIMARY_SORT_TOPICS, TOTAL_ALIASES, match_alias
+from rag.query_lexicon import (
+    PRIMARY_CURRICULUM_TOPICS,
+    PRIMARY_SORT_TOPICS,
+    TOTAL_ALIASES,
+    match_alias,
+)
 
 
 class QueryLexiconTests(unittest.TestCase):
@@ -24,29 +29,43 @@ class QueryLexiconTests(unittest.TestCase):
             "ซีเล็กชั่นซอร์ท": "Selection Sort",
             "อินเซิรชันซอท": "Insertion Sort",
             "เมิจซอท": "Merge Sort",
-            "ควิกซอท": "Quick Sort",
+            "เคาน์ติ้งซอร์ท": "Counting Sort",
         }
         for query, expected in cases.items():
             match = match_alias(query, "topics")
             self.assertIsNotNone(match, query)
             self.assertEqual(match.canonical, expected)
 
-    def test_primary_curriculum_has_exactly_six_algorithms(self):
+    def test_primary_curriculum_matches_source_image_exactly(self):
+        self.assertEqual(
+            PRIMARY_CURRICULUM_TOPICS,
+            (
+                "หลักการเรียงลำดับข้อมูล",
+                "Bubble Sort",
+                "Selection Sort",
+                "Insertion Sort",
+                "Merge Sort",
+                "Counting Sort",
+            ),
+        )
         self.assertEqual(
             PRIMARY_SORT_TOPICS,
             (
+                "Bubble Sort",
                 "Selection Sort",
                 "Insertion Sort",
-                "Bubble Sort",
-                "Shell Sort",
                 "Merge Sort",
-                "Quick Sort",
+                "Counting Sort",
             ),
         )
-        self.assertIsNone(match_alias("heap sort", "topics"))
-        excluded = match_alias("heap sort", "non_curriculum_topics")
-        self.assertIsNotNone(excluded)
-        self.assertEqual(excluded.canonical, "Heap Sort")
+        for excluded_topic in ("Shell Sort", "Quick Sort", "Heap Sort"):
+            self.assertIsNone(match_alias(excluded_topic, "topics"))
+            excluded = match_alias(
+                excluded_topic,
+                "non_curriculum_topics",
+            )
+            self.assertIsNotNone(excluded)
+            self.assertEqual(excluded.canonical, excluded_topic)
 
     def test_concept_variants(self):
         cases = {

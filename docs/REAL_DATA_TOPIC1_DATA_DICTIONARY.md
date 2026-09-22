@@ -173,19 +173,21 @@ QA result with `extract_images=true` and `render_vector_pages=true`:
 
 ## Curriculum scope vs source coverage
 
-The **primary curriculum contains exactly six sorting algorithms**:
+The **primary curriculum contains exactly six topics, in this order**:
 
-1. Selection Sort
-2. Insertion Sort
-3. Bubble Sort
-4. Shell Sort
+1. หลักการเรียงลำดับข้อมูล
+2. Bubble Sort
+3. Selection Sort
+4. Insertion Sort
 5. Merge Sort
-6. Quick Sort
+6. Counting Sort
 
-The approved PDFs may also mention Heap Sort, Cocktail Sort, Counting Sort,
-Radix Sort, Bucket Sort, Batcher odd-even merge, square-root sorting, or
-external sorting. These are **reference-only source content** and must not be
-promoted into the tutor's primary topic list.
+Counting Sort replaces Quick Sort in this curriculum.
+
+The approved PDFs may also mention Shell Sort, Quick Sort, Heap Sort,
+Cocktail Sort, Radix Sort, Bucket Sort, Batcher odd-even merge,
+square-root sorting, or external sorting. These are **reference-only source
+content** and must not be promoted into the tutor's primary topic list.
 
 The sources also cover sorting definitions, ordering requirements, stability,
 in-place/adaptive concepts, complexity, performance comparisons, partition,

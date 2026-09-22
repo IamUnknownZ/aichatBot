@@ -63,29 +63,39 @@ class ClarificationServiceTests(unittest.TestCase):
         self.assertEqual(result.retrieval_query, "__conversation__")
         self.assertEqual(result.elapsed_ms, 0.0)
 
-    def test_curriculum_topic_list_has_exactly_six_algorithms(self):
+    def test_curriculum_topic_list_matches_source_image_exactly(self):
         answer = self.service.direct_response(
             "Sorting Algorithms มีอะไรบ้าง",
             [],
         )
         self.assertIsNotNone(answer)
-        for topic in (
+        expected = (
+            "หลักการเรียงลำดับข้อมูล",
+            "Bubble Sort",
             "Selection Sort",
             "Insertion Sort",
-            "Bubble Sort",
-            "Shell Sort",
             "Merge Sort",
-            "Quick Sort",
-        ):
+            "Counting Sort",
+        )
+        positions = [answer.index(topic) for topic in expected]
+        self.assertEqual(positions, sorted(positions))
+        for topic in expected:
             self.assertIn(topic, answer)
-        for topic in ("Heap Sort", "Counting Sort", "Radix Sort", "Bucket Sort"):
+        for topic in (
+            "Shell Sort",
+            "Quick Sort",
+            "Heap Sort",
+            "Radix Sort",
+            "Bucket Sort",
+        ):
             self.assertNotIn(topic, answer)
 
     def test_non_curriculum_algorithm_is_not_taught_as_primary_topic(self):
-        answer = self.service.direct_response("heap sort คืออะไร", [])
-        self.assertIsNotNone(answer)
-        self.assertIn("ไม่ใช่หนึ่งใน 6 อัลกอริทึมหลัก", answer)
-        self.assertIn("Selection", answer)
+        for query in ("quick sort คืออะไร", "shell sort คืออะไร"):
+            answer = self.service.direct_response(query, [])
+            self.assertIsNotNone(answer)
+            self.assertIn("ไม่ใช่หนึ่งใน 6 หัวข้อหลัก", answer)
+            self.assertIn("Counting Sort", answer)
 
     def test_context_resolves_code_without_reasking_topic(self):
         history = [

@@ -6,14 +6,15 @@
   "closed_source": true,
   "external_content_allowed": false,
   "external_images_allowed": false,
-  "primary_curriculum_algorithms": [
+  "primary_curriculum_topics": [
+    "หลักการเรียงลำดับข้อมูล",
+    "Bubble Sort",
     "Selection Sort",
     "Insertion Sort",
-    "Bubble Sort",
-    "Shell Sort",
     "Merge Sort",
-    "Quick Sort"
+    "Counting Sort"
   ],
+  "counting_sort_replaces_quick_sort": true,
   "other_algorithms_in_sources_are_reference_only": true,
   "section_keywords": {
     "overview": [

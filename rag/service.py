@@ -17,7 +17,7 @@ from .config import Settings
 from .embeddings import GeminiEmbedder
 from .models import ExtractedImage, RetrievalResult, SearchHit
 from .query_lexicon import (
-    PRIMARY_SORT_TOPICS,
+    PRIMARY_CURRICULUM_TOPICS,
     TOTAL_ALIASES,
     compact_text as lexicon_compact_text,
     match_alias,
@@ -161,10 +161,10 @@ class RAGService:
     ) -> str | None:
         if self._asks_primary_topic_list(query):
             return (
-                "### อัลกอริทึมการเรียงลำดับข้อมูลในบทเรียน\n\n"
+                "### หัวข้อการเรียงลำดับข้อมูลในบทเรียน\n\n"
                 + "\n".join(
                     f"{index}. **{topic}**"
-                    for index, topic in enumerate(PRIMARY_SORT_TOPICS, start=1)
+                    for index, topic in enumerate(PRIMARY_CURRICULUM_TOPICS, start=1)
                 )
             )
 
@@ -172,9 +172,9 @@ class RAGService:
         if non_curriculum is not None:
             return (
                 f"**{non_curriculum.canonical}** ถูกกล่าวถึงในเอกสารบางส่วน "
-                "แต่ไม่ใช่หนึ่งใน 6 อัลกอริทึมหลักของบทเรียนนี้ครับ\n\n"
-                "หัวข้อหลักคือ **Selection, Insertion, Bubble, Shell, "
-                "Merge และ Quick Sort**"
+                "แต่ไม่ใช่หนึ่งใน 6 หัวข้อหลักของบทเรียนนี้ครับ\n\n"
+                "หัวข้อหลักคือ **หลักการเรียงลำดับข้อมูล, Bubble Sort, "
+                "Selection Sort, Insertion Sort, Merge Sort และ Counting Sort**"
             )
 
         social = match_alias(
@@ -186,9 +186,9 @@ class RAGService:
         if social is not None:
             if social.canonical == "greeting":
                 return (
-                    "ไงครับ 👋 พร้อมช่วยเรื่อง Sorting Algorithms ครับ "
-                    "พิมพ์สั้น ๆ ได้เลย เช่น **บับเบิลซอร์ท**, **Quick Sort** "
-                    "หรือถามให้เปรียบเทียบสองอัลกอริทึมก็ได้"
+                    "ไงครับ 👋 พร้อมช่วยเรื่องการเรียงลำดับข้อมูลครับ "
+                    "พิมพ์สั้น ๆ ได้เลย เช่น **บับเบิลซอร์ท**, **Counting Sort** "
+                    "หรือถามให้เปรียบเทียบหัวข้อในบทเรียนก็ได้"
                 )
 
             if social.canonical == "thanks":
@@ -202,7 +202,7 @@ class RAGService:
                     f"ผมคือ **{self.settings.tutor_name}** ผู้ช่วยเรียนเรื่อง "
                     f"**{self.settings.course_title}** ครับ\n\n"
                     "ลองถามได้หลายแบบ เช่น **บับเบิลซอร์ท**, "
-                    "**อธิบาย Quick Sort**, **Selection Sort ต่างจาก Bubble Sort ยังไง** "
+                    "**อธิบาย Counting Sort**, **Selection Sort ต่างจาก Bubble Sort ยังไง** "
                     "หรือ **ช่วย Trace Bubble Sort 5, 1, 4, 2**"
                 )
 
