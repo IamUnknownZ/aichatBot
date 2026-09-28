@@ -943,7 +943,14 @@ def match_alias(
             best_score = score
             best = candidate
 
-    threshold = 0.80 if kind == "social" else 0.73
+    if kind == "social":
+        threshold = 0.80
+    elif kind == "non_curriculum_topics":
+        # These reference-only names include short aliases such as "shell";
+        # keep ordinary words like "hello" from being treated as algorithms.
+        threshold = 0.86
+    else:
+        threshold = 0.73
     if best is not None and best_score >= threshold:
         return AliasMatch(
             best.kind,

@@ -358,6 +358,104 @@ footer {
     font-size: .78rem;
 }
 
+/* ----- floating response-language control ----- */
+div[class*="st-key-language-float"] {
+    position: fixed !important;
+    z-index: 1001;
+    left: 50%;
+    bottom: 7.75rem;
+    width: min(900px, calc(100vw - 1.5rem));
+    transform: translateX(-50%);
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .45rem;
+    pointer-events: none;
+}
+
+div[class*="st-key-language-float"] > [data-testid="stElementContainer"] {
+    width: auto !important;
+    max-width: none !important;
+    flex: 0 0 auto !important;
+}
+
+div[class*="st-key-language-float"] > [data-testid="stElementContainer"]:has(
+    [data-testid="stButtonGroup"]
+) {
+    width: max-content !important;
+}
+
+div[class*="st-key-language-float"] [data-testid="stMarkdownContainer"] {
+    margin-bottom: 0 !important;
+}
+
+div[class*="st-key-language-float"] .language-float-label {
+    display: inline-flex;
+    align-items: center;
+    gap: .28rem;
+    padding: .32rem .62rem;
+    border: 1px solid rgba(91,91,214,.12);
+    border-radius: 999px;
+    background: rgba(255,255,255,.86);
+    color: var(--muted);
+    font-size: .72rem;
+    line-height: 1.1;
+    white-space: nowrap;
+    box-shadow: 0 7px 18px rgba(31,42,70,.08);
+    backdrop-filter: blur(12px);
+    pointer-events: auto;
+}
+
+div[class*="st-key-language-float"] .language-float-label span:first-child {
+    color: var(--ink);
+    font-weight: 700;
+}
+
+div[class*="st-key-language-float"] [data-testid="stButtonGroup"] {
+    width: max-content !important;
+    max-width: none !important;
+    padding: .16rem;
+    border: 1px solid rgba(91,91,214,.14);
+    border-radius: 999px;
+    background: rgba(255,255,255,.92);
+    box-shadow: 0 8px 20px rgba(31,42,70,.12);
+    backdrop-filter: blur(12px);
+    pointer-events: auto;
+}
+
+div[class*="st-key-language-float"] [role="radiogroup"] {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    width: max-content !important;
+    max-width: none !important;
+}
+
+[data-testid="stButtonGroup"] {
+    width: 100%;
+}
+
+[data-testid="stButtonGroup"] button[data-variant="segmented_control"] {
+    min-height: 2.55rem;
+    font-weight: 680;
+    letter-spacing: -.01em;
+    transition: background .16s ease, border-color .16s ease,
+        color .16s ease, box-shadow .16s ease, transform .16s ease;
+}
+
+[data-testid="stButtonGroup"] button[data-variant="segmented_control"]:hover,
+[data-testid="stButtonGroup"] button[data-variant="segmented_control"]:focus-visible {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 14px rgba(91,91,214,.11);
+}
+
+[data-testid="stButtonGroup"] button[data-variant="segmented_control"][data-selected] {
+    background: linear-gradient(135deg, #5b5bd6, #7c5ce7);
+    border-color: #5b5bd6;
+    color: #ffffff;
+    box-shadow: 0 6px 16px rgba(91,91,214,.22);
+}
+
 /* ----- thinking / typing feedback ----- */
 .tutor-thinking {
     display: inline-flex;
@@ -415,6 +513,47 @@ div[data-testid="stChatInput"] {
 div[data-testid="stChatInput"]:focus-within {
     border-color: rgba(91,91,214,.32);
     box-shadow: 0 17px 48px rgba(64,64,150,.15);
+}
+
+/* Keep the native chat composer and response-language control on one row. */
+@media (min-width: 1201px) {
+    div[data-testid="stChatInput"] {
+        position: fixed !important;
+        z-index: 1000;
+        left: max(.75rem, calc(50% - 550px)) !important;
+        bottom: 3.5rem !important;
+        width: min(620px, calc(100vw - 1.5rem - 453px)) !important;
+        max-width: none !important;
+        margin: 0 !important;
+    }
+
+    div[class*="st-key-language-float"] {
+        bottom: calc(3.5rem + 6px);
+        width: min(1100px, calc(100vw - 1.5rem));
+    }
+}
+
+@media (min-width: 701px) and (max-width: 1200px) {
+    div[data-testid="stChatInput"] {
+        position: fixed !important;
+        z-index: 1000;
+        left: max(.75rem, calc(50% - 450px)) !important;
+        bottom: 3.5rem !important;
+        width: min(600px, calc(100vw - 310px)) !important;
+        max-width: none !important;
+        margin: 0 !important;
+    }
+
+    div[class*="st-key-language-float"] {
+        left: 50%;
+        bottom: calc(3.5rem + 6px);
+        width: min(900px, calc(100vw - 1.5rem));
+        transform: translateX(-50%);
+    }
+
+    div[class*="st-key-language-float"] .language-float-label {
+        display: none;
+    }
 }
 
 /* ----- prompt cards/buttons ----- */
@@ -541,6 +680,31 @@ div.stButton > button:active {
         border-radius: 16px;
         padding: .95rem 1rem;
     }
+
+    div[class*="st-key-language-float"] {
+        left: .75rem;
+        right: .75rem;
+        bottom: 7.75rem;
+        width: auto;
+        transform: none;
+        justify-content: center;
+    }
+
+    div[class*="st-key-language-float"] .language-float-label {
+        display: none;
+    }
+
+    div[class*="st-key-language-float"] [data-testid="stButtonGroup"] {
+        width: 100% !important;
+    }
+
+    [data-testid="stButtonGroup"] button[data-variant="segmented_control"] {
+        min-height: 2.42rem;
+        padding-left: .5rem;
+        padding-right: .5rem;
+        font-size: .78rem;
+    }
+
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -588,6 +752,22 @@ div.stButton > button:active {
     .tutor-thinking,
     div.stButton > button {
         background: rgba(25,28,38,.72);
+    }
+
+    div[class*="st-key-language-float"] .language-float-label,
+    div[class*="st-key-language-float"] [data-testid="stButtonGroup"] {
+        background: rgba(25,28,38,.78);
+        border-color: rgba(155,145,255,.20) !important;
+    }
+
+    div[class*="st-key-language-float"] .language-float-label span:first-child {
+        color: #f7f8fb;
+    }
+
+    [data-testid="stButtonGroup"] button[data-variant="segmented_control"]:not(
+        [data-selected]
+    ) {
+        color: #e6e9f0;
     }
 
     div[data-testid="stChatInput"] {

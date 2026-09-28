@@ -230,6 +230,15 @@
           ],
           "slide_labels": [
             "4"
+          ],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "หลักการเรียงลำดับข้อมูล - ordering relation และตัวอย่างก่อน/หลังการเรียง",
+              "visual_topic": "หลักการเรียงลำดับข้อมูล",
+              "visual_role": "concept_relation",
+              "visual_detail": "แสดงความสัมพันธ์ของข้อมูลก่อนและหลังจัดเรียง"
+            }
           ]
         },
         "5": {
@@ -332,6 +341,15 @@
           ],
           "slide_labels": [
             "9"
+          ],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Insertion Sort - insert key into sorted prefix",
+              "visual_topic": "Insertion Sort",
+              "visual_role": "concept_array",
+              "visual_detail": "แสดงการนำ key ไปแทรกใน prefix ที่เรียงแล้ว"
+            }
           ]
         },
         "10": {
@@ -349,6 +367,15 @@
           ],
           "slide_labels": [
             "10"
+          ],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Insertion Sort - pseudocode สำหรับเลื่อนข้อมูลและแทรก key",
+              "visual_topic": "Insertion Sort",
+              "visual_role": "pseudocode",
+              "visual_detail": "โค้ดกำหนด key แล้วเลื่อนสมาชิกที่มากกว่าไปทางขวา"
+            }
           ]
         },
         "11": {
@@ -367,6 +394,16 @@
           ],
           "slide_labels": [
             "11"
+          ],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Insertion Sort - worked example comparison table",
+              "visual_topic": "Insertion Sort",
+              "visual_role": "worked_example_trace",
+              "visual_detail": "ตารางแสดงลำดับการเปรียบเทียบและจำนวนครั้งของการแทรก",
+              "clip": [106.37, 58.41, 378.71, 220.05]
+            }
           ]
         },
         "12": {
@@ -403,6 +440,16 @@
           ],
           "slide_labels": [
             "13"
+          ],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Selection Sort - สแกนช่วงที่ยังไม่เรียงเพื่อหาค่าต่ำสุด",
+              "visual_topic": "Selection Sort",
+              "visual_role": "concept_array",
+              "visual_detail": "แสดงตำแหน่งที่เรียงแล้วและช่วงที่ยังค้นหาค่าต่ำสุด",
+              "clip": [95, 140, 360, 192]
+            }
           ]
         },
         "14": {
@@ -438,6 +485,15 @@
           ],
           "slide_labels": [
             "15"
+          ],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Selection Sort - worked example minimum selection and swaps",
+              "visual_topic": "Selection Sort",
+              "visual_role": "worked_example_trace",
+              "visual_detail": "ตารางแสดงการเลือกค่าต่ำสุดและการสลับตำแหน่งในแต่ละรอบ"
+            }
           ]
         },
         "16": {
@@ -474,6 +530,16 @@
           ],
           "slide_labels": [
             "17"
+          ],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Bubble Sort - เปรียบเทียบสมาชิกที่อยู่ติดกันและสลับเมื่อผิดลำดับ",
+              "visual_topic": "Bubble Sort",
+              "visual_role": "concept_swap",
+              "visual_detail": "ตัวอย่างการเปรียบเทียบคู่ติดกันและการเลื่อนค่าสูงสุดไปท้ายชุด",
+              "clip": [100, 140, 360, 193]
+            }
           ]
         },
         "18": {
@@ -491,6 +557,15 @@
           ],
           "slide_labels": [
             "18"
+          ],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Bubble Sort - pseudocode และเงื่อนไขหยุดเมื่อไม่มีการสลับ",
+              "visual_topic": "Bubble Sort",
+              "visual_role": "pseudocode",
+              "visual_detail": "โค้ดลดช่วงเปรียบเทียบทีละรอบและใช้ swapped เพื่อหยุดเร็ว"
+            }
           ]
         },
         "19": {
@@ -510,6 +585,16 @@
           ],
           "slide_labels": [
             "19"
+          ],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Bubble Sort - worked example การเปรียบเทียบและสลับในแต่ละรอบ",
+              "visual_topic": "Bubble Sort",
+              "visual_role": "worked_example_trace",
+              "visual_detail": "ตารางแสดงค่าที่ถูกเปรียบเทียบและผลหลังผ่านรอบการทำงาน",
+              "clip": [130, 75, 320, 150]
+            }
           ]
         },
         "20": {
@@ -676,6 +761,16 @@
           ],
           "slide_labels": [
             "28"
+          ],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Merge Sort - divide-and-conquer tree แบ่งข้อมูลและรวมผลลัพธ์",
+              "visual_topic": "Merge Sort",
+              "visual_role": "concept_divide_and_conquer",
+              "visual_detail": "ต้นไม้ตัวอย่างแสดงการแบ่งอาร์เรย์เป็นสองส่วน แล้ว merge กลับเป็นชุดที่เรียงแล้ว",
+              "clip": [130, 125, 325, 215]
+            }
           ]
         },
         "29": {
@@ -695,6 +790,16 @@
           ],
           "slide_labels": [
             "29"
+          ],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Merge Sort - merge operation รวมชุดย่อยที่เรียงแล้วเข้าด้วยกัน",
+              "visual_topic": "Merge Sort",
+              "visual_role": "concept_merge",
+              "visual_detail": "แสดงการอ่านค่าจากชุดย่อย a และเขียนผลลงชุด b ตามลำดับ",
+              "clip": [10, 68, 445, 138]
+            }
           ]
         },
         "30": {
@@ -714,6 +819,15 @@
           ],
           "slide_labels": [
             "30"
+          ],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Merge Sort - pseudocode แบ่งข้อมูลและเรียก merge ซ้ำ",
+              "visual_topic": "Merge Sort",
+              "visual_role": "pseudocode",
+              "visual_detail": "โค้ดแบ่งช่วงข้อมูลเป็นสองส่วนแล้ว merge ผลที่เรียงแล้ว"
+            }
           ]
         },
         "31": {
@@ -734,6 +848,16 @@
           ],
           "slide_labels": [
             "31"
+          ],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Merge Sort - running time และขั้นตอนการรวมผลลัพธ์",
+              "visual_topic": "Merge Sort",
+              "visual_role": "complexity_trace",
+              "visual_detail": "ภาพเชื่อมโยงการแบ่งครึ่งกับจำนวนงานในแต่ละระดับของ merge",
+              "clip": [145, 140, 310, 220]
+            }
           ]
         },
         "32": {
@@ -1015,6 +1139,16 @@
           ],
           "slide_labels": [
             "46"
+          ],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Counting Sort - count table และ cumulative count ใน worked example",
+              "visual_topic": "Counting Sort",
+              "visual_role": "worked_example_count_table",
+              "visual_detail": "ตาราง counts C[i], cumulative C[i] และผลลัพธ์ B ของตัวอย่าง A=[4,2,2,8,3,3,1]",
+              "clip": [125, 80, 335, 155]
+            }
           ]
         },
         "47": {
@@ -1306,6 +1440,15 @@
           "slide_labels": [
             "3",
             "4"
+          ],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "หลักการเรียงลำดับข้อมูล - before/after array และภาพการกระจายข้อมูล",
+              "visual_topic": "หลักการเรียงลำดับข้อมูล",
+              "visual_role": "overview_example",
+              "visual_detail": "แสดงข้อมูลก่อนเรียง หลังเรียง และกราฟเปรียบเทียบลำดับข้อมูล"
+            }
           ]
         },
         "3": {
@@ -1346,6 +1489,15 @@
           "slide_labels": [
             "7",
             "8"
+          ],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Selection Sort - lessThan/swap implementation และจำนวนครั้งการเปรียบเทียบ",
+              "visual_topic": "Selection Sort",
+              "visual_role": "code_and_complexity",
+              "visual_detail": "ภาพ crop นี้เป็นส่วนโค้ด Selection Sort ของสไลด์บน ไม่ใช่ Bubble Sort ที่อยู่สไลด์ถัดไป"
+            }
           ]
         },
         "5": {
@@ -1366,6 +1518,22 @@
           "slide_labels": [
             "9",
             "10"
+          ],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Bubble Sort - implementation with early-stop check",
+              "visual_topic": "Bubble Sort",
+              "visual_role": "code_and_complexity",
+              "visual_detail": "โค้ดเปรียบเทียบค่าติดกัน พร้อมหยุดก่อนครบ n รอบเมื่อไม่มีการสลับ"
+            },
+            {
+              "kind": "trace_crop",
+              "label": "Insertion Sort - insert key into the sorted prefix",
+              "visual_topic": "Insertion Sort",
+              "visual_role": "concept_array",
+              "visual_detail": "ภาพแสดง key ที่ถูกแทรกในส่วนข้อมูลที่เรียงแล้ว"
+            }
           ]
         },
         "6": {
@@ -1386,6 +1554,15 @@
           "slide_labels": [
             "11",
             "12"
+          ],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Insertion Sort - โค้ดแทรก key และตารางจำนวนครั้งการเปรียบเทียบ",
+              "visual_topic": "Insertion Sort",
+              "visual_role": "code_and_complexity",
+              "visual_detail": "โค้ดเลื่อนสมาชิกใน sorted prefix และสรุปจำนวน comparison"
+            }
           ]
         },
         "7": {
@@ -1469,6 +1646,7 @@
         "11": {
           "section": "heap_merge",
           "subtopic": "Heap Sort implementation and Merge Sort introduction",
+          "curriculum_status": "mixed",
           "content_types": [
             "code",
             "diagram"
@@ -1484,6 +1662,26 @@
           "slide_labels": [
             "21",
             "22"
+          ],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Heap Sort - implementation and heapify code (นอกขอบเขตบทเรียน)",
+              "visual_topic": "Heap Sort",
+              "visual_role": "code",
+              "curriculum_status": "reference_only",
+              "visual_detail": "โค้ด Heap Sort ที่อยู่ในเอกสารอ้างอิง แต่ไม่ใช่หัวข้อหลัก",
+              "clip": [45, 45, 550, 410]
+            },
+            {
+              "kind": "trace_crop",
+              "label": "Merge Sort - introduction: แบ่งข้อมูลเป็นส่วนย่อยก่อน merge",
+              "visual_topic": "Merge Sort",
+              "visual_role": "concept_divide_and_merge",
+              "curriculum_status": "primary",
+              "visual_detail": "ภาพเริ่มต้นของการแบ่งชุดข้อมูลและการรวมผลแบบ Merge Sort",
+              "clip": [35, 426, 560, 803]
+            }
           ]
         },
         "12": {
@@ -1504,6 +1702,15 @@
           "slide_labels": [
             "23",
             "24"
+          ],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Merge Sort - implementation และ merge operation",
+              "visual_topic": "Merge Sort",
+              "visual_role": "code_and_merge",
+              "visual_detail": "โค้ดแบ่งช่วงข้อมูลและรวมค่าจากสองช่วงที่เรียงแล้ว"
+            }
           ]
         },
         "13": {
@@ -1524,11 +1731,21 @@
           "slide_labels": [
             "25",
             "26"
+          ],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Merge Sort - วิเคราะห์จำนวนงานของ merge และ upper bound",
+              "visual_topic": "Merge Sort",
+              "visual_role": "complexity_analysis",
+              "visual_detail": "แผนภาพการรวมสองชุดและสมการขอบเขตบนของเวลา"
+            }
           ]
         },
         "14": {
           "section": "merge_quick",
           "subtopic": "Merge runtime conclusion and Quick Sort introduction",
+          "curriculum_status": "mixed",
           "content_types": [
             "complexity",
             "partition_diagram"
@@ -1679,6 +1896,7 @@
         "21": {
           "section": "comparison_summary",
           "subtopic": "Auxiliary memory comparison and summary",
+          "curriculum_status": "reference_only",
           "content_types": [
             "comparison",
             "summary"
@@ -1695,6 +1913,812 @@
             "42"
           ]
         }
+      }
+    },
+    "เอกสารหน่วยที่ 8 การเรียงลำดับข้อมูล.pdf": {
+      "sha256": "6d836b226d4340d65a73526526d14fafefd42bb3f4c4ffc8669992ea662b5950",
+      "language": "th",
+      "physical_pages": 29,
+      "notes": "Thai unit textbook. Only the approved curriculum topics are primary; Shell Sort and Quick Sort remain outside the current lesson scope.",
+      "pages": {
+        "1": {
+          "section": "overview",
+          "subtopic": "Sorting definition, types, and learning objectives",
+          "curriculum_status": "primary",
+          "content_types": ["text", "outline"],
+          "visual_mode": "none",
+          "visual_available": false,
+          "keywords": ["sorting", "การเรียงลำดับข้อมูล", "internal sorting", "external sorting"]
+        },
+        "2": {
+          "section": "fundamentals",
+          "subtopic": "Data sorting definition and internal/external sorting",
+          "curriculum_status": "primary",
+          "content_types": ["text", "definition"],
+          "visual_mode": "none",
+          "visual_available": false,
+          "keywords": ["sorting", "internal sorting", "external sorting"]
+        },
+        "3": {
+          "section": "fundamentals",
+          "subtopic": "Internal/external sorting taxonomy and algorithm families",
+          "curriculum_status": "primary",
+          "content_types": ["text", "overview_diagram"],
+          "visual_mode": "figure_crop",
+          "visual_available": true,
+          "keywords": ["sorting types", "selection", "insertion", "exchange"],
+          "visuals": [
+            {
+              "kind": "figure_crop",
+              "label": "หลักการเรียงลำดับข้อมูล - แผนภาพประเภท Internal/External และหมวด Selection/Insertion/Exchange",
+              "visual_topic": "หลักการเรียงลำดับข้อมูล",
+              "visual_role": "overview_taxonomy",
+              "visual_detail": "แผนภาพจากรูปที่ 8.1 แบ่งการเรียงลำดับภายใน/ภายนอก และแสดงกลุ่มวิธีที่เอกสารกล่าวถึง"
+            }
+          ]
+        },
+        "4": {
+          "section": "selection_sort",
+          "subtopic": "Selection Sort worked example, round 1",
+          "curriculum_status": "primary",
+          "content_types": ["explanation", "trace", "worked_example"],
+          "visual_mode": "trace_crop",
+          "visual_available": true,
+          "keywords": ["selection sort", "minimum", "swap", "round 1"],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Selection Sort - ตัวอย่างที่ 8.1 รอบที่ 1: เลือกค่าน้อยสุด 10 แล้วสลับกับ 20",
+              "visual_topic": "Selection Sort",
+              "visual_role": "worked_example_step",
+              "visual_step": 1,
+              "visual_detail": "ค้นค่าต่ำสุดใน A[1..5] ได้ 10 ที่ A[3] แล้ว swap กับ A[1]",
+              "clip": [120, 560, 520, 665]
+            }
+          ]
+        },
+        "5": {
+          "section": "selection_sort",
+          "subtopic": "Selection Sort worked example, rounds 2-4",
+          "curriculum_status": "primary",
+          "content_types": ["trace", "worked_example"],
+          "visual_mode": "trace_crop",
+          "visual_available": true,
+          "keywords": ["selection sort", "minimum", "swap", "round 2", "round 3", "round 4"],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Selection Sort - ตัวอย่างที่ 8.1 รอบที่ 2: เลือกค่าน้อยสุด 20 แล้วสลับกับ 38",
+              "visual_topic": "Selection Sort",
+              "visual_role": "worked_example_step",
+              "visual_step": 2,
+              "visual_detail": "ค้นค่าต่ำสุดในช่วง A[2..5] ได้ 20 ที่ A[3] แล้ว swap กับ A[2]",
+              "clip": [120, 100, 520, 195]
+            },
+            {
+              "kind": "trace_crop",
+              "label": "Selection Sort - ตัวอย่างที่ 8.1 รอบที่ 3: ค่า 38 อยู่ตำแหน่งถูกต้องจึงไม่สลับ",
+              "visual_topic": "Selection Sort",
+              "visual_role": "worked_example_step",
+              "visual_step": 3,
+              "visual_detail": "ค้นค่าต่ำสุดในช่วง A[3..5] ได้ 38 ที่ A[3] และคงตำแหน่งเดิม",
+              "clip": [120, 245, 520, 330]
+            },
+            {
+              "kind": "trace_crop",
+              "label": "Selection Sort - ตัวอย่างที่ 8.1 รอบที่ 4: เลือก 50 แล้วสลับกับ 70 ได้ผลลัพธ์สุดท้าย",
+              "visual_topic": "Selection Sort",
+              "visual_role": "worked_example_step",
+              "visual_step": 4,
+              "visual_detail": "ค้นค่าต่ำสุดในช่วง A[4..5] ได้ 50 ที่ A[5] แล้ว swap กับ A[4]",
+              "clip": [120, 430, 520, 520]
+            }
+          ]
+        },
+        "6": {
+          "section": "insertion_sort",
+          "subtopic": "Insertion Sort sorted/unsorted partition and worked example setup",
+          "curriculum_status": "primary",
+          "content_types": ["explanation", "figure", "worked_example"],
+          "visual_mode": "figure_crop",
+          "visual_available": true,
+          "keywords": ["insertion sort", "sorted", "unsorted", "insert"],
+          "visuals": [
+            {
+              "kind": "figure_crop",
+              "label": "Insertion Sort - แบ่งอาร์เรย์เป็นส่วน Sorted และ Unsorted ก่อนแทรก A[i]",
+              "visual_topic": "Insertion Sort",
+              "visual_role": "concept_partition",
+              "visual_detail": "รูปที่ 8.2 แสดงขอบเขต j ของส่วนที่เรียงแล้วและ i ของข้อมูลที่ยังไม่เรียง"
+            }
+          ]
+        },
+        "7": {
+          "section": "insertion_sort",
+          "subtopic": "Insertion Sort worked example, rounds 1-4",
+          "curriculum_status": "primary",
+          "content_types": ["trace", "worked_example"],
+          "visual_mode": "trace_crop",
+          "visual_available": true,
+          "keywords": ["insertion sort", "insert", "round 1", "round 2", "round 3", "round 4"],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Insertion Sort - ตัวอย่างที่ 8.2 รอบที่ 1: แทรก 38 ก่อน 40",
+              "visual_topic": "Insertion Sort",
+              "visual_role": "worked_example_step",
+              "visual_step": 1,
+              "visual_detail": "เมื่อ i=2 ค่า 38 น้อยกว่า 40 จึงแทรกไว้ที่ A[1]"
+            },
+            {
+              "kind": "trace_crop",
+              "label": "Insertion Sort - ตัวอย่างที่ 8.2 รอบที่ 2: แทรก 33 หน้า 38 และ 40",
+              "visual_topic": "Insertion Sort",
+              "visual_role": "worked_example_step",
+              "visual_step": 2,
+              "visual_detail": "เมื่อ i=3 ค่า 33 ถูกแทรกไว้หน้าส่วน Sorted เดิม"
+            },
+            {
+              "kind": "trace_crop",
+              "label": "Insertion Sort - ตัวอย่างที่ 8.2 รอบที่ 3: 74 อยู่ถูกตำแหน่งจึงไม่แทรก",
+              "visual_topic": "Insertion Sort",
+              "visual_role": "worked_example_step",
+              "visual_step": 3,
+              "visual_detail": "เมื่อ i=4 ค่า 74 มากกว่าค่าก่อนหน้า จึงคงตำแหน่งเดิม"
+            }
+          ]
+        },
+        "8": {
+          "section": "bubble_insertion",
+          "subtopic": "Insertion Sort final round and Bubble Sort introduction",
+          "curriculum_status": "mixed",
+          "content_types": ["trace", "explanation"],
+          "visual_mode": "trace_crop",
+          "visual_available": true,
+          "keywords": ["insertion sort", "bubble sort", "round 4", "round n-1"],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Insertion Sort - ตัวอย่างที่ 8.2 รอบที่ 4: แทรก 65 ระหว่าง 40 กับ 74 ได้ชุดเรียงสมบูรณ์",
+              "visual_topic": "Insertion Sort",
+              "visual_role": "worked_example_step",
+              "visual_step": 4,
+              "visual_detail": "รอบสุดท้ายเมื่อ i=5 แทรก 65 ที่ A[4] และได้ 33, 38, 40, 65, 74"
+            }
+          ]
+        },
+        "9": {
+          "section": "bubble_sort",
+          "subtopic": "Bubble Sort worked example 8.3, rounds 1-2",
+          "curriculum_status": "primary",
+          "content_types": ["trace", "worked_example"],
+          "visual_mode": "trace_crop",
+          "visual_available": true,
+          "keywords": ["bubble sort", "adjacent comparison", "round 1", "round 2"],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Bubble Sort - ตัวอย่างที่ 8.3 รอบที่ 1: เปรียบเทียบจากท้ายขึ้นบนให้ 4 ลอยไปตำแหน่งแรก",
+              "visual_topic": "Bubble Sort",
+              "visual_role": "worked_example_step",
+              "visual_step": 1,
+              "visual_detail": "เปรียบเทียบคู่ติดกันจาก A[6] ย้อนขึ้นไป และสลับเมื่อ 4 น้อยกว่าค่าข้างหน้า"
+            },
+            {
+              "kind": "trace_crop",
+              "label": "Bubble Sort - ตัวอย่างที่ 8.3 รอบที่ 2: ให้ 7 ลอยไปตำแหน่งที่สอง",
+              "visual_topic": "Bubble Sort",
+              "visual_role": "worked_example_step",
+              "visual_step": 2,
+              "visual_detail": "ไม่เปรียบเทียบตำแหน่งแรกซ้ำ เพราะ 4 อยู่ถูกตำแหน่งแล้ว"
+            }
+          ]
+        },
+        "10": {
+          "section": "bubble_sort",
+          "subtopic": "Bubble Sort worked example 8.3, rounds 3-4",
+          "curriculum_status": "primary",
+          "content_types": ["trace", "worked_example"],
+          "visual_mode": "trace_crop",
+          "visual_available": true,
+          "keywords": ["bubble sort", "round 3", "round 4"],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Bubble Sort - ตัวอย่างที่ 8.3 รอบที่ 3-4: จัด 8 และ 9 เข้าตำแหน่งด้วยการเปรียบเทียบติดกัน",
+              "visual_topic": "Bubble Sort",
+              "visual_role": "worked_example_steps",
+              "visual_steps": [3, 4],
+              "visual_detail": "ลดช่วงเปรียบเทียบทีละตำแหน่งหลังจากค่าที่จัดแล้วอยู่ท้ายชุด"
+            }
+          ]
+        },
+        "11": {
+          "section": "bubble_sort",
+          "subtopic": "Bubble Sort worked example 8.3, final round",
+          "curriculum_status": "primary",
+          "content_types": ["trace", "worked_example", "conclusion"],
+          "visual_mode": "trace_crop",
+          "visual_available": true,
+          "keywords": ["bubble sort", "round 5", "final result"],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Bubble Sort - ตัวอย่างที่ 8.3 รอบที่ 5: เปรียบเทียบ 10 กับ 15 และได้ผลลัพธ์สุดท้าย",
+              "visual_topic": "Bubble Sort",
+              "visual_role": "worked_example_step",
+              "visual_step": 5,
+              "visual_detail": "รอบสุดท้ายของข้อมูล 6 ค่า ทำให้ได้ 4, 7, 8, 9, 10, 15",
+              "clip": [250, 245, 400, 430]
+            }
+          ]
+        },
+        "12": {
+          "section": "bubble_sort",
+          "subtopic": "Bubble Sort worked example 8.4, rounds 1-2",
+          "curriculum_status": "primary",
+          "content_types": ["trace", "worked_example"],
+          "visual_mode": "trace_crop",
+          "visual_available": true,
+          "keywords": ["bubble sort", "round 1", "round 2", "largest value"],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Bubble Sort - ตัวอย่างที่ 8.4 รอบที่ 1-2: ดันค่ามากสุดไปท้ายอาร์เรย์",
+              "visual_topic": "Bubble Sort",
+              "visual_role": "worked_example_steps",
+              "visual_steps": [1, 2],
+              "visual_detail": "ตัวอย่างนี้เปรียบเทียบจากซ้ายไปขวา ทำให้ 8 แล้ว 7 เคลื่อนไปตำแหน่งท้าย"
+            }
+          ]
+        },
+        "13": {
+          "section": "bubble_sort",
+          "subtopic": "Bubble Sort worked example 8.4, rounds 3-4",
+          "curriculum_status": "primary",
+          "content_types": ["trace", "worked_example", "conclusion"],
+          "visual_mode": "trace_crop",
+          "visual_available": true,
+          "keywords": ["bubble sort", "round 3", "round 4", "final result"],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Bubble Sort - ตัวอย่างที่ 8.4 รอบที่ 3-4: ปิดท้ายด้วย 3, 5, 6, 7, 8",
+              "visual_topic": "Bubble Sort",
+              "visual_role": "worked_example_steps",
+              "visual_steps": [3, 4],
+              "visual_detail": "ลดจำนวนคู่ที่ต้องเปรียบเทียบในแต่ละรอบจนได้อาร์เรย์เรียงจากน้อยไปมาก"
+            }
+          ]
+        },
+        "14": {
+          "section": "shell_sort",
+          "subtopic": "Shell Sort idea and gap D",
+          "curriculum_status": "reference_only",
+          "content_types": ["explanation", "trace"],
+          "visual_mode": "internal_only",
+          "visual_available": true,
+          "keywords": ["shell sort", "gap", "D"]
+        },
+        "15": {
+          "section": "shell_sort",
+          "subtopic": "Shell Sort gap D=5 comparisons",
+          "curriculum_status": "reference_only",
+          "content_types": ["trace"],
+          "visual_mode": "internal_only",
+          "visual_available": true,
+          "keywords": ["shell sort", "gap", "D=5"]
+        },
+        "16": {
+          "section": "shell_sort",
+          "subtopic": "Shell Sort gap D=2 and D=1",
+          "curriculum_status": "reference_only",
+          "content_types": ["trace"],
+          "visual_mode": "internal_only",
+          "visual_available": true,
+          "keywords": ["shell sort", "gap", "D=2", "D=1"]
+        },
+        "17": {
+          "section": "quick_sort",
+          "subtopic": "Quick Sort pivot and pointer rules",
+          "curriculum_status": "reference_only",
+          "content_types": ["explanation"],
+          "visual_mode": "internal_only",
+          "visual_available": true,
+          "keywords": ["quick sort", "pivot", "F", "R"]
+        },
+        "18": {
+          "section": "quick_sort",
+          "subtopic": "Quick Sort first partition trace",
+          "curriculum_status": "reference_only",
+          "content_types": ["trace"],
+          "visual_mode": "internal_only",
+          "visual_available": true,
+          "keywords": ["quick sort", "partition", "pivot", "F", "R"]
+        },
+        "19": {
+          "section": "quick_sort",
+          "subtopic": "Quick Sort recursive partitions",
+          "curriculum_status": "reference_only",
+          "content_types": ["trace"],
+          "visual_mode": "internal_only",
+          "visual_available": true,
+          "keywords": ["quick sort", "partition", "pivot"]
+        },
+        "20": {
+          "section": "quick_sort",
+          "subtopic": "Quick Sort partition with key 3 and 27",
+          "curriculum_status": "reference_only",
+          "content_types": ["trace"],
+          "visual_mode": "internal_only",
+          "visual_available": true,
+          "keywords": ["quick sort", "partition", "pivot"]
+        },
+        "21": {
+          "section": "quick_sort",
+          "subtopic": "Quick Sort partition with key 94 and 36",
+          "curriculum_status": "reference_only",
+          "content_types": ["trace"],
+          "visual_mode": "internal_only",
+          "visual_available": true,
+          "keywords": ["quick sort", "partition", "pivot"]
+        },
+        "22": {
+          "section": "quick_sort",
+          "subtopic": "Quick Sort partition with key 63",
+          "curriculum_status": "reference_only",
+          "content_types": ["trace"],
+          "visual_mode": "internal_only",
+          "visual_available": true,
+          "keywords": ["quick sort", "partition", "pivot"]
+        },
+        "23": {
+          "section": "merge_sort",
+          "subtopic": "Merge Sort concept and merge operation",
+          "curriculum_status": "primary",
+          "content_types": ["explanation", "trace", "worked_example"],
+          "visual_mode": "trace_crop",
+          "visual_available": true,
+          "keywords": ["merge sort", "merge", "ประสาน"],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Merge Sort - แนวคิดการนำกลุ่มข้อมูลที่เรียงแล้วมาประสานเป็นชุดเดียว",
+              "visual_topic": "Merge Sort",
+              "visual_role": "concept_merge",
+              "visual_detail": "เริ่มจากกลุ่มย่อยที่เรียงแล้ว แล้วรวมให้เป็นกลุ่มใหญ่ขึ้น"
+            }
+          ]
+        },
+        "24": {
+          "section": "merge_sort",
+          "subtopic": "Merge Sort worked example, pair and group merges",
+          "curriculum_status": "primary",
+          "content_types": ["trace", "worked_example"],
+          "visual_mode": "trace_crop",
+          "visual_available": true,
+          "keywords": ["merge sort", "merge", "worked example", "pair"],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Merge Sort - ตัวอย่างที่ 8.7 ขั้นที่ 1: จับคู่ข้อมูลและเรียงภายในคู่",
+              "visual_topic": "Merge Sort",
+              "visual_role": "worked_example_step",
+              "visual_step": 1,
+              "visual_detail": "จัดคู่ 30/15, 47/25, 56/85, 75/63 และ 55/80 ให้เรียงภายในคู่"
+            },
+            {
+              "kind": "trace_crop",
+              "label": "Merge Sort - ตัวอย่างที่ 8.7 ขั้นที่ 2: รวมคู่ใกล้เคียงเป็นกลุ่มใหญ่",
+              "visual_topic": "Merge Sort",
+              "visual_role": "worked_example_step",
+              "visual_step": 2,
+              "visual_detail": "ประสานกลุ่มที่เรียงแล้วสองกลุ่มให้เป็นชุดที่มีสมาชิกมากขึ้น"
+            },
+            {
+              "kind": "trace_crop",
+              "label": "Merge Sort - ตัวอย่างที่ 8.7 ขั้นที่ 3: รวมกลุ่มจนเหลือชุดเดียว",
+              "visual_topic": "Merge Sort",
+              "visual_role": "worked_example_step",
+              "visual_step": 3,
+              "visual_detail": "รวมกลุ่มที่เหลือและรักษาลำดับจากน้อยไปมากก่อนเข้าสู่ขั้นสุดท้าย"
+            }
+          ]
+        },
+        "25": {
+          "section": "merge_sort",
+          "subtopic": "Merge Sort final merge result",
+          "curriculum_status": "primary",
+          "content_types": ["trace", "worked_example", "conclusion"],
+          "visual_mode": "trace_crop",
+          "visual_available": true,
+          "keywords": ["merge sort", "final merge", "sorted result"],
+          "visuals": [
+            {
+              "kind": "trace_crop",
+              "label": "Merge Sort - ตัวอย่างที่ 8.7 ขั้นสุดท้าย: เหลือกลุ่มเดียวและเรียงสมบูรณ์",
+              "visual_topic": "Merge Sort",
+              "visual_role": "worked_example_final",
+              "visual_step": 4,
+              "visual_detail": "ผลลัพธ์สุดท้ายคือ 15, 25, 30, 47, 50, 55, 63, 75, 80, 85"
+            }
+          ]
+        },
+        "26": {
+          "section": "exercises",
+          "subtopic": "Unit 8 exercises covering primary and reference algorithms",
+          "curriculum_status": "mixed",
+          "content_types": ["exercise"],
+          "visual_mode": "none",
+          "visual_available": false,
+          "keywords": ["exercise", "แบบฝึกหัด"]
+        },
+        "27": {
+          "section": "exercises",
+          "subtopic": "Unit 8 true/false and algorithm exercises",
+          "curriculum_status": "mixed",
+          "content_types": ["exercise"],
+          "visual_mode": "none",
+          "visual_available": false,
+          "keywords": ["exercise", "แบบฝึกหัด"]
+        },
+        "28": {
+          "section": "activities",
+          "subtopic": "Group activity covering six sorting methods",
+          "curriculum_status": "mixed",
+          "content_types": ["activity"],
+          "visual_mode": "none",
+          "visual_available": false,
+          "keywords": ["activity", "กิจกรรม", "presentation"]
+        },
+        "29": {
+          "section": "activities",
+          "subtopic": "Unit 8 activity continuation",
+          "curriculum_status": "mixed",
+          "content_types": ["activity"],
+          "visual_mode": "none",
+          "visual_available": false,
+          "keywords": ["activity", "กิจกรรม"]
+        }
+      }
+    },
+    "Counting_sort.pages": {
+      "sha256": "d6010def734fe0998e3d7335cb6de85214353ad78f74cc92886fe61a56f35057",
+      "language": "th",
+      "physical_pages": 3,
+      "source_kind": "pages_archive",
+      "source_quality": "local_provided",
+      "source_origin": "Apple Pages document supplied in real_data",
+      "approved_for_text": true,
+      "pages": {
+        "1": {
+          "section": "counting_sort",
+          "subtopic": "Counting Sort definition, pseudocode, and worked example",
+          "curriculum_status": "primary",
+          "content_types": ["text", "pseudocode", "worked_example"],
+          "visual_mode": "embedded_then_render",
+          "keywords": ["counting sort", "การเรียงลำดับโดยใช้การนับ", "count array"],
+          "visuals": [
+            {
+              "kind": "embedded_image",
+              "label": "Counting Sort - แผนภาพการนับและการสร้างผลลัพธ์",
+              "visual_topic": "Counting Sort",
+              "visual_role": "worked_example",
+              "visual_detail": "ภาพหลักจากไฟล์ Pages แสดง A, C และการวางค่าลง B",
+              "user_visible": true
+            }
+          ]
+        },
+        "2": {
+          "section": "radix_sort",
+          "subtopic": "Radix Sort and stable sorting",
+          "curriculum_status": "reference_only",
+          "content_types": ["text", "pseudocode", "worked_example"],
+          "visual_mode": "internal_only",
+          "keywords": ["radix sort", "stable sort"]
+        },
+        "3": {
+          "section": "bucket_sort",
+          "subtopic": "Bucket Sort",
+          "curriculum_status": "reference_only",
+          "content_types": ["text", "pseudocode"],
+          "visual_mode": "none",
+          "keywords": ["bucket sort", "bucket"]
+        }
+      }
+    },
+    "Selection Sort - GeeksforGeeks.pdf": {
+      "sha256": "e55b6667fb70848345abb07501843f56a2b8261d3c74372d18a7a814d54c0240",
+      "language": "en",
+      "physical_pages": 5,
+      "source_kind": "web_capture",
+      "source_quality": "web_capture_with_branding",
+      "source_origin": "Local GeeksforGeeks capture supplied in real_data",
+      "approved_for_text": true,
+      "pages": {
+        "1": {"section": "selection_sort", "subtopic": "Selection Sort definition and algorithm", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["selection sort"]},
+        "2": {"section": "selection_sort", "subtopic": "Selection Sort implementation", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["selection sort", "code"]},
+        "3": {"section": "selection_sort", "subtopic": "Selection Sort output and complexity", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["selection sort", "complexity"]},
+        "4": {"section": "selection_sort", "subtopic": "Selection Sort questions and properties", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["selection sort", "stable"]},
+        "5": {"section": "reference", "subtopic": "Web page navigation and footer", "curriculum_status": "reference_only", "visual_mode": "none", "keywords": ["reference"]}
+      }
+    },
+    "cormen-insertion-sort.pdf": {
+      "sha256": "bf7717f77146db1baebe91f977b507f57e1d39ebf69563020d8972e3305bf9b2",
+      "language": "en",
+      "physical_pages": 7,
+      "source_kind": "book_excerpt",
+      "source_quality": "clean_diagram",
+      "source_origin": "Local insertion-sort textbook excerpt supplied in real_data",
+      "approved_for_text": true,
+      "pages": {
+        "1": {"section": "fundamentals", "subtopic": "Algorithm design introduction", "curriculum_status": "primary", "visual_mode": "none", "keywords": ["algorithm", "sorting"]},
+        "2": {
+          "section": "insertion_sort",
+          "subtopic": "Insertion Sort card-sorting concept",
+          "curriculum_status": "primary",
+          "content_types": ["explanation", "figure"],
+          "visual_mode": "figure_crop",
+          "keywords": ["insertion sort", "cards"],
+          "visuals": [
+            {
+              "kind": "figure_crop",
+              "label": "Insertion Sort - แนวคิดการเรียงไพ่ในมือ",
+              "visual_topic": "Insertion Sort",
+              "visual_role": "concept_analogy",
+              "visual_detail": "ภาพ Figure 2.1 แสดงการหยิบไพ่ทีละใบแล้วแทรกในส่วนที่เรียงแล้ว",
+              "clip": [140, 65, 350, 250],
+              "user_visible": true
+            }
+          ]
+        },
+        "3": {
+          "section": "insertion_sort",
+          "subtopic": "Insertion Sort array trace and pseudocode",
+          "curriculum_status": "primary",
+          "content_types": ["trace", "pseudocode", "figure"],
+          "visual_mode": "figure_crop",
+          "keywords": ["insertion sort", "trace", "pseudocode"],
+          "visuals": [
+            {
+              "kind": "figure_crop",
+              "label": "Insertion Sort - trace A = [5, 2, 4, 6, 1, 3] ทีละขั้น",
+              "visual_topic": "Insertion Sort",
+              "visual_role": "worked_example_trace",
+              "visual_detail": "ภาพ Figure 2.2 แสดงการเลื่อนค่าและแทรก key ในแต่ละรอบ",
+              "clip": [130, 58, 500, 250],
+              "user_visible": true
+            }
+          ]
+        },
+        "4": {"section": "insertion_sort", "subtopic": "Insertion Sort loop invariant", "curriculum_status": "primary", "visual_mode": "none", "keywords": ["insertion sort", "loop invariant"]},
+        "5": {"section": "insertion_sort", "subtopic": "Insertion Sort correctness", "curriculum_status": "primary", "visual_mode": "none", "keywords": ["insertion sort", "correctness"]},
+        "6": {"section": "insertion_sort", "subtopic": "Insertion Sort pseudocode conventions", "curriculum_status": "primary", "visual_mode": "none", "keywords": ["insertion sort", "pseudocode"]},
+        "7": {"section": "insertion_sort", "subtopic": "Insertion Sort implementation details", "curriculum_status": "primary", "visual_mode": "none", "keywords": ["insertion sort", "implementation"]}
+      }
+    },
+    "counting sort.pdf": {
+      "sha256": "827ce8660b6269c6037c6acb7ba0c3d087fc390e81ce55fedae50471db7783d0",
+      "language": "en",
+      "physical_pages": 6,
+      "source_kind": "lecture_notes",
+      "source_quality": "clean_diagram",
+      "source_origin": "Local MIT 6.006 recitation PDF supplied in real_data",
+      "approved_for_text": true,
+      "pages": {
+        "1": {
+          "section": "counting_sort",
+          "subtopic": "Counting Sort count array and cumulative counts",
+          "curriculum_status": "primary",
+          "content_types": ["explanation", "figure"],
+          "visual_mode": "embedded_image",
+          "keywords": ["counting sort", "count array", "cumulative count"],
+          "visuals": [
+            {"kind": "embedded_image", "label": "Counting Sort - สร้าง count array C จากข้อมูล A", "visual_topic": "Counting Sort", "visual_role": "count_array", "visual_detail": "นับจำนวนการปรากฏของแต่ละค่าใน input", "user_visible": true},
+            {"kind": "embedded_image", "label": "Counting Sort - เปลี่ยน C เป็น cumulative count C'", "visual_topic": "Counting Sort", "visual_role": "cumulative_count", "visual_detail": "ใช้จำนวนค่าที่น้อยกว่าหรือเท่ากับ x เพื่อหาตำแหน่งในผลลัพธ์", "user_visible": true}
+          ]
+        },
+        "2": {
+          "section": "counting_sort",
+          "subtopic": "Stable Counting Sort output placement",
+          "curriculum_status": "mixed",
+          "content_types": ["explanation", "figure"],
+          "visual_mode": "embedded_image",
+          "keywords": ["counting sort", "stable", "output"],
+          "visuals": [
+            {"kind": "embedded_image", "label": "Counting Sort - วางสมาชิกลง B แบบ stable", "visual_topic": "Counting Sort", "visual_role": "stable_output", "visual_detail": "เดินข้อมูลย้อนกลับและลดค่า C เพื่อรักษาลำดับของข้อมูลที่เท่ากัน", "curriculum_status": "primary", "user_visible": true}
+          ]
+        },
+        "3": {"section": "radix_sort", "subtopic": "Radix Sort by digit", "curriculum_status": "reference_only", "visual_mode": "internal_only", "keywords": ["radix sort", "digit"]},
+        "4": {"section": "reference", "subtopic": "Graph basics outside sorting curriculum", "curriculum_status": "reference_only", "visual_mode": "none", "keywords": ["graph"]},
+        "5": {"section": "reference", "subtopic": "Incidence list outside sorting curriculum", "curriculum_status": "reference_only", "visual_mode": "none", "keywords": ["graph", "incidence list"]},
+        "6": {"section": "reference", "subtopic": "Graph operations outside sorting curriculum", "curriculum_status": "reference_only", "visual_mode": "none", "keywords": ["graph"]}
+      }
+    },
+    "insertion_sort_algorithm.pdf": {
+      "sha256": "37de351c610739d80572cce4cb9a66826de08e97162beb635feff3e02094cd43",
+      "language": "en",
+      "physical_pages": 3,
+      "source_kind": "web_capture",
+      "source_quality": "web_capture_with_branding",
+      "source_origin": "Local Tutorialspoint insertion-sort capture supplied in real_data",
+      "approved_for_text": true,
+      "pages": {
+        "1": {"section": "insertion_sort", "subtopic": "Insertion Sort visual walkthrough", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["insertion sort"]},
+        "2": {"section": "insertion_sort", "subtopic": "Insertion Sort algorithm and pseudocode", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["insertion sort", "pseudocode"]},
+        "3": {"section": "insertion_sort", "subtopic": "Insertion Sort implementation", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["insertion sort", "implementation"]}
+      }
+    },
+    "lecs105.pdf": {
+      "sha256": "fc16365476231ac1635a7e22b065eddba93e6350952a02a3a38ba07c9ff8679e",
+      "language": "en",
+      "physical_pages": 14,
+      "source_kind": "textbook_excerpt",
+      "source_quality": "watermarked_textbook",
+      "source_origin": "Local Class XII sorting chapter supplied in real_data",
+      "approved_for_text": true,
+      "pages": {
+        "1": {"section": "overview", "subtopic": "Sorting chapter overview", "curriculum_status": "primary", "visual_mode": "none", "keywords": ["sorting"]},
+        "2": {"section": "overview", "subtopic": "Sorting motivation and examples", "curriculum_status": "primary", "visual_mode": "none", "keywords": ["sorting"]},
+        "3": {"section": "bubble_sort", "subtopic": "Bubble Sort comparisons in passes", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["bubble sort", "pass", "swap"]},
+        "4": {"section": "bubble_sort", "subtopic": "Bubble Sort algorithm and Python implementation", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["bubble sort", "code"]},
+        "5": {"section": "selection_sort", "subtopic": "Selection Sort introduction", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["selection sort"]},
+        "6": {"section": "selection_sort", "subtopic": "Selection Sort comparisons in passes", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["selection sort", "pass"]},
+        "7": {"section": "selection_sort", "subtopic": "Selection Sort algorithm and properties", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["selection sort", "algorithm"]},
+        "8": {"section": "insertion_sort", "subtopic": "Insertion Sort introduction", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["insertion sort"]},
+        "9": {"section": "insertion_sort", "subtopic": "Insertion Sort comparisons and shifts", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["insertion sort", "pass"]},
+        "10": {"section": "insertion_sort", "subtopic": "Insertion Sort worked exercise", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["insertion sort", "exercise"]},
+        "11": {"section": "insertion_sort", "subtopic": "Insertion Sort Python implementation", "curriculum_status": "primary", "visual_mode": "none", "keywords": ["insertion sort", "code"]},
+        "12": {"section": "fundamentals", "subtopic": "Time complexity of the three primary elementary sorts", "curriculum_status": "primary", "visual_mode": "none", "keywords": ["complexity", "bubble sort", "selection sort", "insertion sort"]},
+        "13": {"section": "exercises", "subtopic": "Sorting exercises", "curriculum_status": "primary", "visual_mode": "none", "keywords": ["exercise", "bubble sort", "selection sort", "insertion sort"]},
+        "14": {"section": "exercises", "subtopic": "Sorting exercises continuation", "curriculum_status": "primary", "visual_mode": "none", "keywords": ["exercise", "sorting"]}
+      }
+    },
+    "rohini_37999080689.pdf": {
+      "sha256": "beab3528f883774de77bbf830ce6a6da78c8a9c2e1dc376d6641f3c6db8904a9",
+      "language": "en",
+      "physical_pages": 4,
+      "source_kind": "lecture_notes",
+      "source_quality": "watermarked_lecture_notes",
+      "source_origin": "Local insertion-sort notes supplied in real_data",
+      "approved_for_text": true,
+      "pages": {
+        "1": {"section": "insertion_sort", "subtopic": "Insertion Sort concept and example", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["insertion sort"]},
+        "2": {"section": "insertion_sort", "subtopic": "Insertion Sort worked example", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["insertion sort", "example"]},
+        "3": {"section": "insertion_sort", "subtopic": "Insertion Sort algorithm", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["insertion sort", "algorithm"]},
+        "4": {"section": "insertion_sort", "subtopic": "Insertion Sort C implementation", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["insertion sort", "code"]}
+      }
+    },
+    "selection_sort_algorithm.pdf": {
+      "sha256": "670db01892788c77c478c7fe0d18ce31631fec3ad0a5059eef74cf99c46ff6d4",
+      "language": "en",
+      "physical_pages": 3,
+      "source_kind": "web_capture",
+      "source_quality": "web_capture_with_branding",
+      "source_origin": "Local Tutorialspoint selection-sort capture supplied in real_data",
+      "approved_for_text": true,
+      "pages": {
+        "1": {"section": "selection_sort", "subtopic": "Selection Sort visual walkthrough", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["selection sort"]},
+        "2": {"section": "selection_sort", "subtopic": "Selection Sort algorithm and pseudocode", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["selection sort", "pseudocode"]},
+        "3": {"section": "selection_sort", "subtopic": "Selection Sort implementation", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["selection sort", "implementation"]}
+      }
+    },
+    "การเรียงลำดับแบบเลือก selection.pdf": {
+      "sha256": "0dd5978ca2d6ed63c1f5c90d4977ead7211a375abfb296fc685994190e7652ca",
+      "language": "en-th",
+      "physical_pages": 18,
+      "source_kind": "mixed_local_reference",
+      "source_quality": "clean_diagram_and_thai_explanation",
+      "source_origin": "Local bilingual Selection Sort document supplied in real_data",
+      "approved_for_text": true,
+      "pages": {
+        "1": {
+          "section": "selection_sort",
+          "subtopic": "Selection Sort visual steps 1-2",
+          "curriculum_status": "primary",
+          "content_types": ["figure", "worked_example"],
+          "visual_mode": "embedded_image",
+          "keywords": ["selection sort", "step", "minimum", "swap"],
+          "visuals": [
+            {"kind": "embedded_image", "label": "Selection Sort - Step 1: เลือกค่าน้อยสุดแล้ว swap กับสมาชิกแรก", "visual_topic": "Selection Sort", "visual_role": "worked_example_step", "visual_step": 1, "visual_detail": "หา minimum ในส่วนที่ยังไม่เรียงแล้วสลับกับสมาชิกตำแหน่งแรก", "user_visible": true},
+            {"kind": "embedded_image", "label": "Selection Sort - Step 2: เลื่อนขอบเขตส่วนที่เรียงแล้ว", "visual_topic": "Selection Sort", "visual_role": "worked_example_step", "visual_step": 2, "visual_detail": "คงสมาชิกที่เรียงแล้วไว้และหา minimum ใน unsorted subarray ถัดไป", "user_visible": true}
+          ]
+        },
+        "2": {
+          "section": "selection_sort",
+          "subtopic": "Selection Sort visual steps 3-4",
+          "curriculum_status": "primary",
+          "content_types": ["figure", "worked_example"],
+          "visual_mode": "embedded_image",
+          "keywords": ["selection sort", "step", "minimum", "swap"],
+          "visuals": [
+            {"kind": "embedded_image", "label": "Selection Sort - Step 3: วาง minimum ของช่วงที่เหลือ", "visual_topic": "Selection Sort", "visual_role": "worked_example_step", "visual_step": 3, "visual_detail": "เลือกค่าต่ำสุดจากช่วงที่ยังไม่เรียงและวางในตำแหน่งถัดไป", "user_visible": true},
+            {"kind": "embedded_image", "label": "Selection Sort - Step 4: ทำซ้ำจนส่วนท้ายเรียงแล้ว", "visual_topic": "Selection Sort", "visual_role": "worked_example_step", "visual_step": 4, "visual_detail": "สลับค่าที่เลือกได้และขยาย sorted prefix", "user_visible": true}
+          ]
+        },
+        "3": {
+          "section": "selection_sort",
+          "subtopic": "Selection Sort visual steps 5-6",
+          "curriculum_status": "primary",
+          "content_types": ["figure", "worked_example"],
+          "visual_mode": "embedded_image",
+          "keywords": ["selection sort", "step", "minimum", "swap"],
+          "visuals": [
+            {"kind": "embedded_image", "label": "Selection Sort - Step 5: ตรวจช่วงท้ายของอาร์เรย์", "visual_topic": "Selection Sort", "visual_role": "worked_example_step", "visual_step": 5, "visual_detail": "เปรียบเทียบค่าที่เหลือและเลือก minimum ของรอบถัดไป", "user_visible": true},
+            {"kind": "embedded_image", "label": "Selection Sort - Step 6: ได้อาร์เรย์เรียงสมบูรณ์", "visual_topic": "Selection Sort", "visual_role": "worked_example_final", "visual_step": 6, "visual_detail": "ทุกสมาชิกอยู่ในตำแหน่งที่เรียงจากน้อยไปมาก", "user_visible": true}
+          ]
+        },
+        "4": {"section": "selection_sort", "subtopic": "Selection Sort definition and properties", "curriculum_status": "primary", "visual_mode": "none", "keywords": ["selection sort", "definition"]},
+        "5": {"section": "selection_sort", "subtopic": "Selection Sort C++ implementation", "curriculum_status": "primary", "visual_mode": "none", "keywords": ["selection sort", "code"]},
+        "6": {"section": "selection_sort", "subtopic": "Selection Sort stability and applications", "curriculum_status": "primary", "visual_mode": "none", "keywords": ["selection sort", "stability", "application"]},
+        "7": {
+          "section": "selection_sort",
+          "subtopic": "Selection Sort minimum-search concept",
+          "curriculum_status": "primary",
+          "visual_mode": "figure_crop",
+          "keywords": ["selection sort", "minimum", "unsorted list"],
+          "visuals": [
+            {"kind": "figure_crop", "label": "Selection Sort - เริ่มจากกำหนดสมาชิกแรกเป็น minimum", "visual_topic": "Selection Sort", "visual_role": "concept_minimum", "visual_detail": "ภาพอธิบายการกำหนดค่าต่ำสุดและเปรียบเทียบกับสมาชิกถัดไป", "clip": [65, 270, 555, 590], "user_visible": true}
+          ]
+        },
+        "8": {
+          "section": "selection_sort",
+          "subtopic": "Selection Sort compare and swap concept",
+          "curriculum_status": "primary",
+          "visual_mode": "figure_crop",
+          "keywords": ["selection sort", "compare", "swap"],
+          "visuals": [
+            {"kind": "figure_crop", "label": "Selection Sort - เปรียบเทียบ minimum กับสมาชิกที่เหลือ", "visual_topic": "Selection Sort", "visual_role": "concept_compare", "visual_detail": "ภาพแสดงการเปรียบเทียบสมาชิกในช่วงที่ยังไม่เรียง", "clip": [85, 55, 535, 370], "user_visible": true},
+            {"kind": "figure_crop", "label": "Selection Sort - นำ minimum ไปไว้ด้านหน้าโดยการ swap", "visual_topic": "Selection Sort", "visual_role": "concept_swap", "visual_detail": "ภาพแสดงการนำ minimum ไปไว้หน้าส่วน unsorted หลังจบรอบ", "clip": [70, 350, 550, 650], "user_visible": true}
+          ]
+        },
+        "9": {
+          "section": "selection_sort",
+          "subtopic": "Selection Sort first iteration trace",
+          "curriculum_status": "primary",
+          "visual_mode": "trace_crop",
+          "keywords": ["selection sort", "step", "iteration"],
+          "visuals": [
+            {"kind": "trace_crop", "label": "Selection Sort - trace รอบที่ 1: หา minimum และ swap", "visual_topic": "Selection Sort", "visual_role": "worked_example_iteration", "visual_step": 1, "visual_detail": "แสดงการเปรียบเทียบใน step=0 และการสลับค่า 2 ไปตำแหน่งแรก", "clip": [95, 60, 560, 590], "user_visible": true}
+          ]
+        },
+        "10": {
+          "section": "selection_sort",
+          "subtopic": "Selection Sort second iteration trace",
+          "curriculum_status": "primary",
+          "visual_mode": "trace_crop",
+          "keywords": ["selection sort", "step", "iteration"],
+          "visuals": [
+            {"kind": "trace_crop", "label": "Selection Sort - trace รอบที่ 2: ขยาย sorted prefix", "visual_topic": "Selection Sort", "visual_role": "worked_example_iteration", "visual_step": 2, "visual_detail": "แสดงการหา minimum ในช่วงที่เหลือและวางค่า 10 ในตำแหน่งถัดไป", "clip": [95, 60, 560, 510], "user_visible": true}
+          ]
+        },
+        "11": {
+          "section": "selection_sort",
+          "subtopic": "Selection Sort third iteration trace",
+          "curriculum_status": "primary",
+          "visual_mode": "trace_crop",
+          "keywords": ["selection sort", "step", "iteration"],
+          "visuals": [
+            {"kind": "trace_crop", "label": "Selection Sort - trace รอบที่ 3: ตรวจค่าที่อยู่ถูกตำแหน่งแล้ว", "visual_topic": "Selection Sort", "visual_role": "worked_example_iteration", "visual_step": 3, "visual_detail": "เมื่อ minimum อยู่ตำแหน่งเดิม ไม่ต้อง swap", "clip": [95, 60, 560, 435], "user_visible": true}
+          ]
+        },
+        "12": {
+          "section": "selection_sort",
+          "subtopic": "Selection Sort final iteration and pseudocode",
+          "curriculum_status": "primary",
+          "content_types": ["trace", "pseudocode"],
+          "visual_mode": "trace_crop",
+          "keywords": ["selection sort", "step", "pseudocode"],
+          "visuals": [
+            {"kind": "trace_crop", "label": "Selection Sort - trace รอบสุดท้ายและ pseudocode", "visual_topic": "Selection Sort", "visual_role": "worked_example_final", "visual_step": 4, "visual_detail": "ปิดท้ายการเรียงและเชื่อมโยงกับ pseudocode ของอัลกอริทึม", "clip": [95, 60, 560, 355], "user_visible": true}
+          ]
+        },
+        "13": {"section": "selection_sort", "subtopic": "Selection Sort code in Python, Java, C, and C++", "curriculum_status": "primary", "visual_mode": "none", "keywords": ["selection sort", "code"]},
+        "14": {"section": "fundamentals", "subtopic": "Selection Sort time, space, and stability", "curriculum_status": "primary", "visual_mode": "none", "keywords": ["selection sort", "complexity", "stability"]},
+        "15": {"section": "fundamentals", "subtopic": "Selection Sort complexity and applications", "curriculum_status": "primary", "visual_mode": "none", "keywords": ["selection sort", "complexity", "application"]},
+        "16": {"section": "selection_sort", "subtopic": "Selection Sort Thai explanation and C# code", "curriculum_status": "primary", "visual_mode": "none", "keywords": ["selection sort", "การเรียงลำดับแบบเลือก"]},
+        "17": {"section": "selection_sort", "subtopic": "Selection Sort Thai complexity, advantages, and disadvantages", "curriculum_status": "primary", "visual_mode": "none", "keywords": ["selection sort", "complexity"]},
+        "18": {"section": "selection_sort", "subtopic": "Selection Sort Thai summary", "curriculum_status": "primary", "visual_mode": "none", "keywords": ["selection sort", "สรุป"]}
       }
     }
   }

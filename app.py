@@ -5,14 +5,20 @@ from uuid import uuid4
 import streamlit as st
 from dotenv import load_dotenv
 
+from prompt import resolve_response_language, response_language_options
 from rag.bootstrap import build_rag_service
 from rag.config import Settings
+from rag.visuals import (
+    compact_image_caption,
+    image_message_payload,
+    image_preview_groups,
+)
 from ui import inject_theme, render_hero, render_welcome_panel
 
 
 load_dotenv()
 page_settings = Settings.from_env()
-APP_CACHE_VERSION = "2026-09-22-format-visual-v6"
+APP_CACHE_VERSION = "2026-09-27-language-control-v3"
 
 st.set_page_config(
     page_title=f"{page_settings.course_title} · AI Tutor",
@@ -107,6 +113,41 @@ def render_sources(sources: list[dict[str, object]]) -> None:
             preview = str(item.get("preview", "")).strip()
             if preview:
                 st.caption(preview)
+
+
+def render_message_images(
+    images: list[dict[str, object]],
+    *,
+    visual_request: bool,
+) -> None:
+    if not images:
+        return
+
+    def render_items() -> None:
+        index = 0
+        for group in image_preview_groups(images, columns=3):
+            columns = st.columns(len(group))
+            for column, image in zip(columns, group):
+                index += 1
+                metadata = image.get("metadata", {})
+                if not isinstance(metadata, dict):
+                    metadata = {}
+                with column:
+                    st.image(image["image_bytes"], width="stretch")
+                    st.caption(
+                        compact_image_caption(
+                            metadata,
+                            page_number=image.get("page_number", ""),
+                            index=index,
+                        )
+                    )
+
+    if visual_request:
+        st.caption("ภาพจากเอกสารฐานความรู้จริง")
+        render_items()
+    else:
+        with st.expander("ภาพประกอบจากเอกสารฐานความรู้"):
+            render_items()
 
 
 @st.cache_resource(show_spinner=False)
@@ -246,6 +287,9 @@ if settings.profile_enabled and service is not None and "profile" not in st.sess
 
 ensure_chat_state(settings)
 
+if "response_language" not in st.session_state:
+    st.session_state["response_language"] = "thai"
+
 student_name = None
 if st.session_state.get("profile"):
     student_name = st.session_state["profile"].get("display_name")
@@ -355,6 +399,10 @@ for message in messages:
         st.markdown(message["content"])
         if role == "assistant":
             render_sources(message.get("sources", []))
+            render_message_images(
+                message.get("images", []),
+                visual_request=bool(message.get("visual_request")),
+            )
 
 
 preset_query = None
@@ -380,6 +428,45 @@ if service is not None and len(messages) <= 1:
 
 
 queued_query = st.session_state.pop("queued_prompt", None)
+language_options = response_language_options()
+language_labels = [label for label, _ in language_options]
+language_by_label = {label: mode for label, mode in language_options}
+current_language = st.session_state.get("response_language", "thai")
+if current_language not in language_by_label.values():
+    current_language = "thai"
+    st.session_state["response_language"] = current_language
+current_language_label = next(
+    (
+        label
+        for label, mode in language_options
+        if mode == current_language
+    ),
+    language_labels[0],
+)
+with st.container(key="language-float", border=False):
+    st.markdown(
+        """
+<div class="language-float-label">
+  <span>🌐 ภาษาคำตอบ</span>
+  <span>Response language</span>
+</div>
+""",
+        unsafe_allow_html=True,
+    )
+    selected_language_label = st.segmented_control(
+        "ภาษาคำตอบ / Response language",
+        options=language_labels,
+        default=current_language_label,
+        key="response_language_control",
+        help="เลือกภาษาไทยหรือภาษาอังกฤษสำหรับคำตอบถัดไป",
+        width="content",
+        label_visibility="collapsed",
+    )
+    if selected_language_label is None:
+        selected_language_label = current_language_label
+    response_language = language_by_label[selected_language_label]
+    st.session_state["response_language"] = response_language
+
 typed_query = st.chat_input(
     f"ถามเกี่ยวกับ {settings.course_title}...",
     disabled=service is None,
@@ -411,6 +498,16 @@ if user_query:
             result = service.retrieve(user_query, history_before)
             answered = service.answerable(result)
             visual_request = service.is_visual_request(user_query)
+            visual_topic = (
+                service.visual_topic(user_query, history_before)
+                if visual_request
+                else None
+            )
+            explicit_visual_topic = (
+                service.topic_from_query(user_query)
+                if visual_request
+                else None
+            )
 
             current_references = list(
                 dict.fromkeys(
@@ -419,7 +516,7 @@ if user_query:
                 )
             )
             previous_references = []
-            if visual_request:
+            if visual_request and explicit_visual_topic is None:
                 for message in reversed(history_before):
                     sources = message.get("sources", [])
                     previous_references = [
@@ -446,7 +543,9 @@ if user_query:
                 images = service.select_user_visible_images(
                     image_candidates,
                     limit=settings.max_images_per_answer,
+                    topic=visual_topic,
                 )
+            image_payload = image_message_payload(images)
 
             render_thinking(
                 thinking_placeholder,
@@ -460,6 +559,7 @@ if user_query:
                     result=result,
                     history=history_before,
                     model_name=settings.generation_model,
+                    language_mode=response_language,
                 )
                 response_text = "".join(stream)
                 thinking_placeholder.empty()
@@ -467,11 +567,18 @@ if user_query:
                 timing["ttft_ms"] = (perf_counter() - request_started) * 1000.0
             elif visual_request:
                 thinking_placeholder.empty()
-                response_text = (
-                    "มีครับ ภาพประกอบจากเอกสารที่เกี่ยวข้องอยู่ด้านล่าง"
-                    if images
-                    else "จากหน้าที่ค้นเจอ ตอนนี้ไม่พบภาพประกอบที่ดึงมาแสดงได้ครับ"
-                )
+                if resolve_response_language(response_language, user_query) == "en":
+                    response_text = (
+                        "Yes. Relevant visuals from the course documents are below."
+                        if images
+                        else "I could not find a reviewed visual for the retrieved pages."
+                    )
+                else:
+                    response_text = (
+                        "มีครับ ภาพประกอบจากเอกสารที่เกี่ยวข้องอยู่ด้านล่าง"
+                        if images
+                        else "จากหน้าที่ค้นเจอ ตอนนี้ไม่พบภาพประกอบที่ดึงมาแสดงได้ครับ"
+                    )
                 st.markdown(response_text)
                 timing["ttft_ms"] = (perf_counter() - request_started) * 1000.0
             else:
@@ -480,6 +587,7 @@ if user_query:
                     result=result,
                     history=history_before,
                     model_name=settings.generation_model,
+                    language_mode=response_language,
                 )
                 response_text = st.write_stream(
                     track_stream(
@@ -501,26 +609,10 @@ if user_query:
             )
             render_sources(answer_sources)
 
-            if images:
-                if visual_request:
-                    st.caption("ภาพจากเอกสารฐานความรู้จริง")
-                    for index, image in enumerate(images, start=1):
-                        st.image(
-                            image.image_bytes,
-                            caption=(
-                                f"{image.metadata.get('caption') or f'ภาพ {index}'} · "
-                                f"{image.source_file} · หน้า {image.page_number}"
-                            ),
-                        )
-                else:
-                    with st.expander("ภาพประกอบจากเอกสารฐานความรู้"):
-                        for image in images:
-                            st.image(
-                                image.image_bytes,
-                                caption=(
-                                    f"{image.source_file} · หน้า {image.page_number}"
-                                ),
-                            )
+            render_message_images(
+                image_payload,
+                visual_request=visual_request,
+            )
 
             if show_debug:
                 with st.expander("RAG debug"):
@@ -555,6 +647,8 @@ if user_query:
                     "role": "assistant",
                     "content": response_text,
                     "sources": answer_sources,
+                    "images": image_payload,
+                    "visual_request": visual_request,
                 }
             )
 

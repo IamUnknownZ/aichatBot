@@ -1,6 +1,8 @@
 # Environment variables
 .env
 .env.local
+.env.*
+!.env.example
 .streamlit/secrets.toml
 
 # Python
@@ -24,4 +26,5 @@ Thumbs.db
 readthis.md
 PROJECT_FRAMEWORK.md
 AI_Chatbot_Project_Summary.pdf
+exports/
 docs/Enabling Learning of Programming through Educational Chatbot.pdf

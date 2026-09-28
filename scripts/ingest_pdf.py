@@ -5,16 +5,21 @@ from dataclasses import replace
 
 from dotenv import load_dotenv
 
-from rag.bootstrap import build_rag_service, resolve_pdf_paths
+from rag.bootstrap import build_rag_service, resolve_source_paths
 from rag.config import Settings
-from rag.pdf_ingest import parse_pdf
+from rag.pdf_ingest import parse_source
 from rag.store import PgVectorStore
+
+
+def approved_ingest_sources():
+    """Return every manifest-approved PDF and Apple Pages source."""
+    return resolve_source_paths()
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
         description=(
-            "Index all approved real_data PDFs into PostgreSQL + pgvector. "
+            "Index all approved real_data sources into PostgreSQL + pgvector. "
             "Internal PDF images/page renders are prepared by default."
         )
     )
@@ -55,7 +60,7 @@ def main() -> None:
             render_vector_pages=True,
         )
 
-    approved = resolve_pdf_paths()
+    approved = approved_ingest_sources()
 
     if args.images_only:
         store = PgVectorStore(
@@ -65,7 +70,7 @@ def main() -> None:
         store.ensure_schema()
         visual_count = 0
         for pdf_path in approved:
-            document = parse_pdf(
+            document = parse_source(
                 pdf_path,
                 extract_images=True,
                 render_vector_pages=True,

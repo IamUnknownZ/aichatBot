@@ -136,6 +136,21 @@ class ClarificationServiceTests(unittest.TestCase):
                 "อธิบาย Bubble Sort ให้เข้าใจง่าย",
             )
 
+    def test_explicit_visual_topic_wins_over_previous_topic(self):
+        history = [
+            {"role": "user", "content": "อธิบาย Insertion Sort"},
+            {"role": "assistant", "content": "คำอธิบายก่อนหน้า"},
+        ]
+
+        self.assertEqual(
+            self.service.visual_topic("ภาพ Bubble Sort", history),
+            "Bubble Sort",
+        )
+        self.assertEqual(
+            self.service.visual_topic("ภาพ", history),
+            "Insertion Sort",
+        )
+
     def test_specific_algorithm_query_reranks_exact_topic_first(self):
         result = self.service.retrieve("insertion sort คืออะไร", [])
         self.assertTrue(result.hits)

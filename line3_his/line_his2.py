@@ -23,8 +23,8 @@ def hello():
     return "Hello, World!"
 
 # LINE Bot Config
-configuration = Configuration(access_token='39r+/9GtJsUY7+kHS4JbvUkozYjupaQLIwzZTfg928KT8DUogrFpXb7jsAenFtkY0gRH4zXZW9IyqDuTOKBWFXoys1/v/mWrren6A2Awj8yjxSWQmOA1NIy/aS/hnx88m10YbGnKEFM7mduW8X47OgdB04t89/1O/w1cDnyilFU=')
-handler = WebhookHandler('31af1de24d49fab9753c3401d73971a9')
+configuration = Configuration(access_token=os.getenv("LINE_CHANNEL_ACCESS_TOKEN", ""))
+handler = WebhookHandler(os.getenv("LINE_CHANNEL_SECRET", ""))
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 # Gemini Config

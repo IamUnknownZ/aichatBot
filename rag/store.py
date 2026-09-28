@@ -129,6 +129,8 @@ class LocalLexicalStore:
 
         hits: list[SearchHit] = []
         for chunk in self.chunks:
+            if chunk.metadata.get("curriculum_status") == "reference_only":
+                continue
             text = chunk.content
             text_lower = text.lower()
             text_tokens = self._word_tokens(text)
@@ -629,7 +631,9 @@ class PgVectorStore:
                 1 - (embedding <=> %s) AS vector_score,
                 similarity(content, %s) AS lexical_score
             FROM rag_document_chunks
-            WHERE embedding IS NOT NULL{scope_clause}
+            WHERE embedding IS NOT NULL
+                AND COALESCE(metadata->>'curriculum_status', 'primary')
+                    <> 'reference_only'{scope_clause}
             ORDER BY embedding <=> %s
             LIMIT %s
         """
@@ -640,7 +644,9 @@ class PgVectorStore:
                 1 - (embedding <=> %s) AS vector_score,
                 similarity(content, %s) AS lexical_score
             FROM rag_document_chunks
-            WHERE embedding IS NOT NULL{scope_clause}
+            WHERE embedding IS NOT NULL
+                AND COALESCE(metadata->>'curriculum_status', 'primary')
+                    <> 'reference_only'{scope_clause}
             ORDER BY similarity(content, %s) DESC
             LIMIT %s
         """

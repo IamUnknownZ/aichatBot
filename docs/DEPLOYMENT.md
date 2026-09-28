@@ -58,7 +58,7 @@ Course identity ปรับได้โดยไม่แก้ UI code:
     python -m scripts.ingest_pdf --force
 
 กระบวนการนี้จะ:
-1. scan เฉพาะ `real_data/**/*.pdf`
+1. scan เฉพาะ source ที่อนุมัติใน manifest ใต้ `real_data/` (`.pdf` และ `.pages`)
 2. hash และ ingest แต่ละ PDF แยกกัน
 3. แบ่งข้อความตาม physical PDF page
 4. สร้าง text embedding
@@ -120,7 +120,7 @@ Course identity ปรับได้โดยไม่แก้ UI code:
 
 `RAG_INDEX_IMAGES` เป็น optional multimodal vector; retrieval ปกติผูกรูปตาม text hit จึงไม่จำเป็นต้องเปิด
 
-ถ้าแก้เฉพาะ logic การ crop/ภาพและ PDF hash เดิมยังอยู่ในฐานข้อมูล ให้ใช้ `python -m scripts.ingest_pdf --images-only` เพื่อ refresh `rag_document_images` โดยไม่ recompute text embeddings และไม่กิน embedding quota ซ้ำ
+ถ้าแก้เฉพาะ logic การ crop/ภาพและ source hash เดิมยังอยู่ในฐานข้อมูล ให้ใช้ `python -m scripts.ingest_pdf --images-only` เพื่อ refresh `rag_document_images` โดยไม่ recompute text embeddings และไม่กิน embedding quota ซ้ำ
 
 ภาพถูกเลือกด้วยคู่ `source_id + page_number` เพื่อป้องกันรูปหน้าเดียวกันจากคนละ PDF ปะปนกัน
 

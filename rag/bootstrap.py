@@ -1,17 +1,30 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from pathlib import Path
 
 from .config import Settings
 from .embeddings import GeminiEmbedder
-from .pdf_ingest import parse_pdf
+from .pdf_ingest import parse_source
 from .service import RAGService
 from .store import LocalLexicalStore, PgVectorStore
 
 
-def resolve_pdf_paths(project_root: str | Path | None = None) -> list[Path]:
-    """Return only PDFs that belong to the approved real_data knowledge base."""
+def _approved_source_names(real_data_dir: Path) -> set[str]:
+    names: set[str] = set()
+    for manifest_path in sorted(real_data_dir.glob("*_manifest.json")):
+        data = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if data.get("closed_source") is not True:
+            continue
+        sources = data.get("sources", {})
+        if isinstance(sources, dict):
+            names.update(str(name) for name in sources)
+    return names
+
+
+def resolve_source_paths(project_root: str | Path | None = None) -> list[Path]:
+    """Return only manifest-approved source files in real_data/."""
     root = (
         Path(project_root).resolve()
         if project_root is not None
@@ -23,19 +36,32 @@ def resolve_pdf_paths(project_root: str | Path | None = None) -> list[Path]:
             "ไม่พบโฟลเดอร์ real_data/ ซึ่งเป็นฐานความรู้จริงของระบบ"
         )
 
-    pdf_paths = sorted(
+    approved_names = _approved_source_names(real_data_dir)
+    source_paths = sorted(
         (
             path
-            for path in real_data_dir.rglob("*.pdf")
+            for path in real_data_dir.rglob("*")
             if path.is_file()
+            and path.suffix.lower() in {".pdf", ".pages"}
+            and path.name in approved_names
         ),
         key=lambda path: path.relative_to(real_data_dir).as_posix().casefold(),
     )
-    if not pdf_paths:
+    if not source_paths:
         raise FileNotFoundError(
-            "ไม่พบไฟล์ PDF ใน real_data/ ระบบจะไม่ fallback ไปใช้ข้อมูลทดลอง"
+            "ไม่พบ source ที่ได้รับอนุมัติใน manifest ของ real_data/ "
+            "ระบบจะไม่ fallback ไปใช้ข้อมูลทดลอง"
         )
-    return pdf_paths
+    return source_paths
+
+
+def resolve_pdf_paths(project_root: str | Path | None = None) -> list[Path]:
+    """Return only approved PDF sources for backwards-compatible callers."""
+    return [
+        path
+        for path in resolve_source_paths(project_root)
+        if path.suffix.lower() == ".pdf"
+    ]
 
 
 def _file_sha256(path: Path) -> str:
@@ -46,9 +72,9 @@ def _file_sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def _parse_document(pdf_path: Path, settings: Settings):
-    document = parse_pdf(
-        pdf_path,
+def _parse_document(source_path: Path, settings: Settings):
+    document = parse_source(
+        source_path,
         chunk_size=settings.chunk_chars,
         overlap=settings.chunk_overlap,
         extract_images=settings.extract_images,
@@ -56,7 +82,7 @@ def _parse_document(pdf_path: Path, settings: Settings):
     )
     if not document.chunks:
         raise RuntimeError(
-            f"PDF ไม่มีข้อความที่สามารถสร้าง RAG index ได้: {pdf_path.name}"
+            f"source ไม่มีข้อความที่สามารถสร้าง RAG index ได้: {source_path.name}"
         )
     return document
 
@@ -86,8 +112,8 @@ def build_rag_service(
     if not settings.gemini_api_key:
         raise ValueError("ยังไม่ได้ตั้งค่า GEMINI_API_KEY")
 
-    pdf_paths = resolve_pdf_paths(project_root)
-    source_ids = [_file_sha256(path) for path in pdf_paths]
+    source_paths = resolve_source_paths(project_root)
+    source_ids = [_file_sha256(path) for path in source_paths]
 
     embedder = GeminiEmbedder(
         api_key=settings.gemini_api_key,
@@ -113,7 +139,7 @@ def build_rag_service(
             }
             missing_paths = [
                 path
-                for path, source_id in zip(pdf_paths, source_ids, strict=True)
+                for path, source_id in zip(source_paths, source_ids, strict=True)
                 if force_reindex or not indexed[source_id]
             ]
 
@@ -132,8 +158,8 @@ def build_rag_service(
                     f"({missing_names}) และ RAG_AUTO_INGEST=false"
                 )
 
-            for pdf_path in missing_paths:
-                document = _parse_document(pdf_path, settings)
+            for source_path in missing_paths:
+                document = _parse_document(source_path, settings)
                 embeddings = embedder.embed_texts(
                     [chunk.content for chunk in document.chunks],
                     task_type="RETRIEVAL_DOCUMENT",
@@ -182,8 +208,8 @@ def build_rag_service(
     # Never fall back to legacy/demo PDFs or external content.
     chunks = []
     images = []
-    for pdf_path in pdf_paths:
-        document = _parse_document(pdf_path, settings)
+    for source_path in source_paths:
+        document = _parse_document(source_path, settings)
         chunks.extend(document.chunks)
         images.extend(document.images)
 
