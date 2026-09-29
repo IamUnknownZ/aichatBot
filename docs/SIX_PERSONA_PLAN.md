@@ -49,10 +49,10 @@ the remaining scopes. No further agents may be spawned while both are open.
 
 currentUnit: 4
 nextPass: HANDOFF
-candidate: six-persona-workspace at 5a46415 (reviewed); follow-up fixes in worktree pending final checkpoint
+candidate: final verified checkpoint on six-persona-workspace; reviewed baseline was 5a46415
 verification: final full Python suite PASS (115); targeted UI/history/identity follow-up PASS (22); Node identity/locks PASS; compileall/diff check PASS; Chrome desktop/mobile/scroll-to-bottom PASS; PostgreSQL rollback integration/RLS PASS; live Gemini Thai/English PASS; Chrome refresh/new-tab history PASS
 blockers: automation_update unavailable (no scheduled heartbeat required for this handoff)
-nextAction: final checkpoint and handoff; do not start Merge Sort extraction until new sources and explicit instruction arrive
+nextAction: await new Merge Sort sources and explicit instruction; all workers closed at handoff, maximum two allowed if resumed
 
 Database schema/backend implemented separately by Peirce; SQLite transaction
 fixtures passed, live PostgreSQL rollback integration passed without retaining
