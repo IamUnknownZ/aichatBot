@@ -13,20 +13,26 @@ from rag.visuals import (
     image_message_payload,
     image_preview_groups,
 )
-from ui import inject_theme, render_hero, render_welcome_panel
+from ui import inject_theme, render_welcome_panel
+from ui.workspace import inject_workspace_theme, render_workspace_header, persona_avatar
+from rag.personas import PERSONAS, get_persona
+from rag.chat_history import ChatHistory, HistoryUnavailable, _owner
+from ui.browser_identity import browser_identity
+from ui.history_state import restore_thread
 
 
 load_dotenv()
 page_settings = Settings.from_env()
-APP_CACHE_VERSION = "2026-09-27-language-control-v3"
+APP_CACHE_VERSION = "2026-09-29-six-persona-v1"
 
 st.set_page_config(
     page_title=f"{page_settings.course_title} · AI Tutor",
     page_icon="🎓",
     layout="wide",
-    initial_sidebar_state="collapsed",
+    initial_sidebar_state="expanded",
 )
 inject_theme()
+inject_workspace_theme()
 
 
 def get_secret(name: str) -> str:
@@ -168,241 +174,174 @@ def create_rag_service(
     return service, settings
 
 
-def refresh_recent_questions(service, settings) -> list[str]:
-    profile = st.session_state.get("profile")
-    if not profile:
-        return []
-    try:
-        return service.store.get_recent_questions(
-            profile["user_id"],
-            limit=settings.recent_question_limit,
-        )
-    except Exception:
-        return []
-
-
 def ensure_chat_state(settings: Settings) -> None:
-    if "chat_session_id" not in st.session_state:
-        st.session_state["chat_session_id"] = str(uuid4())
-
-    if "messages" not in st.session_state or not st.session_state["messages"]:
-        st.session_state["messages"] = [
-            {
-                "role": "assistant",
-                "content": (
-                    f"ถามเรื่อง **{settings.course_title}** ได้เลยครับ "
-                    "ผมจะค้นจากเอกสารรายวิชาก่อนตอบ และถ้าข้อมูลไม่พอจะบอกตรง ๆ"
-                ),
-            }
-        ]
+    st.session_state.setdefault("active_persona", "nui")
+    threads = st.session_state.setdefault("persona_threads", {})
+    active = st.session_state["active_persona"]
+    if active not in threads:
+        persona = get_persona(active)
+        threads[active] = [{"role": "assistant", "content":
+            f"สวัสดีครับ ผมคือ **{persona.name}** เป็น AI ช่วยเรียน "
+            f"**{settings.course_title}** · {persona.subtitle} "
+            "คำตอบจะยึดเอกสารบทเรียน และจะบอกเมื่อหลักฐานไม่พอ"}]
+    st.session_state["messages"] = threads[active]
+    st.session_state.setdefault("response_language", "thai")
 
 
 api_key = get_secret("GEMINI_API_KEY")
 database_url = get_secret("DATABASE_URL")
-
 service = None
 settings = page_settings
 service_error = None
-
 if api_key:
     try:
         with st.spinner("กำลังเชื่อมต่อฐานความรู้..."):
-            service, settings = create_rag_service(
-                api_key,
-                database_url,
-                APP_CACHE_VERSION,
-            )
-    except Exception as exc:
-        service_error = f"{type(exc).__name__}: {exc}"
-
-
-if service is not None and settings.profile_enabled:
-
-    @st.dialog("ยินดีต้อนรับ 👋", width="small")
-    def profile_dialog():
-        st.write(
-            f"ก่อนเริ่มคุยกับ **{settings.tutor_name}** บอกชื่อที่อยากให้เรียกสั้น ๆ "
-            "เพื่อให้ระบบจำประวัติคำถามของคุณได้"
-        )
-        with st.form("profile_form", border=False):
-            display_name = st.text_input(
-                "ชื่อ / ชื่อเล่น",
-                placeholder="เช่น บาส",
-                max_chars=40,
-            )
-            submitted = st.form_submit_button(
-                "เริ่มเรียน",
-                type="primary",
-                use_container_width=True,
-            )
-
-        st.caption(
-            "นี่เป็นโปรไฟล์เพื่อจดจำประวัติ ไม่ใช่ระบบยืนยันตัวตน "
-            "ถ้าใช้ในห้องเรียนควรเลือกชื่อที่ไม่ซ้ำกับเพื่อน"
-        )
-
-        if submitted:
-            name = display_name.strip()
-            if not name:
-                st.warning("กรอกชื่อก่อนเริ่มใช้งานครับ")
-                return
-
-            persisted = service.store_mode == "postgres-pgvector"
-            try:
-                profile = service.store.get_or_create_profile(name)
-            except Exception:
-                profile = None
-                persisted = False
-
-            if profile is None:
-                profile = {
-                    "user_id": str(uuid4()),
-                    "display_name": name,
-                }
-                persisted = False
-
-            st.session_state["profile"] = profile
-            st.session_state["profile_persisted"] = persisted
-            st.session_state["chat_session_id"] = str(uuid4())
-
-            try:
-                st.session_state["recent_questions"] = (
-                    service.store.get_recent_questions(
-                        profile["user_id"],
-                        limit=settings.recent_question_limit,
-                    )
-                    if persisted
-                    else []
-                )
-            except Exception:
-                st.session_state["recent_questions"] = []
-
-            st.rerun()
-
-
-if settings.profile_enabled and service is not None and "profile" not in st.session_state:
-    profile_dialog()
-    st.stop()
-
+            service, settings = create_rag_service(api_key, database_url, APP_CACHE_VERSION)
+    except Exception:
+        service_error = "ไม่สามารถเชื่อมต่อฐานความรู้ได้ กรุณาตรวจการตั้งค่าและ index"
 
 ensure_chat_state(settings)
+identity = browser_identity()
+history_backend = None
+history_ready = False
+history_notice = ""
+if service is not None and identity:
+    try:
+        history_backend = ChatHistory(service.store._connect)
+        if not st.session_state.get("history_schema_ready"):
+            history_backend.initialize()
+            st.session_state["history_schema_ready"] = True
+        owner_key = _owner(identity["token"])
+        if st.session_state.get("history_owner") != owner_key:
+            profile = history_backend.get_profile(identity["token"])
+            st.session_state["history_owner"] = owner_key
+            st.session_state["history_loaded"] = set()
+            st.session_state["persona_threads"] = {}
+            ensure_chat_state(settings)
+            st.session_state["display_name"] = (profile or {}).get("display_name", "")
+        history_ready = restore_thread(st.session_state, history_backend,
+            identity["token"], st.session_state["active_persona"])
+        st.session_state["messages"] = st.session_state["persona_threads"][st.session_state["active_persona"]]
+        if not history_ready:
+            history_notice = "โหลดประวัติเดิมไม่สำเร็จ · ไม่ถือว่าประวัติว่าง และยังไม่บันทึกทับ"
+    except (HistoryUnavailable, ValueError):
+        history_notice = "ระบบประวัติยังไม่พร้อม · บทสนทนาใหม่อยู่ใน session นี้เท่านั้น"
 
-if "response_language" not in st.session_state:
-    st.session_state["response_language"] = "thai"
-
-student_name = None
-if st.session_state.get("profile"):
-    student_name = st.session_state["profile"].get("display_name")
-
-render_hero(
-    course_title=settings.course_title,
-    course_level=settings.course_level,
-    tutor_name=settings.tutor_name,
-    mascot_symbol=settings.mascot_emoji,
-    student_name=student_name,
-)
-
-if service is not None:
-    profile_label = (
-        "จำประวัติแล้ว"
-        if st.session_state.get("profile_persisted")
-        else "ประวัติใน session"
-    )
-    st.markdown(
-        f"""
-<div class="tutor-status-row">
-  <span class="tutor-chip">✦ Vector RAG · pgvector</span>
-  <span class="tutor-chip">ไทย · English · คำทับศัพท์</span>
-  <span class="tutor-chip">{profile_label}</span>
-</div>
-""",
-        unsafe_allow_html=True,
-    )
-elif service_error:
-    st.error(f"ระบบฐานความรู้ยังไม่พร้อม: {service_error}")
-else:
-    st.info("ยังไม่ได้ตั้งค่า GEMINI_API_KEY สำหรับระบบ AI")
-
+if service is not None and settings.profile_enabled:
+    if identity is None:
+        st.info("กำลังเตรียมรหัสผู้ใช้สำหรับเบราว์เซอร์นี้")
+        st.stop()
+    @st.dialog("ยินดีต้อนรับ · AI Learning Studio", width="small")
+    def display_name_dialog():
+        st.write("ชื่อใช้แสดงผลเท่านั้น ชื่อซ้ำกันได้โดยไม่รวมประวัติ")
+        with st.form("display_name_form"):
+            display = st.text_input("ชื่อ / ชื่อเล่น", max_chars=40)
+            submit = st.form_submit_button("เริ่มเรียน", type="primary")
+        st.caption("ประวัติผูกกับเบราว์เซอร์นี้ ไม่ใช่บัญชีล็อกอิน ล้างข้อมูลเบราว์เซอร์หรือเปลี่ยนเครื่องจะไม่เห็นประวัติเดิม")
+        if submit:
+            if not display.strip():
+                st.warning("กรอกชื่อที่ต้องการให้เรียก")
+                return
+            st.session_state["display_name"] = display.strip()
+            if history_backend and history_ready:
+                try:
+                    history_backend.set_profile(identity["token"], display.strip())
+                except HistoryUnavailable:
+                    st.session_state["history_name_failed"] = True
+            st.rerun()
+    if not st.session_state.get("display_name"):
+        display_name_dialog()
+        st.stop()
 
 with st.sidebar:
-    if student_name:
-        st.markdown(f"### 👋 {student_name}")
-        st.caption(f"กำลังเรียน: {settings.course_title}")
-
-    recent_questions = st.session_state.get("recent_questions", [])
-    if recent_questions:
-        st.markdown("#### คำถามล่าสุด")
-        for idx, question in enumerate(recent_questions[: settings.recent_question_limit]):
-            label = question if len(question) <= 44 else question[:41] + "…"
-            if st.button(
-                label,
-                key=f"recent_question_{idx}",
-                use_container_width=True,
-            ):
-                st.session_state["queued_prompt"] = question
-
+    st.markdown("### ✦ AI Learning Studio")
+    st.caption("6 AI tutors · ฐานความรู้เดียวกัน")
+    st.markdown("##### เลือกเพื่อน AI")
+    for persona in PERSONAS:
+        selected = st.session_state["active_persona"] == persona.id
+        with st.container(key=f"persona-card-{persona.id}"):
+            face, label = st.columns([1, 4], vertical_alignment="center")
+            with face:
+                st.image(persona_avatar(persona), width=42)
+            with label:
+                if st.button(f"{persona.name} · {persona.subtitle}", key=f"persona_{persona.id}",
+                             type="primary" if selected else "secondary", use_container_width=True):
+                    st.session_state["active_persona"] = persona.id
+                    st.session_state.pop("queued_prompt", None)
+                    st.rerun()
     st.divider()
-
-    if st.button("เริ่มแชตใหม่", use_container_width=True):
-        st.session_state["messages"] = []
-        st.session_state["chat_session_id"] = str(uuid4())
-        st.rerun()
-
-    if settings.profile_enabled and student_name:
-        if st.button("เปลี่ยนชื่อ", use_container_width=True):
-            for key in (
-                "profile",
-                "profile_persisted",
-                "recent_questions",
-                "messages",
-                "chat_session_id",
-            ):
-                st.session_state.pop(key, None)
+    st.caption("คุณ · ผู้เรียน")
+    student_name = st.session_state.get("display_name", "")
+    if student_name:
+        st.markdown(f"**{student_name}**")
+    with st.expander("ชื่อแสดงผล", expanded=False):
+        name = st.text_input("ชื่อ / ชื่อเล่น", value=student_name, max_chars=40)
+        if st.button("บันทึกชื่อ", key="save_display_name"):
+            if name.strip():
+                st.session_state["display_name"] = name.strip()
+                if history_backend and history_ready:
+                    try:
+                        history_backend.set_profile(identity["token"], name.strip())
+                        st.session_state["history_name_failed"] = False
+                    except HistoryUnavailable:
+                        st.session_state["history_name_failed"] = True
+                st.rerun()
+    st.caption("ชื่อใช้แสดงผล ไม่ใช้ค้นหรือรวมประวัติ")
+    if st.button("เริ่มแชตใหม่", key="new_chat", use_container_width=True):
+        st.session_state["confirm_clear"] = st.session_state["active_persona"]
+    if st.session_state.get("confirm_clear") == st.session_state["active_persona"]:
+        st.warning("จะลบบทสนทนาของ AI คนนี้เท่านั้น ย้อนกลับไม่ได้")
+        left, right = st.columns(2)
+        if left.button("ยืนยันลบ", key="confirm_delete"):
+            can_clear = not history_backend and not st.session_state.get("history_owner")
+            if history_backend and history_ready:
+                can_clear = history_backend.clear_history(identity["token"], st.session_state["active_persona"])
+            if can_clear:
+                st.session_state["persona_threads"].pop(st.session_state["active_persona"], None)
+                st.session_state.pop("confirm_clear", None)
+                st.session_state.pop("last_history_save", None)
+                st.rerun()
+            else:
+                st.error("ลบไม่สำเร็จ ประวัติเดิมยังอยู่")
+        if right.button("ยกเลิก", key="cancel_delete"):
+            st.session_state.pop("confirm_clear", None)
             st.rerun()
-
+    st.caption("ประวัติเป็นของเบราว์เซอร์นี้ · หลีกเลี่ยงเครื่องสาธารณะ")
+    if identity and not identity.get("persisted"):
+        st.warning("เบราว์เซอร์ไม่อนุญาตให้จำรหัส ประวัติจะกลับมาไม่ได้หลังปิด session")
+    if st.session_state.get("history_name_failed"):
+        st.warning("ชื่อยังไม่ถูกบันทึกถาวร")
     with st.expander("Advanced", expanded=False):
-        show_debug = st.checkbox(
-            "แสดง RAG debug",
-            value=False,
-            help="ใช้ตอนพัฒนา/เก็บผลการทดลองบทที่ 4",
-        )
+        show_debug = st.checkbox("แสดง RAG debug", value=False)
         st.caption(f"Model: {settings.generation_model}")
         st.caption(f"Retrieval: {service.store_mode if service else 'unavailable'}")
-        if service is not None:
-            lexicon_size = getattr(service, "lexicon_size", None)
-            if lexicon_size is not None:
-                st.caption(f"Query lexicon: {lexicon_size} aliases")
-            clarification_size = getattr(
-                service,
-                "clarification_lexicon_size",
-                None,
-            )
-            if clarification_size is not None:
-                st.caption(
-                    f"Clarification dictionary: {clarification_size} aliases"
-                )
-        st.caption(
-            f"top-k {settings.top_k} · threshold {settings.min_relevance_score:.2f}"
-        )
-        if service is not None and service.startup_note:
-            st.warning(service.startup_note)
 
-if "show_debug" not in locals():
-    show_debug = False
-
+active_persona = get_persona(st.session_state["active_persona"])
+if service is not None:
+    service = service.for_persona(active_persona.id)
+    settings = service.settings
+render_workspace_header(active_persona, settings.course_title, student_name)
+if history_notice:
+    st.warning(history_notice)
+elif history_ready:
+    st.caption("โหลดประวัติแล้ว · แยกตาม AI · ชื่อซ้ำกันได้")
+if st.session_state.get("last_history_save") is False:
+    st.warning("บันทึกคำตอบล่าสุดไม่สำเร็จ · ยังเห็นได้ใน session นี้ แต่รีเฟรชแล้วอาจหาย")
+if service_error:
+    st.warning(service_error)
+elif service is None:
+    st.info("หน้าตา UI พร้อมแสดงตัวอย่าง · ต้องตั้ง GEMINI_API_KEY และฐานข้อมูลก่อนถาม AI")
 
 messages = st.session_state["messages"]
 for message in messages:
     role = "assistant" if message["role"] in {"assistant", "model"} else "user"
-    avatar = "🧠" if role == "assistant" else "🙂"
+    avatar = persona_avatar(active_persona) if role == "assistant" else "🙂"
     with st.chat_message(role, avatar=avatar):
         st.markdown(message["content"])
         if role == "assistant":
             render_sources(message.get("sources", []))
-            render_message_images(
-                message.get("images", []),
-                visual_request=bool(message.get("visual_request")),
-            )
+            render_message_images(message.get("images", []),
+                visual_request=bool(message.get("visual_request")))
 
 
 preset_query = None
@@ -487,7 +426,7 @@ if user_query:
     with st.chat_message("user", avatar="🙂"):
         st.markdown(user_query)
 
-    with st.chat_message("assistant", avatar="🧠"):
+    with st.chat_message("assistant", avatar=persona_avatar(active_persona)):
         try:
             request_started = perf_counter()
             thinking_placeholder = st.empty()
@@ -665,31 +604,17 @@ if user_query:
                 answer_chars=len(response_text),
             )
 
-            profile = st.session_state.get("profile")
-            if profile:
-                service.store.save_exchange(
-                    user_id=profile["user_id"],
-                    session_id=st.session_state["chat_session_id"],
-                    question=user_query,
-                    answer=response_text,
-                    metadata={
-                        "pages": result.pages,
-                        "top_score": round(result.top_score, 6),
-                        "answered": answered,
-                        "retrieval_ms": round(result.elapsed_ms, 2),
-                        "ttft_ms": round(ttft_ms, 2),
-                        "total_ms": round(total_ms, 2),
-                        "model": settings.generation_model,
-                    },
-                )
-
-                recent = st.session_state.get("recent_questions", [])
-                updated = [user_query] + [
-                    q for q in recent if q.casefold() != user_query.casefold()
-                ]
-                st.session_state["recent_questions"] = updated[
-                    : settings.recent_question_limit
-                ]
+            if history_backend and history_ready and identity:
+                try:
+                    saved = history_backend.save_exchange(
+                        identity["token"], active_persona.id, user_query, response_text,
+                        assistant_metadata={"sources": answer_sources, "images": image_payload,
+                                            "visual_request": visual_request})
+                except (ValueError, HistoryUnavailable):
+                    saved = False
+                st.session_state["last_history_save"] = saved
+            else:
+                st.session_state["last_history_save"] = False
 
             # Re-render the completed exchange from session history so the
             # streamed assistant block does not remain as a stale/ghost

@@ -35,7 +35,9 @@ class AppLanguageControlTests(unittest.TestCase):
             ["ไทย / Thai", "English / อังกฤษ"],
         )
         self.assertEqual(len(self.app.chat_input), 1)
-        self.assertEqual(len(self.app.text_input), 0)
+        # Display-name editing belongs to the sidebar, never replaces chat_input.
+        self.assertEqual(len(self.app.text_input), 1)
+        self.assertEqual(len(self.app.sidebar.text_input), 1)
         send_buttons = [button for button in self.app.button if button.label == "ส่ง"]
         self.assertEqual(len(send_buttons), 0)
         self.assertEqual(len(self.app.selectbox), 0)

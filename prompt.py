@@ -71,7 +71,7 @@ You are an AI Tutor for first-year university students.
 """.strip()
 
 
-def build_tutor_prompt(mode: str = "auto", query: str = "") -> str:
+def build_tutor_prompt(mode: str = "auto", query: str = "", *, persona_id: str | None = None) -> str:
     """Build the system prompt for the selected Thai/English answer mode."""
     language = resolve_response_language(mode, query)
     if language == "th":
@@ -94,7 +94,11 @@ def build_tutor_prompt(mode: str = "auto", query: str = "") -> str:
             "\nโหมดอัตโนมัติ: เลือกภาษาตามภาษาของคำถามปัจจุบัน "
             "หากเป็นคำถามผสมให้ใช้ภาษาหลักที่ผู้ใช้ใช้มากกว่า"
         )
-    return f"{PROMPT_SORTING_TUTOR_BASE}\n\n{contract}"
+    identity = ''
+    if persona_id is not None:
+        from rag.personas import persona_instruction
+        identity = '\n\n' + persona_instruction(persona_id)
+    return f"{PROMPT_SORTING_TUTOR_BASE}\n\n{contract}{identity}"
 
 
 # Backwards-compatible constant for callers that do not yet have a query.

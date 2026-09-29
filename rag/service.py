@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
+from copy import copy
+from dataclasses import replace
 import logging
 import re
 from time import perf_counter
@@ -80,6 +82,16 @@ class RAGService:
         self.store = store
         self.client = genai.Client(api_key=settings.gemini_api_key)
         self.startup_note = startup_note
+        self.persona_id = None
+
+    def for_persona(self, persona_id: str) -> "RAGService":
+        """Isolate request identity while sharing immutable indexes/connection pools."""
+        from .personas import get_persona
+        persona = get_persona(persona_id)
+        selected = copy(self)
+        selected.settings = replace(self.settings, tutor_name=persona.name)
+        selected.persona_id = persona.id
+        return selected
 
     @property
     def store_mode(self) -> str:
@@ -1534,7 +1546,7 @@ class RAGService:
 """.strip()
 
         config = types.GenerateContentConfig(
-            system_instruction=build_tutor_prompt(language_mode, query),
+            system_instruction=build_tutor_prompt(language_mode, query, persona_id=self.persona_id),
             max_output_tokens=self.settings.generation_max_output_tokens,
             thinking_config=types.ThinkingConfig(
                 thinking_level=types.ThinkingLevel.MINIMAL
