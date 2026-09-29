@@ -26,6 +26,10 @@ class Cursor:
         if params is None:
             for statement in sql.split(';'):
                 if statement.strip():
+                    # SQLite has no RLS. Policy enforcement needs PostgreSQL
+                    # integration and is not claimed by these transaction tests.
+                    if 'ENABLE ROW LEVEL SECURITY' in statement:
+                        continue
                     statement = statement.replace(
                         'order_id BIGINT GENERATED ALWAYS AS IDENTITY UNIQUE',
                         'order_id INTEGER PRIMARY KEY AUTOINCREMENT').replace(

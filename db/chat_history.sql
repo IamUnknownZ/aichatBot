@@ -17,3 +17,8 @@ CREATE TABLE IF NOT EXISTS browser_chat_exchanges (
 
 CREATE INDEX IF NOT EXISTS browser_chat_exchange_order
     ON browser_chat_exchanges(owner_hash, persona_id, order_id);
+
+-- Server-side PostgreSQL credentials own this capability-scoped history.
+-- No public API policies: Supabase anon/authenticated clients cannot read it.
+ALTER TABLE browser_chat_owners ENABLE ROW LEVEL SECURITY;
+ALTER TABLE browser_chat_exchanges ENABLE ROW LEVEL SECURITY;

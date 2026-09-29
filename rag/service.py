@@ -1546,7 +1546,7 @@ class RAGService:
 """.strip()
 
         config = types.GenerateContentConfig(
-            system_instruction=build_tutor_prompt(language_mode, query, persona_id=self.persona_id),
+            system_instruction=build_tutor_prompt(language_mode, query, persona_id=getattr(self, "persona_id", None)),
             max_output_tokens=self.settings.generation_max_output_tokens,
             thinking_config=types.ThinkingConfig(
                 thinking_level=types.ThinkingLevel.MINIMAL

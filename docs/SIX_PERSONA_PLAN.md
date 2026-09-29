@@ -41,18 +41,21 @@ Use failing regression tests before implementation. One writer lock:
 `/tmp/aichat-six-personas-writer.lock`. Main session owns production files.
 Separate fixed-candidate review before declaring complete.
 Scheduled automation_update is unavailable; no heartbeat was created.
-Preferred separate BUILD model not used: main session remains writer.
+Current concurrency: at most two Luna workers, per the latest user instruction.
+They own browser identity and app/history integration respectively; main owns
+the remaining scopes. No further agents may be spawned while both are open.
 
 ## Status
 
-currentUnit: 3
-nextPass: BUILD
-candidate: none
-verification: PASS persona isolation (3), DB transaction fixtures (12), history state (2), workspace switching (1), browser identity JS
-blockers: automation_update unavailable; Chrome connection unavailable
-nextAction: complete AppTest regressions, scoped checkpoint and separate review; DOM QA awaits Chrome extension connection
+currentUnit: 4
+nextPass: REVIEW
+candidate: six-persona-workspace at 9bfe2eabfa358ca62366c71656be0cb2b41c90b0 (preliminary; newer worktree changes are not included)
+verification: full Python suite PASS (110); targeted suite PASS (42); Node identity PASS; Chrome desktop/mobile DOM PASS; PostgreSQL rollback integration/RLS PASS; live Gemini Thai/English PASS
+blockers: automation_update unavailable; full browser reopen/history UI lifecycle not yet exercised
+nextAction: fixed-candidate review and scoped checkpoint; see SIX_PERSONA_VERIFICATION.md for remaining acceptance checks
 
 Database schema/backend implemented separately by Peirce; SQLite transaction
-fixtures passed, live PostgreSQL application NOT_RUN. Main session integrated
-frontend/backend. Native Chrome selector reports unavailable, no DOM QA claimed.
+fixtures passed, live PostgreSQL rollback integration passed without retaining
+schema changes. Main session integrated frontend/backend. Chrome later connected
+and desktop/mobile DOM checks were executed successfully.
 UI preview at port 8502 has API and DB credentials disabled deliberately.

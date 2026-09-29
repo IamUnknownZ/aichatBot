@@ -18,7 +18,15 @@ from ui.workspace import inject_workspace_theme, render_workspace_header, person
 from rag.personas import PERSONAS, get_persona
 from rag.chat_history import ChatHistory, HistoryUnavailable, _owner
 from ui.browser_identity import browser_identity
-from ui.history_state import restore_thread
+from ui.history_state import (
+    append_answer_and_log,
+    clear_pending_history_saves,
+    history_save_status,
+    queue_pending_history_save,
+    restore_thread,
+    retry_pending_history_saves,
+    set_history_save_status,
+)
 
 
 load_dotenv()
@@ -221,6 +229,13 @@ if service is not None and identity:
             st.session_state["display_name"] = (profile or {}).get("display_name", "")
         history_ready = restore_thread(st.session_state, history_backend,
             identity["token"], st.session_state["active_persona"])
+        if history_ready and identity.get("persisted"):
+            retry_pending_history_saves(
+                st.session_state,
+                history_backend,
+                identity["token"],
+                st.session_state["active_persona"],
+            )
         st.session_state["messages"] = st.session_state["persona_threads"][st.session_state["active_persona"]]
         if not history_ready:
             history_notice = "โหลดประวัติเดิมไม่สำเร็จ · ไม่ถือว่าประวัติว่าง และยังไม่บันทึกทับ"
@@ -299,7 +314,11 @@ with st.sidebar:
             if can_clear:
                 st.session_state["persona_threads"].pop(st.session_state["active_persona"], None)
                 st.session_state.pop("confirm_clear", None)
-                st.session_state.pop("last_history_save", None)
+                clear_pending_history_saves(
+                    st.session_state,
+                    identity["token"] if identity else None,
+                    st.session_state["active_persona"],
+                )
                 st.rerun()
             else:
                 st.error("ลบไม่สำเร็จ ประวัติเดิมยังอยู่")
@@ -325,8 +344,21 @@ if history_notice:
     st.warning(history_notice)
 elif history_ready:
     st.caption("โหลดประวัติแล้ว · แยกตาม AI · ชื่อซ้ำกันได้")
-if st.session_state.get("last_history_save") is False:
-    st.warning("บันทึกคำตอบล่าสุดไม่สำเร็จ · ยังเห็นได้ใน session นี้ แต่รีเฟรชแล้วอาจหาย")
+save_status = (
+    history_save_status(
+        st.session_state,
+        identity["token"] if identity else None,
+        active_persona.id,
+    )
+)
+if save_status == "saved":
+    st.caption(f"บันทึกประวัติของ {active_persona.name} แล้ว")
+elif save_status == "pending":
+    st.warning(f"บันทึกประวัติของ {active_persona.name} ยังไม่สำเร็จ · จะลองอีกครั้ง")
+elif save_status == "failed":
+    st.warning(f"บันทึกประวัติของ {active_persona.name} ไม่สำเร็จ · คำตอบยังอยู่ใน session นี้")
+elif save_status == "session_only":
+    st.warning(f"คำตอบของ {active_persona.name} อยู่ใน session นี้เท่านั้น · ยังไม่ได้บันทึกประวัติถาวร")
 if service_error:
     st.warning(service_error)
 elif service is None:
@@ -581,40 +613,53 @@ if user_query:
                         hide_index=True,
                     )
 
-            st.session_state["messages"].append(
+            append_answer_and_log(
+                st.session_state["messages"],
                 {
                     "role": "assistant",
                     "content": response_text,
                     "sources": answer_sources,
                     "images": image_payload,
                     "visual_request": visual_request,
-                }
+                },
+                service.store,
+                {
+                    "query": user_query,
+                    "retrieval_ms": result.elapsed_ms,
+                    "ttft_ms": ttft_ms,
+                    "total_ms": total_ms,
+                    "top_score": result.top_score,
+                    "answered": answered,
+                    "model_name": settings.generation_model,
+                    "pages": result.pages,
+                    "answer_chars": len(response_text),
+                },
             )
 
-            # Persist only after the visible response is complete.
-            service.store.log_answer(
-                query=user_query,
-                retrieval_ms=result.elapsed_ms,
-                ttft_ms=ttft_ms,
-                total_ms=total_ms,
-                top_score=result.top_score,
-                answered=answered,
-                model_name=settings.generation_model,
-                pages=result.pages,
-                answer_chars=len(response_text),
-            )
-
-            if history_backend and history_ready and identity:
-                try:
-                    saved = history_backend.save_exchange(
-                        identity["token"], active_persona.id, user_query, response_text,
-                        assistant_metadata={"sources": answer_sources, "images": image_payload,
-                                            "visual_request": visual_request})
-                except (ValueError, HistoryUnavailable):
-                    saved = False
-                st.session_state["last_history_save"] = saved
+            if history_backend and history_ready and identity and identity.get("persisted"):
+                queued = queue_pending_history_save(
+                    st.session_state,
+                    identity["token"],
+                    active_persona.id,
+                    user_query,
+                    response_text,
+                    {"sources": answer_sources, "images": image_payload,
+                     "visual_request": visual_request},
+                )
+                if queued:
+                    retry_pending_history_saves(
+                        st.session_state,
+                        history_backend,
+                        identity["token"],
+                        active_persona.id,
+                    )
             else:
-                st.session_state["last_history_save"] = False
+                set_history_save_status(
+                    st.session_state,
+                    identity["token"] if identity else None,
+                    active_persona.id,
+                    "session_only",
+                )
 
             # Re-render the completed exchange from session history so the
             # streamed assistant block does not remain as a stale/ghost
