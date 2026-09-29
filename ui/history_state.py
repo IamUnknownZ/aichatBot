@@ -5,6 +5,26 @@ from uuid import UUID, uuid4
 MAX_PENDING_HISTORY_SAVES = 8
 
 
+def sync_history_identity(state, identity):
+    owner = _owner(identity['token']) if identity else None
+    if state.get('history_owner') == owner:
+        return
+    for key in ('messages', 'display_name', 'history_profile_owner',
+                'confirm_clear', 'history_name_failed', 'last_history_save'):
+        state.pop(key, None)
+    state['history_owner'] = owner
+    state['persona_threads'] = {}
+    state['history_loaded'] = set()
+    state['pending_history_saves'] = []
+    state['history_save_status'] = {}
+
+
+def may_clear_local_history(identity, history_owner):
+    if identity:
+        return identity.get('persisted') is False
+    return history_owner is None
+
+
 def restore_thread(state, backend, token, persona_id):
     key = (_owner(token), persona_id)
     loaded = state.setdefault('history_loaded', set())
@@ -15,7 +35,10 @@ def restore_thread(state, backend, token, persona_id):
     except HistoryUnavailable:
         return False
     if messages:
-        state['persona_threads'][persona_id] = messages
+        local = state['persona_threads'].get(persona_id, [])
+        first_user = next((i for i, message in enumerate(local)
+                           if message.get('role') == 'user'), len(local))
+        state['persona_threads'][persona_id] = messages + local[first_user:]
     loaded.add(key)
     return True
 

@@ -91,7 +91,7 @@ div[data-testid="stChatInput"] {position:relative !important;left:auto !importan
 div[class*="st-key-language-float"] {left:auto !important;right:1.5rem !important;transform:none !important;width:230px !important;bottom:3.5rem !important;}
 div[class*="st-key-language-float"] .language-float-label {display:none !important;}
 @supports(position-anchor:--workspace-composer){
-div[class*="st-key-language-float"] {position-anchor:--workspace-composer;left:calc(anchor(right) - 230px) !important;right:auto !important;}
+div[class*="st-key-language-float"] {position-anchor:--workspace-composer;position-visibility:always;left:calc(anchor(right) - 230px) !important;right:auto !important;}
 }
 }
 [data-testid="stButtonGroup"] button[data-variant="segmented_control"][data-selected] {background:#167a9b !important;border-color:#38bdf8 !important;box-shadow:0 3px 12px #38bdf822 !important;}

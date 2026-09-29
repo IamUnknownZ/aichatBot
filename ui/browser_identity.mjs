@@ -6,6 +6,16 @@ function isCanonicalToken(token) {
 
 export default function ({data, setStateValue}) {
     if (data?.identity?.token) return;
+    if (typeof navigator !== 'undefined' && navigator.locks?.request) {
+        navigator.locks.request('ai-learning-studio-owner-initialization', () => {
+            initialize(setStateValue);
+        }).catch(() => initialize(setStateValue));
+        return;
+    }
+    initialize(setStateValue);
+}
+
+function initialize(setStateValue) {
     const key = 'ai-learning-studio.browser-owner.v1';
     let token;
     let persisted = false;

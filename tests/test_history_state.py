@@ -5,6 +5,47 @@ from rag.chat_history import new_browser_token, HistoryUnavailable, _owner
 
 
 class HistoryStateTests(unittest.TestCase):
+    def test_owner_switch_discards_previous_threads_before_storage_is_contacted(self):
+        from ui import history_state as module
+        old_token, token = new_browser_token(), new_browser_token()
+        state = {'history_owner': _owner(old_token), 'display_name': 'Old',
+                 'persona_threads': {'nui': [{'role': 'user', 'content': 'private'}]},
+                 'messages': [{'role': 'user', 'content': 'private'}],
+                 'pending_history_saves': [{'owner_hash': _owner(old_token)}],
+                 'history_profile_owner': _owner(old_token)}
+        sync = getattr(module, 'sync_history_identity', None)
+        if sync:
+            sync(state, {'token': token, 'persisted': True})
+        self.assertEqual(state.get('persona_threads'), {})
+        self.assertNotIn('display_name', state)
+        self.assertNotIn('messages', state)
+        self.assertNotIn('history_profile_owner', state)
+        self.assertEqual(state.get('pending_history_saves'), [])
+        self.assertEqual(state.get('history_owner'), _owner(token))
+
+    def test_recovered_remote_history_keeps_unsaved_local_exchange(self):
+        from ui.history_state import restore_thread
+        token = new_browser_token()
+        state = {'persona_threads': {'nui': [
+            {'role': 'assistant', 'content': 'Welcome'},
+            {'role': 'user', 'content': 'Unsaved question'},
+            {'role': 'assistant', 'content': 'Unsaved answer'}]}}
+        class Backend:
+            def load_messages(self, *args):
+                return [{'role': 'user', 'content': 'Stored question'},
+                        {'role': 'assistant', 'content': 'Stored answer'}]
+        self.assertTrue(restore_thread(state, Backend(), token, 'nui'))
+        self.assertEqual([m['content'] for m in state['persona_threads']['nui']],
+                         ['Stored question', 'Stored answer', 'Unsaved question', 'Unsaved answer'])
+
+    def test_persistent_browser_cannot_clear_history_without_database(self):
+        from ui import history_state as module
+        check = getattr(module, 'may_clear_local_history', None)
+        self.assertTrue(callable(check), 'Clear must distinguish local-only from persistent history')
+        self.assertFalse(check({'persisted': True}, None))
+        self.assertTrue(check({'persisted': False}, None))
+        self.assertFalse(check(None, 'previous owner'))
+
     def test_restore_happens_once_and_persona_threads_stay_separate(self):
         path=Path(__file__).resolve().parents[1]/'ui/history_state.py'
         self.assertTrue(path.exists(), 'Persisted exchanges must reload into the active thread')

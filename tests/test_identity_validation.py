@@ -14,6 +14,16 @@ browser_identity()
 
 
 class BrowserIdentityRuntimeTests(unittest.TestCase):
+    def test_truthy_string_cannot_claim_persistent_identity(self):
+        import ui.browser_identity as module
+        from rag.chat_history import new_browser_token
+        normalize = getattr(module, 'normalize_identity', None)
+        token = new_browser_token()
+        self.assertTrue(callable(normalize), 'Component data must be validated before use')
+        self.assertEqual(normalize({'token': token, 'persisted': 'false', 'extra': 'ignored'}),
+                         {'token': token, 'persisted': False})
+        self.assertTrue(normalize({'token': token, 'persisted': True})['persisted'])
+
     def test_component_registers_for_sequential_apptest_runtimes(self):
         for _ in range(2):
             app = AppTest.from_string(APP_SOURCE).run()

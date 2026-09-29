@@ -48,14 +48,16 @@ the remaining scopes. No further agents may be spawned while both are open.
 ## Status
 
 currentUnit: 4
-nextPass: REVIEW
-candidate: six-persona-workspace at 9bfe2eabfa358ca62366c71656be0cb2b41c90b0 (preliminary; newer worktree changes are not included)
-verification: full Python suite PASS (110); targeted suite PASS (42); Node identity PASS; Chrome desktop/mobile DOM PASS; PostgreSQL rollback integration/RLS PASS; live Gemini Thai/English PASS
-blockers: automation_update unavailable; full browser reopen/history UI lifecycle not yet exercised
-nextAction: fixed-candidate review and scoped checkpoint; see SIX_PERSONA_VERIFICATION.md for remaining acceptance checks
+nextPass: HANDOFF
+candidate: six-persona-workspace at 5a46415 (reviewed); follow-up fixes in worktree pending final checkpoint
+verification: final full Python suite PASS (115); targeted UI/history/identity follow-up PASS (22); Node identity/locks PASS; compileall/diff check PASS; Chrome desktop/mobile/scroll-to-bottom PASS; PostgreSQL rollback integration/RLS PASS; live Gemini Thai/English PASS; Chrome refresh/new-tab history PASS
+blockers: automation_update unavailable (no scheduled heartbeat required for this handoff)
+nextAction: final checkpoint and handoff; do not start Merge Sort extraction until new sources and explicit instruction arrive
 
 Database schema/backend implemented separately by Peirce; SQLite transaction
 fixtures passed, live PostgreSQL rollback integration passed without retaining
 schema changes. Main session integrated frontend/backend. Chrome later connected
 and desktop/mobile DOM checks were executed successfully.
-UI preview at port 8502 has API and DB credentials disabled deliberately.
+Port 8502 first ran with credentials disabled, then with server-side .env for
+live UI/history QA. New tables and an isolated UI QA conversation were created;
+legacy history was not deleted or migrated. See verification report.

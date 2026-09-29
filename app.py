@@ -25,6 +25,8 @@ from ui.history_state import (
     queue_pending_history_save,
     restore_thread,
     retry_pending_history_saves,
+    sync_history_identity,
+    may_clear_local_history,
     set_history_save_status,
 )
 
@@ -210,6 +212,8 @@ if api_key:
 
 ensure_chat_state(settings)
 identity = browser_identity()
+sync_history_identity(st.session_state, identity)
+ensure_chat_state(settings)
 history_backend = None
 history_ready = False
 history_notice = ""
@@ -220,12 +224,9 @@ if service is not None and identity:
             history_backend.initialize()
             st.session_state["history_schema_ready"] = True
         owner_key = _owner(identity["token"])
-        if st.session_state.get("history_owner") != owner_key:
+        if st.session_state.get("history_profile_owner") != owner_key:
             profile = history_backend.get_profile(identity["token"])
-            st.session_state["history_owner"] = owner_key
-            st.session_state["history_loaded"] = set()
-            st.session_state["persona_threads"] = {}
-            ensure_chat_state(settings)
+            st.session_state["history_profile_owner"] = owner_key
             st.session_state["display_name"] = (profile or {}).get("display_name", "")
         history_ready = restore_thread(st.session_state, history_backend,
             identity["token"], st.session_state["active_persona"])
@@ -258,11 +259,14 @@ if service is not None and settings.profile_enabled:
                 st.warning("กรอกชื่อที่ต้องการให้เรียก")
                 return
             st.session_state["display_name"] = display.strip()
-            if history_backend and history_ready:
+            if history_backend:
                 try:
                     history_backend.set_profile(identity["token"], display.strip())
+                    st.session_state["history_name_failed"] = False
                 except HistoryUnavailable:
                     st.session_state["history_name_failed"] = True
+            else:
+                st.session_state["history_name_failed"] = True
             st.rerun()
     if not st.session_state.get("display_name"):
         display_name_dialog()
@@ -294,12 +298,14 @@ with st.sidebar:
         if st.button("บันทึกชื่อ", key="save_display_name"):
             if name.strip():
                 st.session_state["display_name"] = name.strip()
-                if history_backend and history_ready:
+                if history_backend:
                     try:
                         history_backend.set_profile(identity["token"], name.strip())
                         st.session_state["history_name_failed"] = False
                     except HistoryUnavailable:
                         st.session_state["history_name_failed"] = True
+                else:
+                    st.session_state["history_name_failed"] = True
                 st.rerun()
     st.caption("ชื่อใช้แสดงผล ไม่ใช้ค้นหรือรวมประวัติ")
     if st.button("เริ่มแชตใหม่", key="new_chat", use_container_width=True):
@@ -308,7 +314,7 @@ with st.sidebar:
         st.warning("จะลบบทสนทนาของ AI คนนี้เท่านั้น ย้อนกลับไม่ได้")
         left, right = st.columns(2)
         if left.button("ยืนยันลบ", key="confirm_delete"):
-            can_clear = not history_backend and not st.session_state.get("history_owner")
+            can_clear = may_clear_local_history(identity, st.session_state.get("history_owner"))
             if history_backend and history_ready:
                 can_clear = history_backend.clear_history(identity["token"], st.session_state["active_persona"])
             if can_clear:
@@ -440,14 +446,14 @@ with st.container(key="language-float", border=False):
 
 typed_query = st.chat_input(
     f"ถามเกี่ยวกับ {settings.course_title}...",
-    disabled=service is None,
+    disabled=service is None or not history_ready,
 )
 user_query = preset_query or queued_query or typed_query
 
 
 if user_query:
-    if service is None:
-        st.error("ระบบฐานความรู้ยังไม่พร้อม")
+    if service is None or not history_ready:
+        st.error("ระบบฐานความรู้หรือประวัติยังไม่พร้อม กรุณาลองอีกครั้ง")
         st.stop()
 
     history_before = list(st.session_state["messages"])
@@ -666,12 +672,12 @@ if user_query:
             # element during the next Streamlit rerun.
             st.rerun()
 
-        except Exception as exc:
+        except Exception:
             if "thinking_placeholder" in locals():
                 thinking_placeholder.empty()
             error_text = (
-                "เกิดข้อผิดพลาดระหว่างค้นข้อมูลหรือสร้างคำตอบ: "
-                f"{type(exc).__name__}: {exc}"
+                "ค้นข้อมูลหรือสร้างคำตอบไม่สำเร็จ กรุณาลองอีกครั้ง "
+                "ระบบจะไม่แสดงรายละเอียดการเชื่อมต่อเพื่อปกป้องข้อมูลส่วนตัว"
             )
             st.error(error_text)
             st.session_state["messages"].append(

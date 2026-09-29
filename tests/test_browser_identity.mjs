@@ -61,3 +61,23 @@ render({data:{},setStateValue:(_key,value)=>{temporary=value;}});
 assert.equal(temporary.persisted,false);
 assert.notEqual(temporary.token,first.token);
 console.log('Browser identity canonical-token, storage readback, reload and blocked-storage tests: PASS');
+
+// New tabs must initialize inside the same cross-tab lock, not before it.
+const navigatorDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
+const grants = [];
+Object.defineProperty(globalThis, 'navigator', {configurable:true, value:{locks:{
+  request:(_name, callback)=>new Promise(resolve=>grants.push(()=>resolve(callback()))),
+}}});
+let sharedStorage = null;
+globalThis.localStorage = {getItem:()=>sharedStorage,setItem:(_key,value)=>{sharedStorage=value;}};
+let tabA, tabB;
+render({data:{},setStateValue:(_key,value)=>{tabA=value;}});
+render({data:{},setStateValue:(_key,value)=>{tabB=value;}});
+assert.ok(tabA === undefined, 'A new owner must not be published before its cross-tab lock is granted');
+assert.equal(tabB, undefined);
+for (const grant of grants) grant();
+await Promise.resolve();
+assert.equal(tabA.token, tabB.token, 'Serialized initial tabs must choose the same stored owner');
+if (navigatorDescriptor) Object.defineProperty(globalThis,'navigator',navigatorDescriptor);
+else delete globalThis.navigator;
+console.log('Cross-tab locked initialization: PASS');
