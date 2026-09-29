@@ -11,6 +11,44 @@ from scripts.ingest_pdf import approved_ingest_sources
 
 
 class RealDataScopeTests(unittest.TestCase):
+    def test_merge_book_is_approved_with_readable_thai_code_and_scoped_pages(self):
+        source = next(
+            path for path in resolve_source_paths()
+            if path.name == "Merge_Sort_Complete_Book_TH.pdf"
+        )
+        document = parse_pdf(source)
+        self.assertEqual(document.page_count, 31)
+        by_page = {}
+        for chunk in document.chunks:
+            by_page.setdefault(chunk.page_number, []).append(chunk)
+        self.assertEqual(set(by_page), set(range(1, 32)))
+        self.assertIn("การเรียงลำดับ", " ".join(c.content for c in by_page[4]))
+        self.assertNotIn("คืือ", " ".join(c.content for c in by_page[4]))
+        self.assertIn("def merge_sort(arr):", " ".join(c.content for c in by_page[14]))
+        self.assertIn("    if len(arr) <= 1:", "\n".join(c.content for c in by_page[14]))
+        self.assertEqual(by_page[23][0].metadata["curriculum_status"], "reference_only")
+        self.assertEqual(by_page[14][0].metadata["curriculum_status"], "primary")
+
+    def test_merge_book_visuals_are_precise_labeled_and_exclude_external_sort(self):
+        source = next(
+            path for path in resolve_source_paths()
+            if path.name == "Merge_Sort_Complete_Book_TH.pdf"
+        )
+        document = parse_pdf(source, extract_images=True, render_vector_pages=True)
+        visible = RAGService.select_user_visible_images(
+            document.images, limit=100
+        )
+        self.assertTrue(any(i.page_number == 10 for i in visible))
+        self.assertTrue(any(i.page_number == 14 for i in visible))
+        self.assertTrue(any(i.page_number == 16 for i in visible))
+        self.assertEqual(len(visible), 16)
+        self.assertTrue(all(i.metadata.get("kind") == "figure_crop" for i in visible))
+        self.assertTrue(all(i.metadata.get("visual_topic") == "Merge Sort" for i in visible))
+        self.assertTrue(all(i.metadata.get("label") and i.metadata.get("visual_detail") for i in visible))
+        self.assertFalse(any(i.page_number in {2, 15, 17, 20, 23, 27, 30, 31} for i in visible))
+        page_ten = next(i for i in visible if i.page_number == 10)
+        self.assertIn("ภาพที่ 6.1", page_ten.metadata["source_caption"])
+
     def test_streamlit_production_requires_database(self):
         from rag.bootstrap import build_rag_service
         from rag.config import Settings

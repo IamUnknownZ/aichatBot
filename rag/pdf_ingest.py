@@ -15,9 +15,11 @@ from .models import DocumentChunk, ExtractedImage, ParsedDocument
 
 _WHITESPACE = re.compile(r"[ \t]+")
 _MANY_NEWLINES = re.compile(r"\n{3,}")
+_REPEATED_THAI_MARK = re.compile(r"([\u0e31\u0e34-\u0e3a\u0e47-\u0e4e])\1+")
 _TOPIC_PREFIX = re.compile(r"^(\d+)\.")
 _SOURCE_STEM = re.compile(r"^(?P<number>\d+)\.(?P<title>.+?)(?:-(?P<part>\d+))?$")
 _LEGACY_TEXTBOOK_NAME = "เอกสารหน่วยที่ 8 การเรียงลำดับข้อมูล.pdf"
+_MERGE_BOOK_NAME = "Merge_Sort_Complete_Book_TH.pdf"
 _REFERENCE_ONLY_SECTIONS = {
     "batcher_merge",
     "bucket_sort",
@@ -145,9 +147,13 @@ def _load_source_manifest(
     return {}
 
 
-def _clean_text(text: str) -> str:
+def _clean_text(text: str, *, preserve_indentation: bool = False) -> str:
     text = text.replace("\x00", " ")
-    text = _WHITESPACE.sub(" ", text)
+    if preserve_indentation:
+        text = "\n".join(line.rstrip() for line in text.splitlines())
+        text = _REPEATED_THAI_MARK.sub(r"\1", text)
+    else:
+        text = _WHITESPACE.sub(" ", text)
     text = _MANY_NEWLINES.sub("\n\n", text)
     return text.strip()
 
@@ -182,8 +188,10 @@ def _split_long_text(text: str, chunk_size: int, overlap: int) -> list[str]:
     return parts
 
 
-def split_page_text(text: str, chunk_size: int, overlap: int) -> list[str]:
-    cleaned = _clean_text(text)
+def split_page_text(
+    text: str, chunk_size: int, overlap: int, *, preserve_indentation: bool = False
+) -> list[str]:
+    cleaned = _clean_text(text, preserve_indentation=preserve_indentation)
     if not cleaned:
         return []
 
@@ -386,7 +394,7 @@ def _visual_metadata(
     result: dict[str, object] = {
         "caption": default_caption,
         "label": label,
-        "source_caption": default_caption,
+        "source_caption": str(spec.get("source_caption") or default_caption).strip(),
     }
     for key in (
         "visual_topic",
@@ -731,33 +739,47 @@ def parse_pdf(
     }
 
     reader = PdfReader(path)
+    merge_text_doc = None
+    if source_file == _MERGE_BOOK_NAME:
+        import pymupdf
+        merge_text_doc = pymupdf.open(path)
     chunks: list[DocumentChunk] = []
-
-    for page_idx, page in enumerate(reader.pages, start=1):
-        text = page.extract_text() or ""
-        page_chunks = split_page_text(text, chunk_size, overlap)
-        for chunk_idx, content in enumerate(page_chunks):
-            chunk_metadata = {
-                **source_metadata,
-                **page_metadata.get(page_idx, {}),
-                "page": page_idx,
-                "physical_page": page_idx,
-                "chunk_index": chunk_idx,
-                "source_only": True,
-            }
-            chunk_metadata["curriculum_status"] = _curriculum_status(
-                chunk_metadata
+    try:
+        for page_idx, page in enumerate(reader.pages, start=1):
+            text = (
+                merge_text_doc[page_idx - 1].get_text()
+                if merge_text_doc is not None
+                else page.extract_text() or ""
             )
-            chunks.append(
-                DocumentChunk(
-                    source_id=source_id,
-                    source_file=source_file,
-                    page_number=page_idx,
-                    chunk_index=chunk_idx,
-                    content=content,
-                    metadata=chunk_metadata,
+            page_chunks = split_page_text(
+                text, chunk_size, overlap,
+                preserve_indentation=merge_text_doc is not None,
+            )
+            for chunk_idx, content in enumerate(page_chunks):
+                chunk_metadata = {
+                    **source_metadata,
+                    **page_metadata.get(page_idx, {}),
+                    "page": page_idx,
+                    "physical_page": page_idx,
+                    "chunk_index": chunk_idx,
+                    "source_only": True,
+                }
+                chunk_metadata["curriculum_status"] = _curriculum_status(
+                    chunk_metadata
                 )
-            )
+                chunks.append(
+                    DocumentChunk(
+                        source_id=source_id,
+                        source_file=source_file,
+                        page_number=page_idx,
+                        chunk_index=chunk_idx,
+                        content=content,
+                        metadata=chunk_metadata,
+                    )
+                )
+    finally:
+        if merge_text_doc is not None:
+            merge_text_doc.close()
 
     images = (
         _extract_images_with_pymupdf(

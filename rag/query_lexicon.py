@@ -277,6 +277,30 @@ RAW_ALIASES = {
       "กระจายลงถัง",
       "วิธีถัง",
       "อัลกอริทึมบักเก็ต"
+    ],
+    "Cocktail Sort": [
+      "cocktail sort", "cocktail shaker sort", "shaker sort", "cocktail sorting",
+      "การเรียงแบบค็อกเทล", "ค็อกเทลซอร์ท"
+    ],
+    "Batcher Odd-Even Merge": [
+      "batcher odd-even merge", "odd-even merge sort", "odd even merge sort",
+      "batcher network", "batcher sort"
+    ],
+    "Square-root Sorting": [
+      "square-root sorting", "square root sort", "sqrt sort", "square-root sort"
+    ],
+    "Lower Bound of Comparison Sorting": [
+      "lower bound of comparison sorting", "comparison sorting lower bound",
+      "lower bound comparison sort", "comparison sort lower bound"
+    ],
+    "External Sorting": [
+      "external sorting", "external sort", "external merge sort",
+      "external merge sorting", "external-memory sorting", "out-of-core sorting",
+      "การเรียงลำดับภายนอก", "การเรียงข้อมูลภายนอก"
+    ],
+    "Sorting Performance Comparison": [
+      "sorting performance comparison", "sorting algorithm comparison",
+      "performance comparison of sorting algorithms", "เปรียบเทียบประสิทธิภาพการเรียงลำดับ"
     ]
   },
   "concepts": {

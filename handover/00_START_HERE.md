@@ -1,6 +1,6 @@
 # AI Sorting Tutor — Handover / Start Here
 
-อัปเดตสำหรับการย้ายเครื่อง: 27 กันยายน 2026
+อัปเดตสำหรับการย้ายเครื่อง: 30 กันยายน 2026
 
 เอกสารชุดนี้ทำขึ้นเพื่อให้เปิดโปรเจกต์บนอีกเครื่องแล้วรับช่วงต่อได้โดยไม่ต้องไล่อ่านแชตเก่า
 
@@ -66,21 +66,23 @@ Shell Sort, Quick Sort, Heap Sort, Radix Sort, Bucket Sort ฯลฯ อาจ�
 
 Supabase PostgreSQL + pgvector:
 
-- documents: 3
-- chunks: 119
-- chunks with vectors: 119
-- visuals: 130
+- documents: 13
+- physical pages: 204
+- chunks: 243
+- chunks with vectors: 243
+- visuals: 256
 
 ชนิดภาพใน `rag_document_images`:
-- embedded_image: 8
-- figure_crop: 2
-- trace_crop: 49
-- vector_page_render: 71
+- embedded_image: 50
+- figure_crop: 23
+- trace_crop: 70
+- vector_page_render: 113
 
 หมายเหตุสำคัญ:
-- 71 full-page renders ยังเก็บเป็น internal fallback
+- 113 full-page renders ยังเก็บเป็น internal fallback
 - UI ไม่แสดง full-page render
-- งานต่อที่สำคัญมากคือปรับ crop/label ให้ 71 หน้าที่เหลือกลายเป็น visual region ที่มีคุณภาพมากขึ้น
+- full-page renders ยังเป็น internal only; UI เลือกเฉพาะภาพที่ได้รับ user_visible review
+- หนังสือ Merge Sort ใหม่เพิ่ม 32 chunks, 31 หน้า และ 16 figure crops ที่ตรวจแล้ว
 
 ## 5. เอกสารที่ต้องอ่านต่อ
 

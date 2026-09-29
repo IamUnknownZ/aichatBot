@@ -19,6 +19,7 @@ from .clarifications import (
 from .config import Settings
 from .embeddings import GeminiEmbedder
 from .models import ExtractedImage, RetrievalResult, SearchHit
+from .personas import get_persona
 from .query_lexicon import (
     PRIMARY_CURRICULUM_TOPICS,
     TOTAL_ALIASES,
@@ -92,6 +93,19 @@ class RAGService:
         selected.settings = replace(self.settings, tutor_name=persona.name)
         selected.persona_id = persona.id
         return selected
+
+    @property
+    def thai_statement_particle(self) -> str:
+        persona_id = getattr(self, "persona_id", None)
+        if not persona_id:
+            return "ครับ"
+        persona = get_persona(persona_id)
+        return persona.thai_statement_particle
+
+    @property
+    def thai_first_person(self) -> str:
+        persona_id = getattr(self, "persona_id", None)
+        return get_persona(persona_id).thai_self_reference if persona_id else "ผม"
 
     @property
     def store_mode(self) -> str:
@@ -335,6 +349,8 @@ class RAGService:
         language_mode: str = "thai",
     ) -> str | None:
         language = resolve_response_language(language_mode, query)
+        persona_id = getattr(self, "persona_id", None)
+        persona = get_persona(persona_id) if persona_id else None
         if self._asks_primary_topic_list(query):
             if language == "en":
                 topics = (
@@ -371,7 +387,7 @@ class RAGService:
                 )
             return (
                 f"**{non_curriculum.canonical}** ถูกกล่าวถึงในเอกสารบางส่วน "
-                "แต่ไม่ใช่หนึ่งใน 6 หัวข้อหลักของบทเรียนนี้ครับ\n\n"
+                f"แต่ไม่ใช่หนึ่งใน 6 หัวข้อหลักของบทเรียนนี้{self.thai_statement_particle}\n\n"
                 "หัวข้อหลักคือ **หลักการเรียงลำดับข้อมูล, Bubble Sort, "
                 "Selection Sort, Insertion Sort, Merge Sort และ Counting Sort**"
             )
@@ -406,6 +422,12 @@ class RAGService:
                 if response:
                     return response
             if social.canonical == "greeting":
+                if persona and persona.thai_self_reference == "ฉัน":
+                    return (
+                        "สวัสดีค่ะ 👋 พร้อมช่วยเรื่องการเรียงลำดับข้อมูลค่ะ "
+                        "พิมพ์สั้น ๆ ได้เลย เช่น **บับเบิลซอร์ท**, **Counting Sort** "
+                        "หรือถามให้เปรียบเทียบหัวข้อในบทเรียนก็ได้ค่ะ"
+                    )
                 return (
                     "ไงครับ 👋 พร้อมช่วยเรื่องการเรียงลำดับข้อมูลครับ "
                     "พิมพ์สั้น ๆ ได้เลย เช่น **บับเบิลซอร์ท**, **Counting Sort** "
@@ -413,12 +435,24 @@ class RAGService:
                 )
 
             if social.canonical == "thanks":
+                if persona and persona.thai_self_reference == "ฉัน":
+                    return "ยินดีค่ะ 🙂 ถ้ามีหัวข้อถัดไป พิมพ์ชื่อสั้น ๆ มาได้เลยค่ะ"
                 return "ยินดีครับ 🙂 ถ้ามีหัวข้อถัดไป พิมพ์ชื่อสั้น ๆ มาได้เลย"
 
             if social.canonical == "farewell":
+                if persona and persona.thai_self_reference == "ฉัน":
+                    return "ได้เลยค่ะ 👋 ไว้กลับมาถามต่อเรื่อง Sorting Algorithms ได้ตลอดค่ะ"
                 return "ได้เลยครับ 👋 ไว้กลับมาถามต่อเรื่อง Sorting Algorithms ได้ตลอด"
 
             if social.canonical == "help":
+                if persona and persona.thai_self_reference == "ฉัน":
+                    return (
+                        f"ฉันคือ **{self.settings.tutor_name}** ผู้ช่วยเรียนเรื่อง "
+                        f"**{self.settings.course_title}** ค่ะ\n\n"
+                        "ลองถามได้หลายแบบ เช่น **บับเบิลซอร์ท**, "
+                        "**อธิบาย Counting Sort**, **Selection Sort ต่างจาก Bubble Sort ยังไง** "
+                        "หรือ **ช่วย Trace Bubble Sort 5, 1, 4, 2**"
+                    )
                 return (
                     f"ผมคือ **{self.settings.tutor_name}** ผู้ช่วยเรียนเรื่อง "
                     f"**{self.settings.course_title}** ครับ\n\n"
@@ -428,6 +462,11 @@ class RAGService:
                 )
 
             if social.canonical == "identity":
+                if persona and persona.thai_self_reference == "ฉัน":
+                    return (
+                        f"ฉันชื่อ **{self.settings.tutor_name}** ค่ะ เป็น AI Tutor สำหรับ "
+                        f"**{self.settings.course_title}**"
+                    )
                 return (
                     f"ผมชื่อ **{self.settings.tutor_name}** ครับ เป็น AI Tutor สำหรับ "
                     f"**{self.settings.course_title}**"
@@ -642,9 +681,12 @@ class RAGService:
         topic_norm = _normalize_text(topic)
         thai_norm = _normalize_text(primary_thai_alias("topics", topic))
         section_key = topic.casefold().replace(" ", "_")
+        requested_action = match_alias(query, "actions")
+        action_name = requested_action.canonical if requested_action else ""
 
         def topic_rank(hit: SearchHit) -> tuple[int, float]:
             content_norm = _normalize_text(hit.content)
+            subtopic_norm = _normalize_text(str(hit.metadata.get("subtopic") or ""))
             section = str(hit.metadata.get("section") or "").casefold()
             exact_count = content_norm.count(topic_norm)
             thai_count = content_norm.count(thai_norm) if thai_norm else 0
@@ -658,6 +700,13 @@ class RAGService:
                 + min(thai_count, 4)
                 - other_section_penalty * 3
             )
+            if action_name == "code":
+                if any(term in subtopic_norm for term in ("implementation", "code")):
+                    relevance += 12
+                elif "pseudocode" in subtopic_norm:
+                    relevance += 8
+                if re.search(r"\b(def|function)\b|merge_sort\s*\(", hit.content):
+                    relevance += 4
             return (relevance, hit.score)
 
         return sorted(hits, key=topic_rank, reverse=True)
@@ -1266,15 +1315,14 @@ class RAGService:
             "is preserved in this fallback to avoid mistranslation._"
         )
 
-    @staticmethod
-    def _generation_failure_notice(language: str) -> str:
+    def _generation_failure_notice(self, language: str) -> str:
         if language == "en":
             return (
                 "Sorry, I couldn't generate a reliable answer from the course "
                 "documents just now. Please try again shortly."
             )
         return (
-            "ขออภัยครับ ตอนนี้ระบบสร้างคำตอบจากเอกสารไม่สำเร็จ "
+            f"ขออภัย{self.thai_statement_particle} ตอนนี้ระบบสร้างคำตอบจากเอกสารไม่สำเร็จ "
             "กรุณาลองใหม่อีกครั้งในอีกสักครู่"
         )
 
@@ -1312,7 +1360,7 @@ class RAGService:
                 )
             return (
                 "ระบบสร้างคำตอบใช้เวลานานเกินกำหนด และไม่พบหลักฐานที่เหมาะสม "
-                "สำหรับหัวข้อที่นำมาเปรียบเทียบครับ"
+                f"สำหรับหัวข้อที่นำมาเปรียบเทียบ{self.thai_statement_particle}"
             )
 
         if language == "en":
@@ -1484,8 +1532,8 @@ class RAGService:
                     )
                 else:
                     yield (
-                        "ผมยังตรวจหลักฐาน Big-O ของอัลกอริทึมหลักได้ไม่ครบ "
-                        "จึงขอไม่เติมค่าที่เอกสารยังยืนยันไม่ได้ครับ"
+                        f"{self.thai_first_person}ยังตรวจหลักฐาน Big-O ของอัลกอริทึมหลักได้ไม่ครบ "
+                        f"จึงขอไม่เติมค่าที่เอกสารยังยืนยันไม่ได้{self.thai_statement_particle}"
                     )
                 return
             if language == "en":
@@ -1495,8 +1543,8 @@ class RAGService:
                 )
                 return
             yield (
-                "ผมยังไม่พบข้อมูลที่เพียงพอในเอกสารที่ใช้เป็นฐานความรู้"
-                "สำหรับคำถามนี้ครับ ถ้าต้องการ ลองถามใหม่โดยระบุหัวข้อ"
+                f"{self.thai_first_person}ยังไม่พบข้อมูลที่เพียงพอในเอกสารที่ใช้เป็นฐานความรู้"
+                f"สำหรับคำถามนี้{self.thai_statement_particle} ถ้าต้องการ ลองถามใหม่โดยระบุหัวข้อ"
                 "หรือชื่ออัลกอริทึมให้ชัดขึ้น"
             )
             return
@@ -1516,7 +1564,7 @@ class RAGService:
             else:
                 yield (
                     "พบหลักฐานเรื่องความซับซ้อน แต่ยังจัดรูปตารางให้ครบทั้ง "
-                    "5 อัลกอริทึมหลักอย่างปลอดภัยไม่ได้ครับ"
+                    f"5 อัลกอริทึมหลักอย่างปลอดภัยไม่ได้{self.thai_statement_particle}"
                 )
             return
 

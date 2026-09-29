@@ -88,13 +88,41 @@
 - รอบแก้หลัง review เป็นการแก้และตรวจโดย main ไม่ใช่คำรับรองว่า reviewers
   ทดสอบโค้ดหลังแก้ซ้ำทั้งหมด
 
-## งานเนื้อหาถัดไป
+## เพิ่มเอกสาร Merge Sort
 
-ผู้ใช้จะเพิ่มเอกสาร Merge Sort และสั่ง “จัดการเพิ่ม merge sort” ภายหลัง
-ยังไม่แก้ manifest, crop, chunks หรือ re-index ในงาน UI นี้
-เมื่อได้รับคำสั่งจะใช้ real-data-pdf-curriculum: ดูทุกหน้า แยกคำอธิบาย/โค้ด/
-split-and-merge trace ตรวจ crop ทีละภาพและ label ตามขั้นตอนจากไฟล์ที่อนุมัติ
-หากเอกสารไม่มีโค้ดหรือรายละเอียด จะรายงานช่องว่าง ไม่แต่งเนื้อหาแทนเอกสาร
+ตรวจ `real_data/Merge_Sort_Complete_Book_TH.pdf` ครบทั้ง 31 หน้าและตรวจภาพ
+crop สำหรับผู้เรียนครบ 16 ภาพที่ขนาด 2× ก่อน ingest
+
+- Manifest ผูกเอกสารกับ SHA-256 และระบุ scope ของทุกหน้า
+- เพิ่ม 32 chunks ครอบคลุม 31 หน้า; 22 primary และ 10 reference-only
+- โค้ด Python, pseudocode, recursion trace, dry run, stability,
+  bottom-up, complexity/space และ debugging table มี crop/label แยกตามหน้าที่
+- หน้า External Merge Sort, หน้าสรุป/ตารางผสมหัวข้อนอกบท,
+  ตารางที่ glyph เสีย และหน้าบรรณานุกรม ไม่ถูกเลือกเป็นภาพผู้เรียน
+- สำหรับไฟล์นี้ใช้ PyMuPDF เพื่อรักษารูปแบบโค้ดและลดปัญหาวรรณยุกต์ไทยซ้ำ
+- เพิ่ม index เฉพาะเอกสารนี้ลง PostgreSQL + pgvector; ตรวจพบ chunks 32/32
+  มี embedding และภาพที่ระบุ user-visible 16 ภาพ
+- เพิ่มคำกันเขตสำหรับหัวข้อนอกหลักสูตรที่เอกสารกล่าวถึง เช่น External,
+  Cocktail, Shell และ Batcher และจัดอันดับ code query ให้ implementation
+  มาก่อนย่อหน้าภาพรวม
+- ตั้ง Nui, Saimai และ Bam ใช้สรรพนามและคำลงท้ายแบบผู้หญิงใน welcome,
+  คำตอบระบบสำเร็จรูป และคำสั่ง persona สำหรับคำตอบจากโมเดล
+- ตรวจ PostgreSQL หลัง ingest: 13 documents, 204 physical pages,
+  243/243 chunks มี vectors, 256 visuals รวม; selector คืนเฉพาะ 16 reviewed crops
+- ตรวจ Gemini + PostgreSQL จริง: คำถามโค้ดขึ้นหน้า 14 เป็น hit แรกและคืน
+  implementation ที่รันได้; คำถาม dry run มี trace และภาพหน้า 10
+- ตรวจ scope จริง: External Merge Sort, Cocktail Sort, Shell Sort และ
+  Batcher Odd-Even Merge ได้คำตอบชี้แจงว่าอยู่นอกหัวข้อหลัก
+
+ผลตรวจรอบเตรียม push:
+
+- `venv/bin/python -m unittest discover -s tests -p 'test_*.py'`: ผ่าน 122 tests
+- `compileall`, `git diff --check` และตรวจ JSON ของ manifest: ผ่าน
+- แอปที่ port 8502 และ Streamlit health endpoint ตอบ HTTP 200
+- รอบนี้ Browser runtime แจ้งว่าไม่มี browser ให้เชื่อม จึงไม่ได้ตรวจ DOM/ภาพ
+  ซ้ำหลังรีสตาร์ต; การตรวจ Chrome ก่อนหน้านี้เป็นผลจากรอบก่อน ไม่ใช่รอบนี้
+
+ผลนี้ยืนยันชุดทดสอบและ health endpoint เท่านั้น ไม่ใช่การรับประกันว่าไม่มีบั๊ก
 
 ## การทดสอบก่อนใช้งานจริง
 

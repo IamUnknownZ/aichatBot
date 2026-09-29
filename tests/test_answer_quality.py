@@ -42,6 +42,30 @@ class AnswerQualityTests(unittest.TestCase):
         self.assertIn("Bubble Sort", retrieval_query)
         self.assertIn("Selection Sort", retrieval_query)
 
+    def test_code_question_ranks_the_implementation_chunk_ahead_of_overview(self):
+        overview = make_hit(
+            section="merge_sort",
+            page_number=4,
+            content="Merge Sort overview. Merge Sort divides data. "
+            "Merge Sort recursively sorts each side. Merge Sort merges halves.",
+        )
+        overview.metadata["subtopic"] = "Merge Sort overview"
+        implementation = make_hit(
+            section="merge_sort",
+            page_number=14,
+            content="def merge_sort(arr): return merge(left, right)",
+        )
+        implementation.metadata["subtopic"] = (
+            "Complete Python merge_sort and merge implementation"
+        )
+
+        ranked = RAGService._rerank_topic_hits(
+            "ขอโค้ด Python ของ Merge Sort",
+            [overview, implementation],
+        )
+
+        self.assertEqual(ranked[0].page_number, 14)
+
     def test_coursewide_big_o_query_targets_only_primary_algorithms(self):
         query = "สรุป Big-O ของอัลกอริทึมการเรียงลำดับในบทเรียน"
 

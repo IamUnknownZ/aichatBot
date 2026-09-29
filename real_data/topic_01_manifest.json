@@ -2603,6 +2603,78 @@
         "3": {"section": "selection_sort", "subtopic": "Selection Sort implementation", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["selection sort", "implementation"]}
       }
     },
+    "Merge_Sort_Complete_Book_TH.pdf": {
+      "sha256": "a191944cc98fb79620eb9b221704aefcbc0d9be052da37b7f7ef32ec262d08f1",
+      "language": "th-en",
+      "physical_pages": 31,
+      "source_kind": "local_course_book",
+      "source_quality": "reviewed_page_by_page; Thai prose extracted with PyMuPDF; some tables have visibly damaged glyphs and are excluded as learner visuals",
+      "source_origin": "Local Merge Sort book supplied in real_data; original figure/source credits on PDF page 31",
+      "approved_for_text": true,
+      "pages": {
+        "1": {"section": "merge_sort", "subtopic": "Merge Sort cover", "curriculum_status": "reference_only", "visual_mode": "internal_only"},
+        "2": {"section": "merge_sort", "subtopic": "Book introduction and contents", "curriculum_status": "reference_only", "visual_mode": "internal_only"},
+        "3": {"section": "merge_sort", "subtopic": "Table of contents", "curriculum_status": "reference_only", "visual_mode": "internal_only"},
+        "4": {"section": "merge_sort", "subtopic": "Merge Sort Divide Recurse Merge overview", "curriculum_status": "primary", "visual_mode": "figure_crop", "keywords": ["merge sort", "divide", "recurse", "merge", "ภาพรวม"], "visuals": [
+          {"kind": "figure_crop", "label": "Merge Sort - ภาพรวม 3 ขั้น: Divide → Recurse → Merge", "visual_topic": "Merge Sort", "visual_role": "concept_workflow", "visual_steps": [1, 2, 3], "visual_detail": "ผังงานจากแบ่งอาร์เรย์เป็นสองฝั่ง เรียงแต่ละครึ่งแบบเรียกซ้ำ แล้วผสานสองฝั่งที่เรียงแล้ว", "source_caption": "ภาพที่ 1.1 ลำดับความคิดหลักของ Merge Sort: Divide → Recurse → Merge", "clip": [85, 134, 508, 365], "curriculum_status": "primary", "user_visible": true}
+        ]},
+        "5": {"section": "merge_sort", "subtopic": "Divide and Conquer stages", "curriculum_status": "primary", "visual_mode": "figure_crop", "keywords": ["merge sort", "divide and conquer", "base case"], "visuals": [
+          {"kind": "figure_crop", "label": "Merge Sort - ตารางอธิบาย Divide, Conquer, Combine", "visual_topic": "Merge Sort", "visual_role": "concept_stages", "visual_steps": [1, 2, 3], "visual_detail": "ตารางถามว่าจะแบ่งตรงไหน หยุด recursion เมื่อไร และผสานข้อมูลที่เรียงแล้วอย่างไร", "clip": [50, 272, 546, 378], "curriculum_status": "primary", "user_visible": true}
+        ]},
+        "6": {"section": "merge_sort", "subtopic": "Find midpoint and split an odd length array", "curriculum_status": "primary", "visual_mode": "figure_crop", "keywords": ["merge sort", "midpoint", "slice", "odd length"], "visuals": [
+          {"kind": "figure_crop", "label": "Merge Sort - โค้ดแบ่งอาร์เรย์ 7 ค่าเป็น Left 3 และ Right 4", "visual_topic": "Merge Sort", "visual_role": "code_midpoint", "visual_step": 1, "visual_detail": "ตัวอย่าง mid = len(arr)//2 แล้วใช้ arr[:mid] และ arr[mid:] เพื่อแบ่งข้อมูลจำนวนคี่", "clip": [64, 127, 533, 190], "curriculum_status": "primary", "user_visible": true}
+        ]},
+        "7": {"section": "merge_sort", "subtopic": "Recursive calls and base case", "curriculum_status": "primary", "visual_mode": "figure_crop", "keywords": ["merge sort", "recursion", "base case", "call tree"], "visuals": [
+          {"kind": "figure_crop", "label": "Merge Sort - ผัง recursion ของ [8,3,5,1] ถึง Base Case", "visual_topic": "Merge Sort", "visual_role": "recursion_tree", "visual_step": 2, "visual_detail": "ต้นไม้การเรียก merge_sort แยก [8,3,5,1] เป็นครึ่งซ้ายขวาจนเหลืออาร์เรย์สมาชิกเดียว", "source_caption": "ภาพที่ 4.1 การเรียก Merge Sort ซ้ำกับครึ่งซ้ายและครึ่งขวาจนถึง Base Case", "clip": [78, 90, 493, 388], "curriculum_status": "primary", "user_visible": true}
+        ]},
+        "8": {"section": "merge_sort", "subtopic": "Merge two sorted arrays with front pointers", "curriculum_status": "primary", "visual_mode": "figure_crop", "keywords": ["merge sort", "merge step", "left", "right", "pointer"], "visuals": [
+          {"kind": "figure_crop", "label": "Merge Sort - ขั้น Merge เปรียบเทียบหน้าสองฝั่ง 3 กับ 9", "visual_topic": "Merge Sort", "visual_role": "worked_example_merge_comparison", "visual_step": 3, "visual_detail": "Left=[3,27,38,43] และ Right=[9,10,82] ชี้ i,j ที่สมาชิกหน้า เลือก 3 แล้วเลื่อน i", "source_caption": "ภาพที่ 5.1 ตัวชี้ i และ j ในขั้น Merge", "clip": [75, 135, 485, 386], "curriculum_status": "primary", "user_visible": true}
+        ]},
+        "9": {"section": "merge_sort", "subtopic": "Merge comparison dry run table; rendered numbers have spacing defects", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["merge sort", "merge dry run", "3 27 38 43", "9 10 82"]},
+        "10": {"section": "merge_sort", "subtopic": "Full split down merge up worked trace", "curriculum_status": "primary", "visual_mode": "figure_crop", "keywords": ["merge sort", "dry run", "divide", "merge", "38 27 43 3 9 82 10"], "visuals": [
+          {"kind": "figure_crop", "label": "Merge Sort - Dry Run ครบขั้น แบ่งลงและรวมขึ้น [38,27,43,3,9,82,10]", "visual_topic": "Merge Sort", "visual_role": "worked_example_trace", "visual_steps": [1, 2, 3, 4], "visual_detail": "ลูกศรแดงแสดง Divide จนเหลือค่าเดี่ยว ลูกศรเขียวแสดง Merge กลับเป็น [3,9,10,27,38,43,82]", "source_caption": "ภาพที่ 6.1 ขั้นแบ่งและรวมของ Merge Sort; ดัดแปลงจากแผนภาพ Public Domain ของ VineetKumar บน Wikimedia Commons", "clip": [55, 85, 525, 544], "curriculum_status": "primary", "user_visible": true}
+        ]},
+        "11": {"section": "merge_sort", "subtopic": "Odd count duplicates sorted and reverse sorted edge cases", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["merge sort", "odd count", "duplicates", "sorted input", "reverse"]},
+        "12": {"section": "merge_sort", "subtopic": "Stable sorting and left-first tie rule", "curriculum_status": "primary", "visual_mode": "figure_crop", "keywords": ["merge sort", "stable", "stability", "equal key", "left first"], "visuals": [
+          {"kind": "figure_crop", "label": "Merge Sort - Stability: คะแนนเท่ากันยังคงลำดับ B ก่อน D และ A ก่อน C", "visual_topic": "Merge Sort", "visual_role": "stability_example", "visual_detail": "ก่อนเรียง A80,B70,C80,D70; หลังเรียงแบบ stable เป็น B70,D70,A80,C80", "source_caption": "ภาพที่ 6.2 ตัวอย่าง Stable Sort เมื่อข้อมูลหลายรายการมี key เท่ากัน", "clip": [78, 88, 489, 330], "curriculum_status": "primary", "user_visible": true}
+        ]},
+        "13": {"section": "merge_sort", "subtopic": "Merge Sort and Merge pseudocode", "curriculum_status": "primary", "visual_mode": "figure_crop", "keywords": ["merge sort", "pseudocode", "MERGE-SORT", "MERGE"], "visuals": [
+          {"kind": "figure_crop", "label": "Merge Sort - Pseudocode ขั้นแบ่งครึ่งและเรียกซ้ำ", "visual_topic": "Merge Sort", "visual_role": "pseudocode_divide", "visual_step": 1, "visual_detail": "MERGE-SORT(A): base case, mid, เรียกซ้ำฝั่งซ้ายขวา และคืนค่า MERGE(left,right)", "clip": [45, 82, 540, 238], "curriculum_status": "primary", "user_visible": true},
+          {"kind": "figure_crop", "label": "Merge Sort - Pseudocode ขั้น Merge สองชุดที่เรียงแล้ว", "visual_topic": "Merge Sort", "visual_role": "pseudocode_merge", "visual_step": 2, "visual_detail": "เปรียบเทียบ left[i] กับ right[j] เลื่อน pointer และเติมสมาชิกที่เหลือก่อนคืน result", "clip": [45, 250, 540, 470], "curriculum_status": "primary", "user_visible": true}
+        ]},
+        "14": {"section": "merge_sort", "subtopic": "Complete Python merge_sort and merge implementation", "curriculum_status": "primary", "visual_mode": "figure_crop", "keywords": ["merge sort", "python", "code", "implementation", "merge_sort", "merge"], "visuals": [
+          {"kind": "figure_crop", "label": "Merge Sort - โค้ด Python ฟังก์ชัน merge_sort และ merge ครบชุด", "visual_topic": "Merge Sort", "visual_role": "code_implementation", "visual_steps": [1, 2], "visual_detail": "โค้ด Python มี base case, mid, recursive calls, เปรียบเทียบ <=, เพิ่มตัวชี้ และต่อสมาชิกที่เหลือ", "clip": [63, 86, 537, 398], "curriculum_status": "primary", "user_visible": true},
+          {"kind": "figure_crop", "label": "Merge Sort - ตัวอย่างรัน Python ได้ [3,9,10,27,38,43,82]", "visual_topic": "Merge Sort", "visual_role": "code_example_output", "visual_step": 3, "visual_detail": "เรียก merge_sort กับ [38,27,43,3,9,82,10] และแสดงผลเรียงลำดับ", "clip": [45, 412, 534, 486], "curriculum_status": "primary", "user_visible": true}
+        ]},
+        "15": {"section": "merge_sort", "subtopic": "Code-parts table has damaged formula glyphs; do not use as visual", "curriculum_status": "reference_only", "visual_mode": "internal_only"},
+        "16": {"section": "merge_sort", "subtopic": "Execution trace of [8 3 5 1]", "curriculum_status": "primary", "visual_mode": "figure_crop", "keywords": ["merge sort", "execution trace", "call tree", "8 3 5 1"], "visuals": [
+          {"kind": "figure_crop", "label": "Merge Sort - Trace โค้ดจาก [8,3,5,1] จนได้ [1,3,5,8]", "visual_topic": "Merge Sort", "visual_role": "code_execution_trace", "visual_steps": [1, 2, 3], "visual_detail": "ต้นไม้การเรียก merge_sort และ merge ระบุผลคืนค่าของแต่ละครึ่งจากล่างขึ้นบน", "clip": [45, 48, 537, 220], "curriculum_status": "primary", "user_visible": true}
+        ]},
+        "17": {"section": "merge_sort", "subtopic": "Time complexity Θ(n log n); diagram glyphs damaged", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["merge sort", "time complexity", "best average worst", "theta n log n"]},
+        "18": {"section": "merge_sort", "subtopic": "Recurrence T(n)=2T(n/2)+Θ(n)", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["merge sort", "recurrence", "recursion tree", "theta n log n"]},
+        "19": {"section": "merge_sort", "subtopic": "Space complexity O(n) auxiliary and O(log n) call stack", "curriculum_status": "primary", "visual_mode": "figure_crop", "keywords": ["merge sort", "space complexity", "auxiliary space", "call stack"], "visuals": [
+          {"kind": "figure_crop", "label": "Merge Sort - ตารางพื้นที่ช่วย O(n) และ call stack O(log n)", "visual_topic": "Merge Sort", "visual_role": "complexity_space_table", "visual_detail": "เปรียบเทียบพื้นที่ช่วยสำหรับ Merge, พื้นที่ call stack และพื้นที่รวมของเวอร์ชัน recursive", "clip": [50, 126, 546, 230], "curriculum_status": "primary", "user_visible": true}
+        ]},
+        "20": {"section": "merge_sort", "subtopic": "Mixed summary table includes External Sorting; duplicate stability figure", "curriculum_status": "reference_only", "visual_mode": "internal_only"},
+        "21": {"section": "merge_sort", "subtopic": "Bottom-up Merge Sort run sizes 1 2 4 8", "curriculum_status": "primary", "visual_mode": "figure_crop", "keywords": ["merge sort", "bottom up", "run size", "iterative"], "visuals": [
+          {"kind": "figure_crop", "label": "Merge Sort - Bottom-up รวม sorted runs ขนาด 1 → 2 → 4 → 8", "visual_topic": "Merge Sort", "visual_role": "bottom_up_trace", "visual_steps": [1, 2, 4, 8], "visual_detail": "แถว run size 1,2,4,8 แสดงการผสานช่วงติดกันจน [1,2,3,4,5,6,7,8]", "source_caption": "ภาพที่ 12.1 Bottom-up Merge Sort เริ่มจาก run ขนาด 1 แล้วเพิ่มเป็น 2, 4, 8", "clip": [76, 91, 491, 365], "curriculum_status": "primary", "user_visible": true}
+        ]},
+        "22": {"section": "merge_sort", "subtopic": "Merge Sort with linked lists", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["merge sort", "linked list", "slow fast pointer"]},
+        "23": {"section": "external_sort", "subtopic": "External Merge Sort outside the approved curriculum", "curriculum_status": "reference_only", "visual_mode": "internal_only"},
+        "24": {"section": "merge_sort", "subtopic": "Common Merge Sort bugs and debugging checklist", "curriculum_status": "primary", "visual_mode": "figure_crop", "keywords": ["merge sort", "bug", "debug", "base case", "pointer", "stable"], "visuals": [
+          {"kind": "figure_crop", "label": "Merge Sort - ตารางบั๊กที่พบบ่อยและวิธีแก้", "visual_topic": "Merge Sort", "visual_role": "debugging_table", "visual_detail": "ข้อผิดพลาด base case, การแบ่ง, การผสานก่อนเรียง, ลืมสมาชิกที่เหลือ, tie rule และ pointer", "clip": [50, 82, 547, 276], "curriculum_status": "primary", "user_visible": true}
+        ]},
+        "25": {"section": "merge_sort", "subtopic": "Merge Sort FAQ", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["merge sort", "FAQ", "stable", "in place"]},
+        "26": {"section": "merge_sort", "subtopic": "Top-down versus Bottom-up Merge Sort", "curriculum_status": "primary", "visual_mode": "figure_crop", "keywords": ["merge sort", "top down", "bottom up", "comparison"], "visuals": [
+          {"kind": "figure_crop", "label": "Merge Sort - เปรียบเทียบ Top-down กับ Bottom-up", "visual_topic": "Merge Sort", "visual_role": "variant_comparison_table", "visual_detail": "ตารางเทียบ recursion กับ loop, call stack, เวลา Θ(n log n), stability และลำดับการสร้าง run", "clip": [50, 82, 547, 262], "curriculum_status": "primary", "user_visible": true}
+        ]},
+        "27": {"section": "merge_sort", "subtopic": "Mixed one-page summary includes external sorting", "curriculum_status": "reference_only", "visual_mode": "internal_only"},
+        "28": {"section": "merge_sort", "subtopic": "Merge Sort concept dry run code-reading exercises", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["merge sort", "exercise", "dry run"]},
+        "29": {"section": "merge_sort", "subtopic": "Answers to Merge Sort exercises", "curriculum_status": "primary", "visual_mode": "internal_only", "keywords": ["merge sort", "exercise answer", "dry run"]},
+        "30": {"section": "merge_sort", "subtopic": "Glossary includes external sorting outside scope", "curriculum_status": "reference_only", "visual_mode": "internal_only"},
+        "31": {"section": "merge_sort", "subtopic": "References, source credits and visual licenses", "curriculum_status": "reference_only", "visual_mode": "internal_only"}
+      }
+    },
     "การเรียงลำดับแบบเลือก selection.pdf": {
       "sha256": "0dd5978ca2d6ed63c1f5c90d4977ead7211a375abfb296fc685994190e7652ca",
       "language": "en-th",

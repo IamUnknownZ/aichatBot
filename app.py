@@ -15,7 +15,7 @@ from rag.visuals import (
 )
 from ui import inject_theme, render_welcome_panel
 from ui.workspace import inject_workspace_theme, render_workspace_header, persona_avatar
-from rag.personas import PERSONAS, get_persona
+from rag.personas import PERSONAS, get_persona, welcome_message
 from rag.chat_history import ChatHistory, HistoryUnavailable, _owner
 from ui.browser_identity import browser_identity
 from ui.history_state import (
@@ -33,7 +33,7 @@ from ui.history_state import (
 
 load_dotenv()
 page_settings = Settings.from_env()
-APP_CACHE_VERSION = "2026-09-29-six-persona-v1"
+APP_CACHE_VERSION = "2026-09-30-merge-book-feminine-voices-v2"
 
 st.set_page_config(
     page_title=f"{page_settings.course_title} · AI Tutor",
@@ -189,11 +189,10 @@ def ensure_chat_state(settings: Settings) -> None:
     threads = st.session_state.setdefault("persona_threads", {})
     active = st.session_state["active_persona"]
     if active not in threads:
-        persona = get_persona(active)
-        threads[active] = [{"role": "assistant", "content":
-            f"สวัสดีครับ ผมคือ **{persona.name}** เป็น AI ช่วยเรียน "
-            f"**{settings.course_title}** · {persona.subtitle} "
-            "คำตอบจะยึดเอกสารบทเรียน และจะบอกเมื่อหลักฐานไม่พอ"}]
+        threads[active] = [{
+            "role": "assistant",
+            "content": welcome_message(active, settings.course_title),
+        }]
     st.session_state["messages"] = threads[active]
     st.session_state.setdefault("response_language", "thai")
 
@@ -551,11 +550,19 @@ if user_query:
                         else "I could not find a reviewed visual for the retrieved pages."
                     )
                 else:
-                    response_text = (
-                        "มีครับ ภาพประกอบจากเอกสารที่เกี่ยวข้องอยู่ด้านล่าง"
-                        if images
-                        else "จากหน้าที่ค้นเจอ ตอนนี้ไม่พบภาพประกอบที่ดึงมาแสดงได้ครับ"
-                    )
+                    female_voice = active_persona.thai_statement_particle == "ค่ะ"
+                    if images:
+                        response_text = (
+                            "มีค่ะ ภาพประกอบจากเอกสารที่เกี่ยวข้องอยู่ด้านล่างค่ะ"
+                            if female_voice
+                            else "มีครับ ภาพประกอบจากเอกสารที่เกี่ยวข้องอยู่ด้านล่าง"
+                        )
+                    else:
+                        response_text = (
+                            "จากหน้าที่ค้นเจอ ตอนนี้ไม่พบภาพประกอบที่ดึงมาแสดงได้ค่ะ"
+                            if female_voice
+                            else "จากหน้าที่ค้นเจอ ตอนนี้ไม่พบภาพประกอบที่ดึงมาแสดงได้ครับ"
+                        )
                 st.markdown(response_text)
                 timing["ttft_ms"] = (perf_counter() - request_started) * 1000.0
             else:
